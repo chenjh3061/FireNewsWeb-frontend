@@ -1,178 +1,115 @@
 <template>
-    <a-layout has-sider>
+    <a-layout class="admin-page">
+        <!-- 侧边栏 -->
         <a-layout-sider
-                :style="{ overflow: 'auto', height: '100vh', position: 'fixed', left: 0, top: 0, bottom: 0 }"
+            class="admin-sider"
+            breakpoint="lg"
+            :style="{ left: 0 }"
         >
-            <div class="logo"/>
-            <a-menu v-model:selectedKeys="selectedKeys" mode="inline" theme="dark">
-                <a-menu-item key="1">
-                    <user-outlined/>
-                    <span class="nav-text">nav 1</span>
+            <!-- Logo 区域 -->
+            <div class="logo">管理员系统</div>
+
+            <!-- 菜单 -->
+            <a-menu
+                v-model:selectedKeys="selectedKeys"
+                mode="inline"
+                theme="dark"
+                @select="handleSelect"
+            >
+                <a-menu-item key="dashboard">
+                    <user-outlined />
+                    <span>系统首页</span>
                 </a-menu-item>
-                <a-menu-item key="2">
-                    <video-camera-outlined/>
-                    <span class="nav-text">nav 2</span>
-                </a-menu-item>
-                <a-menu-item key="3">
-                    <upload-outlined/>
-                    <span class="nav-text">nav 3</span>
-                </a-menu-item>
-                <a-menu-item key="4">
-                    <bar-chart-outlined/>
-                    <span class="nav-text">nav 4</span>
-                </a-menu-item>
-                <a-menu-item key="5">
-                    <cloud-outlined/>
-                    <span class="nav-text">nav 5</span>
-                </a-menu-item>
-                <a-menu-item key="6">
-                    <appstore-outlined/>
-                    <span class="nav-text">nav 6</span>
-                </a-menu-item>
-                <a-menu-item key="7">
-                    <team-outlined/>
-                    <span class="nav-text">nav 7</span>
-                </a-menu-item>
-                <a-menu-item key="8">
-                    <shop-outlined/>
-                    <span class="nav-text">nav 8</span>
+
+                <a-sub-menu key="articles-management">
+                    <template #title>
+                        <upload-outlined />
+                        <span>文章管理</span>
+                    </template>
+                    <a-menu-item key="carousel">轮播新闻</a-menu-item>
+                    <a-menu-item key="categories">分类管理</a-menu-item>
+                    <a-menu-item key="newsManage">新闻管理</a-menu-item>
+                    <a-menu-item key="notionManage">通知管理</a-menu-item>
+                </a-sub-menu>
+
+                <a-menu-item key="userManage">
+                    <user-outlined />
+                    <span>用户管理</span>
                 </a-menu-item>
             </a-menu>
         </a-layout-sider>
-        <a-layout :style="{ marginLeft: '200px' }">
-            <a-layout-header :style="{ background: '#fff', padding: 0 }"/>
-            <a-layout-content :style="{ margin: '24px 16px 0', overflow: 'initial' }">
-                <div :style="{ padding: '24px', background: '#fff', textAlign: 'center' }">
-                    ...
-                    <br/>
-                    Really
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    long
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    ...
-                    <br/>
-                    content
-                </div>
-            </a-layout-content>
-            <a-layout-footer :style="{ textAlign: 'center' }">
-                Ant Design ©2018 Created by Ant UED
-            </a-layout-footer>
-        </a-layout>
+
+        <!-- 主内容 -->
+        <a-layout-content class="admin-content">
+            <div class="content-wrapper">
+                <router-view />
+            </div>
+        </a-layout-content>
     </a-layout>
 </template>
+
 <script lang="ts" setup>
-import {ref} from 'vue';
+import { ref } from 'vue';
 import {
-    AppstoreOutlined,
-    BarChartOutlined,
-    CloudOutlined,
-    ShopOutlined,
-    TeamOutlined,
     UploadOutlined,
     UserOutlined,
     VideoCameraOutlined,
 } from '@ant-design/icons-vue';
+import router from "./../router/index.ts";
 
-const selectedKeys = ref<string[]>(['4']);
+const selectedKeys = ref<string[]>([]);
+
+const handleSelect = (info: { key: string }) => {
+    //console.log('Selected key:', info.key); // 调试日志
+    selectedKeys.value = [info.key];
+    router.push('/admin/' + info.key);
+};
 </script>
+
 <style scoped>
-#components-layout-demo-fixed-sider .logo {
-    height: 32px;
+/* 整体布局 */
+.admin-page {
+    height: 100vh;
+}
+
+/* 侧边栏 */
+.admin-sider {
+    background-color: #001529;
+}
+
+.logo {
+    height: 64px;
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+    text-align: center;
+    line-height: 64px;
     background: rgba(255, 255, 255, 0.2);
-    margin: 16px;
+    margin-bottom: 16px;
 }
 
-.site-layout .site-layout-background {
-    background: #fff;
+/* 主内容 */
+.admin-content {
+    padding: 24px;
+    background-color: #f0f2f5;
+    overflow-y: auto;
 }
 
-[data-theme='dark'] .site-layout .site-layout-background {
-    background: #141414;
+.content-wrapper {
+    padding: 24px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    min-height: 280px;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .admin-content {
+        padding: 16px;
+    }
+    .content-wrapper {
+        padding: 16px;
+    }
 }
 </style>

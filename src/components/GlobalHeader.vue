@@ -7,6 +7,9 @@
             <li><a href="#/">首页</a></li>
             <li><a href="#/hotTopics">热点要闻</a></li>
             <li><a href="#/science">科普园地</a></li>
+            <li><a href="#/writer">作者页</a></li>
+            <li><a href="#/admin">管理员</a></li>
+            <li><a href="#/about">关于</a></li>
         </ul>
         <div id="login">
             <a-button><span>登录</span></a-button>
@@ -21,7 +24,7 @@
 <style scoped>
 #indexHeader {
     width: 100%;
-    height: 100px;
+    height: 10vh;
     display: flex;
     align-items: center;
     background-color: #3c288c;
@@ -29,8 +32,8 @@
     box-sizing: border-box;
 }
 #upperLine {
-    width: 85%;
-    height: 3.5%;
+    width: 68%;
+    height: 3%;
     top: 0;
     display: block;
     position: absolute;
@@ -41,12 +44,14 @@
 #logo {
     color: #fff;
     font-size: 20px;
+    margin-left: 6%;
     margin-right: 20px;
 }
 
 #title {
     color: #fff;
     font-size: 30px;
+    margin-top: 1%;
     margin-right: auto; /* 将标题推到中间 */
 }
 

@@ -1,8 +1,8 @@
 <template>
-  <div>热点要闻</div>
+    <div>通知管理</div>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 
 </script>
 
