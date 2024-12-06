@@ -55,7 +55,7 @@ import {
     UserOutlined,
     VideoCameraOutlined,
 } from '@ant-design/icons-vue';
-import router from "./../router/index.ts";
+import router from "../../router";
 
 const selectedKeys = ref<string[]>([]);
 
@@ -100,7 +100,7 @@ const handleSelect = (info: { key: string }) => {
     background: white;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    min-height: 280px;
+    min-height: 80%;
 }
 
 /* 响应式调整 */

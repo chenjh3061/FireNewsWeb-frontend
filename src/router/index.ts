@@ -1,6 +1,6 @@
 import {createRouter, createWebHashHistory, RouteRecordRaw} from "vue-router";
 import IndexPage from "../pages/IndexPage.vue";
-import AdminPage from "../pages/AdminPage.vue";
+import AdminPage from "../pages/Admin/AdminPage.vue";
 import hotTopics from "../pages/HotTopics.vue";
 import Science from "../pages/Science.vue";
 import WriterPage from "../pages/Writer/WriterPage.vue";
@@ -12,6 +12,7 @@ import UserManage from "../pages/Admin/UserManage.vue";
 import NotionManage from "../pages/Admin/NotionManage.vue";
 import CategoriesPage from "../pages/Admin/CategoriesPage.vue";
 import CarouselPage from "../pages/Admin/CarouselPage.vue";
+import AboutPage from "../pages/AboutPage.vue";
 
 const routes: Array<RouteRecordRaw> = [
     {
@@ -27,6 +28,11 @@ const routes: Array<RouteRecordRaw> = [
         path: "/science",
         component: Science,
         name: "science",
+    },
+    {
+      path: "/about",
+      name: "about",
+      component: AboutPage,
     },
     {
         path: "/writer",
