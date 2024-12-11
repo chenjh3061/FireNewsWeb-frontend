@@ -6,8 +6,7 @@
             breakpoint="lg"
             :style="{ left: 0 }"
         >
-            <!-- Logo 区域 -->
-            <div class="logo">管理员系统</div>
+            <div class="side-title">管理员页面</div>
 
             <!-- 菜单 -->
             <a-menu
@@ -69,22 +68,26 @@ const handleSelect = (info: { key: string }) => {
 <style scoped>
 /* 整体布局 */
 .admin-page {
-    height: 100vh;
+    min-height: 80vh;
 }
 
 /* 侧边栏 */
 .admin-sider {
     background-color: #001529;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15); /* 添加阴影 */
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0; /* 上下内边距 */
 }
 
-.logo {
+.side-title {
     height: 64px;
-    font-size: 18px;
+    width: 100%;
+    font-size: 20px;
     font-weight: bold;
     color: white;
     text-align: center;
     line-height: 64px;
-    background: rgba(255, 255, 255, 0.2);
     margin-bottom: 16px;
 }
 
@@ -100,7 +103,7 @@ const handleSelect = (info: { key: string }) => {
     background: white;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    min-height: 80%;
+    min-height: 100%;
 }
 
 /* 响应式调整 */

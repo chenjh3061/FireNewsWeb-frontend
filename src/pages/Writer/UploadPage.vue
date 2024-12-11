@@ -31,15 +31,9 @@
                         placeholder="请输入文章标题"
                         class="title-input"
                     />
-                    <a-textarea
-                        v-model:value="content"
-                        rows="10"
-                        placeholder="在此处编辑您的文章内容..."
-                        class="content-editor"
-                    />
+                    <jodit-editor v-model="content" :config="config" />
                     <div class="editor-actions">
                         <a-button type="primary" @click="submitArticle">提交文章</a-button>
-                        <a-button type="default" @click="clearEditor">清空内容</a-button>
                     </div>
                 </div>
             </a-tab-pane>
@@ -49,9 +43,16 @@
 
 <script lang="ts" setup>
 import { InboxOutlined } from "@ant-design/icons-vue";
-import { ref } from "vue";
+import {onBeforeUnmount, onMounted, ref, watch} from "vue";
 import { message, UploadChangeParam } from "ant-design-vue";
+import JoditEditor  from "../../plugins/JoditEditor.vue";
+import axios from "axios";
 
+// 编辑器配置
+const config = {
+    readonly: false, // 只读
+    theme: "default",
+};
 // 文件上传状态
 const fileList = ref([]);
 
@@ -79,21 +80,30 @@ const content = ref("");
 
 // 提交文章
 const submitArticle = () => {
-    if (!title.value || !content.value) {
-        message.error("请填写文章标题和内容后再提交！");
+    const title = "用户输入的标题"; // 你可以绑定到 v-model
+    if (!content.value || content.value.trim() === "") {
+        message.error("内容不能为空！");
         return;
     }
-    message.success("文章提交成功！");
-    console.log("提交的文章标题：", title.value);
-    console.log("提交的文章内容：", content.value);
-    clearEditor();
+
+    // 发送到后端
+    axios.post("/api/articles", { title, content })
+        .then((response) => {
+            message.success("文章提交成功！");
+        })
+        .catch((error) => {
+            console.error("提交失败：", error);
+            message.error("文章提交失败！");
+        });
 };
+
 
 // 清空编辑内容
 const clearEditor = () => {
     title.value = "";
     content.value = "";
 };
+
 </script>
 
 <style scoped>
@@ -102,7 +112,6 @@ const clearEditor = () => {
     background-color: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    max-width: 800px;
     margin: 20px auto;
 }
 

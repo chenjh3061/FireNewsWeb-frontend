@@ -13,6 +13,7 @@ import NotionManage from "../pages/Admin/NotionManage.vue";
 import CategoriesPage from "../pages/Admin/CategoriesPage.vue";
 import CarouselPage from "../pages/Admin/CarouselPage.vue";
 import AboutPage from "../pages/AboutPage.vue";
+import LoginPage from "../components/LoginModal.vue";
 
 const routes: Array<RouteRecordRaw> = [
     {
@@ -96,4 +97,8 @@ const router = createRouter({
     routes,
 });
 
+//全局路由守卫
+// router.beforeEach((to, from, next) =>{
+//
+// });
 export default router;

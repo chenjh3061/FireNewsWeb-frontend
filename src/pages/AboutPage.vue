@@ -2,7 +2,7 @@
     <div class="about-page">
         <!-- 标题部分 -->
         <div class="about-header">
-            <h1>关于我们</h1>
+            <h1>关于</h1>
             <p>提供最及时、准确的火灾新闻信息，助力社会的安全与发展</p>
         </div>
 
@@ -18,28 +18,28 @@
         <div class="about-section">
             <h2>我们的使命</h2>
             <p>
-                我们的使命是通过实时报道火灾新闻、传播火灾防控知识，减少火灾带来的生命财产损失。我们承诺为用户提供准确、及时、权威的火灾相关信息。
+                实时报道火灾新闻、传播火灾防控知识，减少火灾带来的生命财产损失。我们承诺为用户提供准确、及时、权威的火灾相关信息。
             </p>
         </div>
 
         <!-- 团队介绍 -->
         <div class="about-section team">
-            <h2>我们的团队</h2>
+            <h2>技术支持</h2>
             <div class="team-members">
                 <div class="team-member">
                     <img src="https://via.placeholder.com/150" alt="Team Member" />
-                    <p class="name">张三</p>
-                    <p class="role">创始人</p>
+                    <p class="name">XX电视台</p>
+                    <p class="role">权威新闻报道</p>
                 </div>
                 <div class="team-member">
                     <img src="https://via.placeholder.com/150" alt="Team Member" />
-                    <p class="name">李四</p>
-                    <p class="role">技术负责人</p>
+                    <p class="name">XX救援队</p>
+                    <p class="role">消防专业知识</p>
                 </div>
                 <div class="team-member">
                     <img src="https://via.placeholder.com/150" alt="Team Member" />
-                    <p class="name">王五</p>
-                    <p class="role">内容编辑</p>
+                    <p class="name">火灾新闻网团队</p>
+                    <p class="role">网络技术支持</p>
                 </div>
             </div>
         </div>
@@ -51,9 +51,9 @@
                 有任何问题或建议，欢迎通过以下方式与我们联系：
             </p>
             <ul>
-                <li>Email: support@fireinfo.com</li>
+                <li>Email: support@firenews.com</li>
                 <li>电话: 123-456-7890</li>
-                <li>地址: 北京市朝阳区火灾信息管理大厦</li>
+                <li>地址: XX市YY区ZZ大厦</li>
             </ul>
         </div>
 
@@ -110,6 +110,7 @@
 }
 
 .team-members {
+    padding: 0 50px;
     display: flex;
     justify-content: space-between;
     margin-top: 20px;

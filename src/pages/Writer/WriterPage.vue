@@ -1,7 +1,7 @@
 <template>
     <a-layout class="writer-page">
         <a-layout-sider class="writer-sider" width="20%">
-            <div class="sider-title">作者管理页面</div>
+            <div class="side-title">作者管理页面</div>
             <a-menu
                     v-model:selectedKeys="selectedKeys"
                     mode="inline"
@@ -60,7 +60,7 @@ a-menu {
     padding: 20px 0; /* 上下内边距 */
 }
 
-.sider-title {
+.side-title {
     color: #ffffff;
     font-size: 20px;
     font-weight: bold;

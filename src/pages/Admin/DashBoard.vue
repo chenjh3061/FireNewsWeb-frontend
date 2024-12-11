@@ -8,25 +8,25 @@
                 <a-col span={6}>
                     <a-card :bordered="false" class="stat-card">
                         <div class="card-header">总访问量</div>
-                        <div class="card-value">1,200</div>
+                        <div class="card-value">{{ sysData.totalVisits }}</div>
                     </a-card>
                 </a-col>
                 <a-col span={6}>
                     <a-card :bordered="false" class="stat-card">
                         <div class="card-header">注册用户</div>
-                        <div class="card-value">1,500</div>
+                        <div class="card-value">{{ sysData.registeredUsers }}</div>
                     </a-card>
                 </a-col>
                 <a-col span={6}>
                     <a-card :bordered="false" class="stat-card">
-                        <div class="card-header">今日新增</div>
-                        <div class="card-value">50</div>
+                        <div class="card-header">今日发布</div>
+                        <div class="card-value">{{ sysData.todayNew }}</div>
                     </a-card>
                 </a-col>
                 <a-col span={6}>
                     <a-card :bordered="false" class="stat-card">
-                        <div class="card-header">新闻发布</div>
-                        <div class="card-value">300</div>
+                        <div class="card-header">文章总数</div>
+                        <div class="card-value">{{ sysData.newsPublish }}</div>
                     </a-card>
                 </a-col>
             </a-row>
@@ -36,27 +36,39 @@
         <div class="charts">
             <a-row gutter={16}>
                 <a-col span={12}>
-                    <a-card title="日访问量统计" :bordered="false">
+                    <a-card :bordered="false" class="visit-data" title="日访问量统计">
                         <div ref="lineChart" style="height: 300px;"></div>
                     </a-card>
                 </a-col>
                 <a-col span={12}>
-                    <a-card title="新闻发布趋势" :bordered="false">
+                    <a-card :bordered="false" class="news-data" title="新闻发布趋势">
                         <div ref="barChart" style="height: 300px;"></div>
                     </a-card>
                 </a-col>
             </a-row>
         </div>
+
+        <!--近期动态-->
+        <a-list>
+            <a-list-item></a-list-item>
+        </a-list>
     </div>
 </template>
 
-<script setup lang="ts">
-import { ref, onMounted } from 'vue';
+<script lang="ts" setup>
+import {onMounted, ref} from 'vue';
 import * as echarts from 'echarts';
-import { Row, Col, Card } from 'ant-design-vue';
 
 const lineChart = ref<HTMLDivElement | null>(null);
 const barChart = ref<HTMLDivElement | null>(null);
+
+// 系统相关数据
+const sysData = {
+    totalVisits: 1024,
+    registeredUsers: 2345,
+    todayNew: 987,
+    newsPublish: 612,
+};
 
 // 组件挂载后初始化图表
 onMounted(() => {
@@ -149,6 +161,10 @@ onMounted(() => {
 
 .charts {
     margin-top: 40px;
-    width: 100%;
+}
+
+.visit-data,
+.news-data {
+    width: 400px;
 }
 </style>
