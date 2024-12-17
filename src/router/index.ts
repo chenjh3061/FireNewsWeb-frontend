@@ -13,7 +13,8 @@ import NotionManage from "../pages/Admin/NotionManage.vue";
 import CategoriesPage from "../pages/Admin/CategoriesPage.vue";
 import CarouselPage from "../pages/Admin/CarouselPage.vue";
 import AboutPage from "../pages/AboutPage.vue";
-import LoginPage from "../components/LoginModal.vue";
+import LoginPage from "../components/modals/LoginModal.vue";
+import CommentManage from "../pages/Admin/CommentManage.vue";
 
 const routes: Array<RouteRecordRaw> = [
     {
@@ -78,6 +79,11 @@ const routes: Array<RouteRecordRaw> = [
                 component: NewsManage,
             },
             {
+                path: "commentManage",
+                name: "commentManage",
+                component: CommentManage,
+            },
+            {
                 path: "userManage",
                 name: "userManage",
                 component: UserManage,
@@ -98,7 +104,7 @@ const router = createRouter({
 });
 
 //全局路由守卫
-// router.beforeEach((to, from, next) =>{
-//
-// });
+router.beforeEach((to, from, next) =>{
+    next();
+});
 export default router;

@@ -11,23 +11,24 @@
             :dataSource="newsData"
             :rowKey="record => record.id"
             class="news-table"
+            @resizeColumn="handleResizeColumn"
         />
 
         <!-- 弹窗 - 用于新增或修改新闻 -->
         <a-modal
             v-model:visible="isModalVisible"
+            :footer="null"
             title="新闻编辑"
             @cancel="handleCancel"
             @ok="handleOk"
-            :footer="null"
         >
             <div class="modal-content">
                 <a-form :form="form">
                     <a-form-item label="新闻标题">
-                        <a-input v-model:value="formData.title" />
+                        <a-input v-model:value="formData.title"/>
                     </a-form-item>
                     <a-form-item label="新闻内容">
-                        <a-textarea v-model:value="formData.content" rows="4" />
+                        <a-textarea v-model:value="formData.content" rows="4"/>
                     </a-form-item>
                 </a-form>
                 <div class="modal-footer">
@@ -39,33 +40,32 @@
     </div>
 </template>
 
-<script setup lang="ts">
-import { ref } from "vue";
-import { Modal, Button, Table, Input, Form, message } from "ant-design-vue";
+<script lang="ts" setup>
+import {ref} from "vue";
+import {message, TableColumnsType} from "ant-design-vue";
 
 // 新闻数据
 const newsData = ref([
-    { id: 1, title: "新闻标题 1", content: "新闻内容 1" },
-    { id: 2, title: "新闻标题 2", content: "新闻内容 2" },
+    {id: 1, title: "新闻标题 1", content: "新闻内容 1"},
+    {id: 2, title: "新闻标题 2", content: "新闻内容 2"},
 ]);
 
 // 表格列配置
-const columns = [
-    {
-        title: "新闻标题",
-        dataIndex: "title",
-        key: "title",
-    },
-    {
-        title: "新闻内容",
-        dataIndex: "content",
-        key: "content",
-    },
+const columns = ref<TableColumnsType>([
+    { title: "新闻标题", dataIndex: "title", key: "title", resizable: true, minWidth: 100 },
+    { title: "新闻内容", dataIndex: "content", key: "content", resizable: true, minWidth: 100},
     {
         title: "操作",
+        dataIndex: "action",
         key: "action",
-},
-];
+        resizable: true, minWidth: 100,
+    },
+]);
+
+// 表格列宽拖动
+function handleResizeColumn(w, column){
+    column.width = w;
+};
 
 // Modal 控制
 const isModalVisible = ref(false);
@@ -78,7 +78,7 @@ const form = ref(null);
 
 // 打开 Modal 用于新增或编辑
 const openModal = () => {
-    formData.value = {id: undefined, title: "", content: "" };
+    formData.value = {id: undefined, title: "", content: ""};
     isModalVisible.value = true;
 };
 
@@ -98,13 +98,13 @@ const handleOk = () => {
         // 更新新闻
         const index = newsData.value.findIndex(news => news.id === formData.value.id);
         if (index !== -1) {
-            newsData.value[index] = {id: 1, ...formData.value };
+            newsData.value[index] = {id: 1, ...formData.value};
         }
         message.success("新闻更新成功");
     } else {
         // 新增新闻
         const newId = newsData.value.length + 1;
-        newsData.value.push({ id: newId, ...formData.value });
+        newsData.value.push({id: newId, ...formData.value});
         message.success("新闻新增成功");
     }
 
@@ -113,7 +113,7 @@ const handleOk = () => {
 
 // 编辑新闻
 const editNews = (record: any) => {
-    formData.value = { ...record };
+    formData.value = {...record};
     isModalVisible.value = true;
 };
 

@@ -7,28 +7,39 @@
 
         <!-- 用户列表 -->
         <a-table
-                :columns="columns"
-                :dataSource="userData"
-                :rowKey="record => record.id"
-                class="user-table"
-                :pagination="pagination"
-        />
+            :columns="columns"
+            :data-source="userData"
+            :pagination="pagination"
+            @resizeColumn="handleResizeColumn"
+        >
+            <template #bodyCell="{ column, record }">
+                <template v-if="column.dataIndex === 'username'">
+                    <a-avatar :src="record.avatar" style="margin-right: 8px;"/>
+                    <span>{{ record.username }}</span>
+                </template>
+                <template v-if="column.dataIndex === 'action'">
+                    <a-button id="action" @click="editUser(record)">编辑用户</a-button>
+                    <a-button id="action" @click="deleteUser(record)">删除用户</a-button>
+                </template>
+            </template>
+
+        </a-table>
 
         <!-- 弹窗 - 用于新增或修改用户 -->
         <a-modal
-                v-model:visible="isModalVisible"
-                title="用户编辑"
-                @cancel="handleCancel"
-                @ok="handleOk"
-                :footer="null"
+            v-model:visible="isModalVisible"
+            :footer="null"
+            title="用户编辑"
+            @cancel="handleCancel"
+            @ok="handleOk"
         >
             <div class="modal-content">
                 <a-form :form="form">
                     <a-form-item label="用户名">
-                        <a-input v-model:value="formData.username" />
+                        <a-input v-model:value="formData.username"/>
                     </a-form-item>
                     <a-form-item label="邮箱">
-                        <a-input v-model:value="formData.email" />
+                        <a-input v-model:value="formData.email"/>
                     </a-form-item>
                     <a-form-item label="角色">
                         <a-select v-model:value="formData.role">
@@ -47,38 +58,44 @@
     </div>
 </template>
 
-<script setup lang="ts">
-import { ref } from "vue";
-import { Modal, Button, Table, Input, Form, message, Select, SelectOption } from "ant-design-vue";
+<script lang="ts" setup>
+import {onMounted, ref} from "vue";
+import myAxios from "../../plugins/myAxios";
+import type {TableColumnsType} from "ant-design-vue";
+import {message, Modal} from "ant-design-vue";
 
 // 用户数据
-const userData = ref([
-    { id: 1, username: "张三", email: "zhangsan@example.com", role: "admin" },
-    { id: 2, username: "李四", email: "lisi@example.com", role: "editor" },
-]);
+const userData = ref([]);
+
+const getAllUsers = () => {
+    myAxios.get("user/getAllUsers").then((res) => {
+        if (res.data) {
+            userData.value = res.data;
+        } else {
+            message.error("获取用户数据失败");
+        }
+    }).catch((err) => {
+        message.error(err.toString()+"获取用户数据失败");
+    });
+}
 
 // 表格列配置
-const columns = [
-    {
-        title: "用户名",
-        dataIndex: "username",
-        key: "username",
-    },
-    {
-        title: "邮箱",
-        dataIndex: "email",
-        key: "email",
-    },
-    {
-        title: "角色",
-        dataIndex: "role",
-        key: "role",
-    },
+const columns = ref<TableColumnsType>([
+    {title: "用户", dataIndex: "username", key: "username", resizable: true, minWidth: 100},
+    {title: "邮箱", dataIndex: "email", key: "email", resizable: true, minWidth: 200},
+    {title: "角色", dataIndex: "role", key: "role", resizable: true, minWidth: 100},
     {
         title: "操作",
         key: "action",
-},
-];
+        dataIndex: "action",
+        width: 200,
+    },
+]);
+
+// 表格列宽拖动
+function handleResizeColumn(w, column) {
+    column.width = w;
+};
 
 // 分页设置
 const pagination = ref({
@@ -94,7 +111,9 @@ const pagination = ref({
 // Modal 控制
 const isModalVisible = ref(false);
 const formData = ref({
+    id: null,
     username: "",
+    avatar: "",
     email: "",
     role: "viewer",
 });
@@ -102,7 +121,7 @@ const form = ref(null);
 
 // 打开 Modal 用于新增或编辑
 const openModal = () => {
-    formData.value = { username: "", email: "", role: "viewer" };
+    formData.value = {id: null, username: "", avatar: "", email: "", role: "viewer"};
     isModalVisible.value = true;
 };
 
@@ -118,17 +137,17 @@ const handleOk = () => {
         return;
     }
 
-    if (formData.value.username) {
+    if (formData.value.id) {
         // 更新用户
-        const index = userData.value.findIndex(user => user.id === formData.value.username);
+        const index = userData.value.findIndex(user => user.id === formData.value.id);
         if (index !== -1) {
-            userData.value[index] = {id: 2, ...formData.value };
+            userData.value[index] = {...formData.value};
+            message.success("用户更新成功");
         }
-        message.success("用户更新成功");
     } else {
         // 新增用户
-        const newId = userData.value.length + 1;
-        userData.value.push({ id: newId, ...formData.value });
+        const newId = Math.max(...userData.value.map(user => user.id), 0) + 1;
+        userData.value.push({id: newId, ...formData.value});
         message.success("用户新增成功");
     }
 
@@ -137,21 +156,25 @@ const handleOk = () => {
 
 // 编辑用户
 const editUser = (record: any) => {
-    formData.value = { ...record };
+    formData.value = {...record};
     isModalVisible.value = true;
 };
 
 // 删除用户
-const deleteUser = (id: number) => {
+const deleteUser = (record: any) => {
     Modal.confirm({
         title: "确认删除",
         content: "确认删除该用户吗？",
         onOk() {
-            userData.value = userData.value.filter(user => user.id !== id);
+            userData.value = userData.value.filter(user => user.id !== record.id);
             message.success("用户删除成功");
         },
     });
 };
+
+onMounted(() => {
+    getAllUsers();
+});
 </script>
 
 <style scoped>
@@ -164,8 +187,9 @@ const deleteUser = (id: number) => {
     margin-bottom: 20px;
 }
 
-.user-table {
-    margin-top: 20px;
+.ant-table-thead > tr > th {
+    background: #f7f7f7;
+    cursor: col-resize;
 }
 
 .modal-content {
@@ -181,4 +205,20 @@ const deleteUser = (id: number) => {
 .modal-footer a-button {
     margin-left: 10px;
 }
+
+.header-cell {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.resize-handle {
+    width: 5px;
+    height: 100%;
+    background: transparent;
+    cursor: col-resize;
+    position: absolute;
+    right: 0;
+}
+
 </style>

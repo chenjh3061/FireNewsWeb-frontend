@@ -12,6 +12,7 @@
             :rowKey="record => record.id"
             class="notification-table"
             :pagination="pagination"
+            @resizeColumn="handleResizeColumn"
         />
 
         <!-- 弹窗 - 用于新增或修改通知 -->
@@ -58,27 +59,27 @@ const notificationData = ref([
 ]);
 
 // 表格列配置
-const columns = [
-    {
-        title: "通知标题",
-        dataIndex: "title",
-        key: "title",
-    },
+const columns = ref([
+    {title: "通知标题", dataIndex: "title", key: "title", resizable: true , minWidth: 100 },
     {
         title: "通知内容",
         dataIndex: "content",
-        key: "content",
+        key: "content", resizable: true
     },
     {
         title: "通知类型",
         dataIndex: "type",
-        key: "type",
+        key: "type", resizable: true
     },
     {
         title: "操作",
-        key: "action",
-},
-];
+        key: "action", resizable: true
+    },
+]);
+// 表格列宽拖动
+function handleResizeColumn(w, column){
+    column.width = w;
+}
 
 // 分页设置
 const pagination = ref({

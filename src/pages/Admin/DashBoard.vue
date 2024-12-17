@@ -8,7 +8,8 @@
                 <a-col span={6}>
                     <a-card :bordered="false" class="stat-card">
                         <div class="card-header">总访问量</div>
-                        <div class="card-value">{{ sysData.totalVisits }}</div>
+                        <a-statistic :value="sysData.totalVisits" :precision="0"
+                                     class="card-value"></a-statistic>
                     </a-card>
                 </a-col>
                 <a-col span={6}>

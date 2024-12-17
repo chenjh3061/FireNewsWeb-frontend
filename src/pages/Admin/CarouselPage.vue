@@ -1,24 +1,29 @@
 <template>
-    <div class="carousel-news-management">
-        <h2>轮播新闻管理</h2>
-        <div class="selected-news">
-            <h3>已选轮播新闻（{{ selectedNews.length }}/5）</h3>
-            <a-list
-                    :data-source="selectedNews"
-                    bordered
-                    render-item="news => renderSelectedNews(news)"
-            />
-        </div>
-        <div class="news-list">
-            <h3>新闻列表</h3>
-            <a-list
-                    :data-source="newsList"
-                    bordered
-                    render-item="news => renderNewsItem(news)"
-                    pagination="{ pageSize: 10 }"
-            />
-        </div>
-    </div>
+    <a-list
+        :data-source="selectedNews"
+        bordered
+    >
+        <template #render-item="{ item }">
+            <div class="news-item">
+                <span>{{ item.title }}</span>
+                <a-button type="link" @click="removeFromCarousel(item)">移除</a-button>
+            </div>
+        </template>
+    </a-list>
+
+    <a-list
+        :data-source="newsList"
+        bordered
+        :pagination="{ pageSize: 10 }"
+    >
+        <template #render-item="{ item }">
+            <div class="news-item">
+                <span>{{ item.title }}</span>
+                <a-button type="link" @click="addToCarousel(item)">添加到轮播</a-button>
+            </div>
+        </template>
+    </a-list>
+
 </template>
 
 <script setup lang="ts">

@@ -47,7 +47,7 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 import { defineProps, defineEmits } from "vue";
-import { useUserStore } from "../store/index.ts";
+import { useUserStore } from "../../store";
 
 const userStore = useUserStore();
 

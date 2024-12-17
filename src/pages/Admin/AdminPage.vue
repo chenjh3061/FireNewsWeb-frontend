@@ -30,7 +30,10 @@
                     <a-menu-item key="newsManage">新闻管理</a-menu-item>
                     <a-menu-item key="notionManage">通知管理</a-menu-item>
                 </a-sub-menu>
-
+                <a-menu-item key="commentManage">
+                    <CommentOutlined />
+                    <span>评论管理</span>
+                </a-menu-item>
                 <a-menu-item key="userManage">
                     <user-outlined />
                     <span>用户管理</span>
@@ -52,6 +55,7 @@ import { ref } from 'vue';
 import {
     UploadOutlined,
     UserOutlined,
+    CommentOutlined,
     VideoCameraOutlined,
 } from '@ant-design/icons-vue';
 import router from "../../router";

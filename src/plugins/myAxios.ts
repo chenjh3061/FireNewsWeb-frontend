@@ -32,3 +32,5 @@ axios.interceptors.response.use(function (response) {
     // @ts-ignore
     return Promise.reject(error);
 });
+
+export default instance;

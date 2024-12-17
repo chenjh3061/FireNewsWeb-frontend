@@ -3,11 +3,11 @@
         <a-layout-sider class="writer-sider" width="20%">
             <div class="side-title">作者管理页面</div>
             <a-menu
-                    v-model:selectedKeys="selectedKeys"
-                    mode="inline"
-                    theme="dark"
-                    collapsible
-                    @select="handleSelect"
+                v-model:selectedKeys="selectedKeys"
+                mode="inline"
+                theme="dark"
+                collapsible
+                @select="handleSelect"
             >
                 <a-menu-item key="articles">
                     <pie-chart-outlined/>

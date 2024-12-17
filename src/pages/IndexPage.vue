@@ -3,12 +3,12 @@
         <!-- 顶部搜索框 -->
         <div class="search-container">
             <a-input-search
-                    v-model:value="searchParams.text"
-                    class="search-bar"
-                    enter-button="搜索"
-                    placeholder="请输入搜索内容"
-                    size="large"
-                    @search="onSearch"
+                v-model:value="searchParams.text"
+                class="search-bar"
+                enter-button="搜索"
+                placeholder="请输入搜索内容"
+                size="large"
+                @search="onSearch"
             />
         </div>
 
@@ -33,8 +33,8 @@
             <div class="main-news">
                 <div class="main-news-image">
                     <img
-                            alt="Breaking News"
-                            src="https://via.placeholder.com/600x400?text=Breaking+News"
+                        alt="Breaking News"
+                        src="https://via.placeholder.com/600x400?text=Breaking+News"
                     />
                 </div>
                 <div class="main-news-text">

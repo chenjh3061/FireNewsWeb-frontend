@@ -2,25 +2,25 @@
     <div class="work-management">
         <h2>作品管理</h2>
         <a-table
-                :columns="columns"
-                :data-source="dataSource"
-                row-key="id"
-                bordered
-                pagination="{ pageSize: 5 }"
+            :columns="columns"
+            :data-source="dataSource"
+            bordered
+            pagination="{ pageSize: 10 }"
+            @resizeColumn="handleResizeColumn"
         >
-            <template #actions="{ record }">
-                <a-space>
-                    <a-button type="link" @click="viewDetails(record)">查看详情</a-button>
-                    <a-button type="link" @click="editWork(record)">修改</a-button>
+            <template #bodyCell="{ column, record }">
+                <template v-if="column.dataIndex === 'action'">
+                    <a-button id="action" @click="viewDetails(record)">查看详情</a-button>
+                    <a-button id="action" @click="editWork(record)">修改</a-button>
                     <a-popconfirm
-                            title="确定删除该作品吗？"
-                            ok-text="是"
-                            cancel-text="否"
-                            @confirm="deleteWork(record)"
+                        title="确定删除该作品吗？"
+                        ok-text="是"
+                        cancel-text="否"
+                        @confirm="deleteWork(record)"
                     >
-                        <a-button type="link" danger>删除</a-button>
+                        <a-button id="action" danger>删除</a-button>
                     </a-popconfirm>
-                </a-space>
+                </template>
             </template>
         </a-table>
     </div>
@@ -28,7 +28,7 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import { message } from "ant-design-vue";
+import {message, TableColumnsType} from "ant-design-vue";
 
 // 示例数据
 const dataSource = ref([
@@ -53,28 +53,20 @@ const dataSource = ref([
 ]);
 
 // 表格列定义
-const columns = [
-    {
-        title: "作品标题",
-        dataIndex: "title",
-        key: "title",
-    },
-    {
-        title: "提交时间",
-        dataIndex: "submitDate",
-        key: "submitDate",
-    },
-    {
-        title: "状态",
-        dataIndex: "status",
-        key: "status",
-    },
+const columns = ref<TableColumnsType>([
+    { title: "作品标题", dataIndex: "title", key: "title",resizable: true, },
+    {title: "提交时间", dataIndex: "submitDate", key: "submitDate", resizable: true, },
+    {title: "状态", dataIndex: "status", key: "status", resizable: true, },
     {
         title: "操作",
-        key: "actions",
-        scopedSlots: { customRender: "actions" },
+        key: "action",
+        dataIndex: "action",
+        width: 200,
     },
-];
+]);
+function handleResizeColumn(w, column){
+    column.width = w;
+};
 
 // 操作函数
 const viewDetails = (record: any) => {

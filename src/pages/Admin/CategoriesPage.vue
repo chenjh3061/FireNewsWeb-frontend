@@ -16,23 +16,31 @@
         <a-table
             :columns="columns"
             :data-source="categories"
-            rowKey="category"
-            pagination="{ pageSize: 5 }"
             bordered
-        />
+            pagination="{ pageSize: 5 }"
+            rowKey="category"
+            @resizeColumn="handleResizeColumn"
+        >
+            <template #bodyCell="{ column, record }">
+                <template v-if="column.dataIndex === 'action'">
+                    <a-button id="action" @click="editCategory(record)">编辑分类</a-button>
+                    <a-button id="action" @click="deleteCategory(record)">删除分类</a-button>
+                </template>
+            </template>
+        </a-table>
     </div>
 </template>
 
-<script setup lang="ts">
-import { ref } from "vue";
-import { message, Input, Button, Table } from "ant-design-vue";
+<script lang="ts" setup>
+import {ref} from "vue";
+import {message, TableColumnsType} from "ant-design-vue";
 
 // 分类数据
 const categories = ref<{ category: string }[]>([
-    { category: "时事新闻" },
-    { category: "科技新闻" },
-    { category: "体育新闻" },
-    { category: "娱乐新闻" },
+    {category: "时事新闻"},
+    {category: "科技新闻"},
+    {category: "体育新闻"},
+    {category: "娱乐新闻"},
 ]);
 
 // 新分类名称
@@ -49,11 +57,15 @@ const addCategory = () => {
         message.warning("该分类已存在！");
         return;
     }
-    categories.value.push({ category: trimmedCategory });
+    categories.value.push({category: trimmedCategory});
     newCategory.value = "";
     message.success("分类添加成功！");
 };
 
+// 编辑分类
+const editCategory = (category: string) => {
+    message.success("编辑分类：" + category);
+};
 // 删除分类
 const deleteCategory = (category: string) => {
     categories.value = categories.value.filter((cat) => cat.category !== category);
@@ -61,17 +73,26 @@ const deleteCategory = (category: string) => {
 };
 
 // 表格列配置
-const columns = [
+const columns = ref<TableColumnsType>([
     {
         title: "分类名称",
         dataIndex: "category",
         key: "category",
+        resizable: true,
+        minWidth: 100,
     },
     {
         title: "操作",
         key: "action",
-},
-];
+        dataIndex: "action",
+        resizable: true,
+        minWidth: 100,
+    },
+]);
+// 表格列宽拖动
+function handleResizeColumn(w, column){
+    column.width = w;
+};
 </script>
 
 <style scoped>

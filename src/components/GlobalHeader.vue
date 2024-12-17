@@ -20,7 +20,7 @@
 
 <script setup>
 import { ref } from "vue";
-import LoginModal from "@/components/LoginModal.vue";
+import LoginModal from "@/components/modals/LoginModal.vue";
 
 const isLoginModalVisible = ref(false);
 
@@ -44,6 +44,7 @@ const openLoginModal = () => {
     box-shadow: 0 2px 15px rgba(0, 0, 0, 0.3);
     border-radius: 0 0 15px 15px;
 }
+
 #upperLine {
     width: 68%;
     height: 3%;

@@ -1,7 +1,24 @@
 <template>
     <div class="upload-article-page">
         <h2>上传文章</h2>
-        <a-tabs default-active-key="upload" class="upload-tabs">
+        <a-tabs default-active-key="edit" class="upload-tabs">
+
+            <!-- 在线编辑选项卡 -->
+            <a-tab-pane key="edit" tab="在线编辑">
+                <span>支持从word文档粘贴,图片插入推荐使用url导入</span>
+                <div class="editor-container">
+                    <a-input
+                        v-model:value="title"
+                        placeholder="请输入文章标题"
+                        class="title-input"
+                    />
+                    <jodit-editor v-model="content" :config="config" />
+                    <div class="editor-actions">
+                        <a-button type="primary" @click="submitArticle">提交文章</a-button>
+                    </div>
+                </div>
+            </a-tab-pane>
+
             <!-- 文件上传选项卡 -->
             <a-tab-pane key="upload" tab="文件上传">
                 <a-upload-dragger
@@ -21,21 +38,6 @@
                         支持的文件格式：.doc, .docx, .md, .txt。每次上传一个文件。
                     </p>
                 </a-upload-dragger>
-            </a-tab-pane>
-
-            <!-- 在线编辑选项卡 -->
-            <a-tab-pane key="edit" tab="在线编辑">
-                <div class="editor-container">
-                    <a-input
-                        v-model:value="title"
-                        placeholder="请输入文章标题"
-                        class="title-input"
-                    />
-                    <jodit-editor v-model="content" :config="config" />
-                    <div class="editor-actions">
-                        <a-button type="primary" @click="submitArticle">提交文章</a-button>
-                    </div>
-                </div>
             </a-tab-pane>
         </a-tabs>
     </div>
@@ -78,14 +80,18 @@ function handleDrop(e: DragEvent) {
 const title = ref("");
 const content = ref("");
 
+// 监听内容变化
+watch(content, (newValue) => {
+    console.log("内容变化：", newValue);
+});
+
 // 提交文章
 const submitArticle = () => {
-    const title = "用户输入的标题"; // 你可以绑定到 v-model
     if (!content.value || content.value.trim() === "") {
         message.error("内容不能为空！");
         return;
     }
-
+    console.log("文章：", { title: title.value, content: content.value });
     // 发送到后端
     axios.post("/api/articles", { title, content })
         .then((response) => {
@@ -109,6 +115,7 @@ const clearEditor = () => {
 <style scoped>
 .upload-article-page {
     padding: 16px;
+    min-height: 700px;
     background-color: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -128,6 +135,7 @@ h2 {
 
 .editor-container {
     padding: 16px;
+    min-height: 500px;
     background-color: #fafafa;
     border: 1px solid #d9d9d9;
     border-radius: 8px;
