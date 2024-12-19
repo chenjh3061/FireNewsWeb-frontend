@@ -2,8 +2,9 @@ import axios from "axios";
 import { ref } from "vue";
 
 const instance = axios.create({
-    baseURL: "https://api.github.com",
+    baseURL: "http://localhost:8089",
     timeout: 5000,
+    //withCredentials: true,
     headers: {},
 })
 export const loadingInstance = ref(false);
@@ -24,7 +25,7 @@ axios.interceptors.response.use(function (response) {
     // 2xx 范围内的状态码都会触发该函数。
     // 对响应数据做点什么
     loadingInstance.value = false;
-    return response;
+    return response.data;
 }, function (error) {
     // 超出 2xx 范围的状态码都会触发该函数。
     // 对响应错误做点什么

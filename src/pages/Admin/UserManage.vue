@@ -7,15 +7,17 @@
 
         <!-- 用户列表 -->
         <a-table
-            :columns="columns"
-            :data-source="userData"
-            :pagination="pagination"
-            @resizeColumn="handleResizeColumn"
+                :columns="columns"
+                :data-source="userData"
+                :pagination="pagination"
+                @resizeColumn="handleResizeColumn"
         >
             <template #bodyCell="{ column, record }">
                 <template v-if="column.dataIndex === 'username'">
-                    <a-avatar :src="record.avatar" style="margin-right: 8px;"/>
-                    <span>{{ record.username }}</span>
+                    <div class="user-intro">
+                        <a-avatar :src="record.avatar" style="margin-right: 8px;"/>
+                        <span>{{ record.username }}</span>
+                    </div>
                 </template>
                 <template v-if="column.dataIndex === 'action'">
                     <a-button id="action" @click="editUser(record)">编辑用户</a-button>
@@ -27,11 +29,11 @@
 
         <!-- 弹窗 - 用于新增或修改用户 -->
         <a-modal
-            v-model:visible="isModalVisible"
-            :footer="null"
-            title="用户编辑"
-            @cancel="handleCancel"
-            @ok="handleOk"
+                v-model:visible="isModalVisible"
+                :footer="null"
+                title="用户编辑"
+                @cancel="handleCancel"
+                @ok="handleOk"
         >
             <div class="modal-content">
                 <a-form :form="form">
@@ -70,20 +72,24 @@ const userData = ref([]);
 const getAllUsers = () => {
     myAxios.get("user/getAllUsers").then((res) => {
         if (res.data) {
-            userData.value = res.data;
+            const data = res.data;
+            userData.value = data.data;
+            console.log(userData.value);
         } else {
             message.error("获取用户数据失败");
         }
     }).catch((err) => {
-        message.error(err.toString()+"获取用户数据失败");
+        message.error(err.toString() + "获取用户数据失败");
     });
 }
 
 // 表格列配置
 const columns = ref<TableColumnsType>([
-    {title: "用户", dataIndex: "username", key: "username", resizable: true, minWidth: 100},
+    {title: "用户名", dataIndex: "userName", key: "username", resizable: true, minWidth: 100},
+    {title: "账号", dataIndex: "userAccount", key: "account", resizable: true, minWidth: 150},
+    {title: "密码", dataIndex: "userPassword", key: "password", resizable: true, minWidth: 100},
     {title: "邮箱", dataIndex: "email", key: "email", resizable: true, minWidth: 200},
-    {title: "角色", dataIndex: "role", key: "role", resizable: true, minWidth: 100},
+    {title: "角色", dataIndex: "userRole", key: "role", resizable: true, minWidth: 100},
     {
         title: "操作",
         key: "action",
@@ -181,7 +187,10 @@ onMounted(() => {
 .user-management {
     padding: 20px;
 }
-
+.user-intro {
+    display: flex;
+    align-items: center;
+}
 .title {
     font-size: 24px;
     margin-bottom: 20px;

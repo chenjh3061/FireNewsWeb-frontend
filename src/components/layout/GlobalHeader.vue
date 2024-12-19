@@ -4,12 +4,12 @@
         <div id="logo">logo</div>
         <span id="title">火灾新闻网</span>
         <ul id="navMenu">
-            <li><a href="#/">首页</a></li>
-            <li><a href="#/hotTopics">热点要闻</a></li>
-            <li><a href="#/science">科普园地</a></li>
-            <li><a href="#/writer">作者页</a></li>
-            <li><a href="#/admin">管理员</a></li>
-            <li><a href="#/about">关于</a></li>
+            <li><router-link to="/">首页</router-link></li>
+            <li><router-link to="/hotTopics">热点要闻</router-link></li>
+            <li><router-link to="/science">科普园地</router-link></li>
+            <li><router-link to="/writer">作者页</router-link></li>
+            <li><router-link to="/admin">管理员</router-link></li>
+            <li><router-link to="/about">关于</router-link></li>
         </ul>
         <div id="login">
             <a-button @click="openLoginModal"><span>登录</span></a-button>
@@ -112,7 +112,8 @@ const openLoginModal = () => {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
-}
+}a
+
 #navMenu a:hover::after {
     width: 100%;
 }

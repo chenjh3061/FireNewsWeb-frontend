@@ -45,7 +45,7 @@ const newsList = ref<News[]>([
     { id: 6, title: "火灾新闻6" },
 ]);
 
-const selectedNews = ref<News[]>([newsList.value[0]]);
+const selectedNews = ref<News[]>(newsList.value);
 
 // 添加到轮播新闻
 const addToCarousel = (news: News) => {

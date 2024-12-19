@@ -1,103 +1,86 @@
 <template>
-    <div class="work-management">
-        <h2>作品管理</h2>
+    <div class="article-management">
+        <h2>文章详情页</h2>
         <a-table
             :columns="columns"
             :data-source="dataSource"
             bordered
-            pagination="{ pageSize: 10 }"
-            @resizeColumn="handleResizeColumn"
+            :pagination="{ pageSize: 10 }"
         >
             <template #bodyCell="{ column, record }">
                 <template v-if="column.dataIndex === 'action'">
                     <a-button id="action" @click="viewDetails(record)">查看详情</a-button>
-                    <a-button id="action" @click="editWork(record)">修改</a-button>
-                    <a-popconfirm
-                        title="确定删除该作品吗？"
-                        ok-text="是"
-                        cancel-text="否"
-                        @confirm="deleteWork(record)"
-                    >
-                        <a-button id="action" danger>删除</a-button>
-                    </a-popconfirm>
+                    <a-button id="action" @click="editeArticle(record)">修改文章</a-button>
                 </template>
             </template>
         </a-table>
+
+        <!-- 引入的文章详情弹窗 -->
+        <ArticleModal
+            v-model:visible="isModalVisible"
+            :article="selectedArticle"
+        />
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-import {message, TableColumnsType} from "ant-design-vue";
+import {onMounted, ref} from "vue";
+import ArticleModal from "../../components/modals/ArticleModal.vue";
+import myAxios from "../../plugins/myAxios"; // 引入弹窗组件
 
-// 示例数据
+// 示例文章数据
 const dataSource = ref([
     {
         id: 1,
         title: "火灾案例分析",
         submitDate: "2024-12-01",
         status: "已发布",
-    },
-    {
-        id: 2,
-        title: "森林火灾应急预案",
-        submitDate: "2024-11-20",
-        status: "审核中",
-    },
-    {
-        id: 3,
-        title: "社区火灾安全教育",
-        submitDate: "2024-11-15",
-        status: "已驳回",
+        content: "<p>这是案例分析</p>",
     },
 ]);
 
 // 表格列定义
-const columns = ref<TableColumnsType>([
-    { title: "作品标题", dataIndex: "title", key: "title",resizable: true, },
-    {title: "提交时间", dataIndex: "submitDate", key: "submitDate", resizable: true, },
-    {title: "状态", dataIndex: "status", key: "status", resizable: true, },
+const columns = ref([
+    { title: "文章标题", dataIndex: "articleTitle", key: "title" },
+    { title: "提交时间", dataIndex: "createTime", key: "submitDate" },
+    { title: "状态", dataIndex: "reviewStatus", key: "status" },
     {
         title: "操作",
         key: "action",
         dataIndex: "action",
-        width: 200,
     },
 ]);
-function handleResizeColumn(w, column){
-    column.width = w;
+
+// 请求文章数据
+const getArticles = () => {
+    // 请求数据
+    myAxios.get("/article/getAllArticles").then((res) => {
+
+        if (res.data.code === 0) {
+            dataSource.value = res.data.data; // 设置表格数据源
+            console.log(dataSource.value);
+        } else {
+            console.log("获取文章失败");
+        }
+    });
 };
 
-// 操作函数
+// 弹窗状态及选中的文章
+const isModalVisible = ref(false);
+const selectedArticle = ref(null);
+
+// 查看详情
 const viewDetails = (record: any) => {
-    message.info(`查看作品详情：${record.title}`);
+    selectedArticle.value = record; // 设置当前文章
+    isModalVisible.value = true; // 打开弹窗
 };
 
-const editWork = (record: any) => {
-    message.success(`修改作品：${record.title}`);
+// 修改文章
+const editeArticle = (record: any) => {
+    console.log(record);
 };
 
-const deleteWork = (record: any) => {
-    dataSource.value = dataSource.value.filter((work) => work.id !== record.id);
-    message.success(`已删除作品：${record.title}`);
-};
+onMounted(() => {
+    getArticles(); // 获取文章数据
+})
 </script>
-
-<style scoped>
-.work-management {
-    padding: 16px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.work-management h2 {
-    margin-bottom: 16px;
-    font-size: 18px;
-    font-weight: bold;
-}
-
-.ant-table {
-    margin-top: 16px;
-}
-</style>

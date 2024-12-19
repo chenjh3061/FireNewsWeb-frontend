@@ -3,7 +3,7 @@
         <h2 class="title">新闻管理</h2>
 
         <!-- 操作按钮，点击弹出新闻管理的Modal -->
-        <a-button type="primary" @click="openModal">新增新闻</a-button>
+        <a-button type="primary" @click="openAddModal">新增新闻</a-button>
 
         <!-- 新闻列表 -->
         <a-table
@@ -12,12 +12,24 @@
             :rowKey="record => record.id"
             class="news-table"
             @resizeColumn="handleResizeColumn"
-        />
+        >
+            <template #bodyCell="{column, record}">
+                <template v-if="column.dataIndex === 'action'">
+                    <a-button id="action" @click="viewDetails(record)">查看/修改</a-button>
+                    <a-button>删除文章</a-button>
+                </template>
+            </template>
+        </a-table>
 
-        <!-- 弹窗 - 用于新增或修改新闻 -->
+        <!-- 弹窗 - 用于新增新闻 -->
+        <a-modal v-model:visible="addModalVisible" :footer="null" title="新增新闻" @cancel="handleCancel">
+
+        </a-modal>
+        <!-- 弹窗 - 用于修改新闻 -->
         <a-modal
             v-model:visible="isModalVisible"
             :footer="null"
+            width="800px"
             title="新闻编辑"
             @cancel="handleCancel"
             @ok="handleOk"
@@ -25,10 +37,11 @@
             <div class="modal-content">
                 <a-form :form="form">
                     <a-form-item label="新闻标题">
-                        <a-input v-model:value="formData.title"/>
+                        <a-input v-model:value="selectedArticle.articleTitle"/>
                     </a-form-item>
+                    <a-button @click="startEdit">切换只读</a-button>
                     <a-form-item label="新闻内容">
-                        <a-textarea v-model:value="formData.content" rows="4"/>
+                        <jodit-editor v-model:value="selectedArticle.articleContent" :config="{readonly: isEdit}"/>
                     </a-form-item>
                 </a-form>
                 <div class="modal-footer">
@@ -41,8 +54,10 @@
 </template>
 
 <script lang="ts" setup>
-import {ref} from "vue";
+import {onMounted, ref, watch} from "vue";
 import {message, TableColumnsType} from "ant-design-vue";
+import myAxios from "../../plugins/myAxios";
+import JoditEditor from "../../plugins/JoditEditor.vue";
 
 // 新闻数据
 const newsData = ref([
@@ -52,8 +67,8 @@ const newsData = ref([
 
 // 表格列配置
 const columns = ref<TableColumnsType>([
-    { title: "新闻标题", dataIndex: "title", key: "title", resizable: true, minWidth: 100 },
-    { title: "新闻内容", dataIndex: "content", key: "content", resizable: true, minWidth: 100},
+    { title: "新闻标题", dataIndex: "articleTitle", key: "title", resizable: true, minWidth: 100 },
+    { title: "新闻介绍", dataIndex: "articleDesc", key: "content", resizable: true, minWidth: 100},
     {
         title: "操作",
         dataIndex: "action",
@@ -67,8 +82,23 @@ function handleResizeColumn(w, column){
     column.width = w;
 };
 
+// 请求文章数据
+const getArticles = () => {
+    // 请求数据
+    myAxios.get("/article/getAllArticles").then((res) => {
+
+        if (res.data.code === 0) {
+            newsData.value = res.data.data; // 设置表格数据源
+        } else {
+            console.log("获取文章失败");
+        }
+    });
+};
+
 // Modal 控制
+const addModalVisible = ref(false);
 const isModalVisible = ref(false);
+const selectedArticle = ref(null);
 const formData = ref({
     id: 0,
     title: "",
@@ -77,9 +107,22 @@ const formData = ref({
 const form = ref(null);
 
 // 打开 Modal 用于新增或编辑
-const openModal = () => {
+const openAddModal = () => {
     formData.value = {id: undefined, title: "", content: ""};
+    addModalVisible.value = true;
+};
+// 浏览详情
+const viewDetails = (record: any) => {
+    selectedArticle.value = record;
     isModalVisible.value = true;
+};
+const isEdit = ref(false);
+const editorKey = ref(0); // 用于强制刷新组件
+
+// 开始编辑
+const startEdit = () => {
+    isEdit.value = !isEdit.value;
+    editorKey.value++;
 };
 
 // 取消 Modal
@@ -122,6 +165,10 @@ const deleteNews = (id: number) => {
     newsData.value = newsData.value.filter(news => news.id !== id);
     message.success("新闻删除成功");
 };
+
+onMounted(() => {
+    getArticles();
+});
 </script>
 
 <style scoped>
@@ -138,7 +185,17 @@ const deleteNews = (id: number) => {
     margin-top: 20px;
 }
 
+.edit-modal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 800px;
+}
+
 .modal-content {
+    display: block;
+    margin: 0 auto;
+    width: 800px;
     padding: 20px;
 }
 
