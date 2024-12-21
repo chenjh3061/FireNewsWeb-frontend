@@ -14,6 +14,13 @@
             @resizeColumn="handleResizeColumn"
         >
             <template #bodyCell="{column, record}">
+                <template v-if="column.dataIndex === 'reviewStatus'">
+                    <a-tag class="tag"
+                        :color="record.reviewStatus === 0 ? 'blue' : record.reviewStatus === 1 ? 'green' : 'red'"
+                    >
+                        {{ record.reviewStatus === 0 ? '未审核' : record.reviewStatus === 1 ? '审核通过' : '拒绝' }}
+                    </a-tag>
+                </template>
                 <template v-if="column.dataIndex === 'action'">
                     <a-button id="action" @click="viewDetails(record)">查看/修改</a-button>
                     <a-button>删除文章</a-button>
@@ -29,7 +36,7 @@
         <a-modal
             v-model:visible="isModalVisible"
             :footer="null"
-            width="800px"
+            width="850px"
             title="新闻编辑"
             @cancel="handleCancel"
             @ok="handleOk"
@@ -69,6 +76,9 @@ const newsData = ref([
 const columns = ref<TableColumnsType>([
     { title: "新闻标题", dataIndex: "articleTitle", key: "title", resizable: true, minWidth: 100 },
     { title: "新闻介绍", dataIndex: "articleDesc", key: "content", resizable: true, minWidth: 100},
+    { title: "作者", dataIndex: "authorName", key: "author", resizable: true, minWidth: 100 },
+    { title: "提交时间", dataIndex: "createTime", key: "time", resizable: true, minWidth: 100 },
+    { title: "审核状态", dataIndex: "reviewStatus", key: "status", resizable: true, minWidth: 100 },
     {
         title: "操作",
         dataIndex: "action",
@@ -89,6 +99,7 @@ const getArticles = () => {
 
         if (res.data.code === 0) {
             newsData.value = res.data.data; // 设置表格数据源
+            console.table(res.data.data);
         } else {
             console.log("获取文章失败");
         }
@@ -185,11 +196,8 @@ onMounted(() => {
     margin-top: 20px;
 }
 
-.edit-modal {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 800px;
+.tag {
+    font-size: 18px;
 }
 
 .modal-content {

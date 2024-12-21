@@ -19,8 +19,8 @@
                     <img :src="item.imgUrl" alt="Fire" class="carousel-image"/>
                     <div class="carousel-overlay">
                         <div class="carousel-content">
-                            <h3 class="carousel-title">{{ item.title }}</h3>
-                            <p class="carousel-description">{{ item.description }}</p>
+                            <h3 class="carousel-title">{{ item.articleTitle }}</h3>
+                            <p class="carousel-description">{{ item.articleTitle }}</p>
                             <a @click.prevent="viewNewsDetail(index, item)" class="carousel-link">查看详情</a>
                         </div>
                     </div>
@@ -73,20 +73,23 @@ const searchParams = ref({
 
 const carouselNews = ref([
     {
-        title: '全国火灾数据统计',
-        description: '今年上半年全国发生了超过1000起火灾事故。',
+        articleTitle: '全国火灾数据统计',
+        articleDesc: '今年上半年全国发生了超过1000起火灾事故。',
+        createTime: '2023-04-15',
         newsUrl: '#/article',
         imgUrl: 'https://via.placeholder.com/1200x500?text=Fire+Prevention',
     },
     {
-        title: '火灾应急预警系统升级',
-        description: '新的预警系统将在全国范围内启动，帮助更快应对火灾灾难。',
+        articleTitle: '火灾应急预警系统升级',
+        articleDesc: '新的预警系统将在全国范围内启动，帮助更快应对火灾灾难。',
+        createTime: '2023-04-15',
         newsUrl: '#/article',
         imgUrl: 'https://via.placeholder.com/1200x500?text=Fire+Prevention',
     },
     {
-        title: '森林火灾防控加强',
-        description: '森林火灾防控政策得到进一步加强，严防火灾蔓延。',
+        articleTitle: '森林火灾防控加强',
+        articleDesc: '森林火灾防控政策得到进一步加强，严防火灾蔓延。',
+        createTime: '2023-04-15',
         newsUrl: '#/article',
         imgUrl: 'https://via.placeholder.com/1200x500?text=Fire+Prevention',
     },

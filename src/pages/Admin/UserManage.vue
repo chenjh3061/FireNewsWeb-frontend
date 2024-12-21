@@ -37,17 +37,30 @@
         >
             <div class="modal-content">
                 <a-form :form="form">
+                    <a-form-item label="账号">
+                        <a-input v-model:value="formData.userAccount"/>
+                    </a-form-item>
+                    <a-form-item label="密码">
+                        <a-input-group compact>
+                            <a-input-password v-model:value="formData.userPassword"
+                                              v-model:visible="isEditePassword"
+                                              style="width: calc(100% - 100px)"/>
+                            <a-button type="primary" @click="isEditePassword = !isEditePassword">
+                                {{ isEditePassword ? 'Hide' : 'Show' }}
+                            </a-button>
+                        </a-input-group>
+                    </a-form-item>
                     <a-form-item label="用户名">
-                        <a-input v-model:value="formData.username"/>
+                        <a-input v-model:value="formData.userName"/>
                     </a-form-item>
                     <a-form-item label="邮箱">
                         <a-input v-model:value="formData.email"/>
                     </a-form-item>
                     <a-form-item label="角色">
-                        <a-select v-model:value="formData.role">
+                        <a-select v-model:value="formData.userRole">
                             <a-select-option value="admin">管理员</a-select-option>
-                            <a-select-option value="editor">编辑</a-select-option>
-                            <a-select-option value="viewer">查看者</a-select-option>
+                            <a-select-option value="writer">编辑</a-select-option>
+                            <a-select-option value="user">用户</a-select-option>
                         </a-select>
                     </a-form-item>
                 </a-form>
@@ -118,16 +131,26 @@ const pagination = ref({
 const isModalVisible = ref(false);
 const formData = ref({
     id: null,
-    username: "",
-    avatar: "",
+    userAccount: "",
+    userPassword: "",
+    userName: "",
+    userAvatar: "",
     email: "",
-    role: "viewer",
+    userRole: "",
 });
 const form = ref(null);
 
 // 打开 Modal 用于新增或编辑
-const openModal = () => {
-    formData.value = {id: null, username: "", avatar: "", email: "", role: "viewer"};
+const openModal = (record: any) => {
+    formData.value = record.value || {
+        id: null,
+        userAccount: "",
+        userPassword: "",
+        userName: "",
+        userAvatar: "",
+        email: "",
+        role: "",
+    }
     isModalVisible.value = true;
 };
 
@@ -138,8 +161,8 @@ const handleCancel = () => {
 
 // 保存或更新用户
 const handleOk = () => {
-    if (!formData.value.username || !formData.value.email) {
-        message.error("用户名和邮箱不能为空");
+    if (!formData.value.userAccount || !formData.value.userPassword) {
+        message.error("账号和密码不能为空");
         return;
     }
 
@@ -159,6 +182,8 @@ const handleOk = () => {
 
     isModalVisible.value = false;
 };
+const isEditePassword = ref<boolean>(false);
+
 
 // 编辑用户
 const editUser = (record: any) => {
@@ -187,10 +212,12 @@ onMounted(() => {
 .user-management {
     padding: 20px;
 }
+
 .user-intro {
     display: flex;
     align-items: center;
 }
+
 .title {
     font-size: 24px;
     margin-bottom: 20px;

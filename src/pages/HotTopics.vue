@@ -42,6 +42,7 @@
 
 <script lang="ts" setup>
 import {LikeOutlined, MessageOutlined, StarOutlined} from '@ant-design/icons-vue';
+import myAxios from "../plugins/myAxios";
 
 const listData: Record<string, string>[] = [];
 
@@ -57,6 +58,20 @@ for (let i = 0; i < 23; i++) {
     });
 }
 
+const getHotTopics = () => {
+    myAxios.get("/article/getHotArticles").then((res: any) => {
+        res.data.data.reduce((a, b) => a.concat(b), []).forEach((item) => {
+            listData.push({
+                href: '',
+                title: item.articleTitle,
+                avatar: 'https://joeschmoe.io/api/v1/random',
+                description: "Ant Design, a design language for background applications",
+                content: item.articleContent,
+            });
+        });
+    });
+}
+
 const pagination = {
     onChange: (page: number) => {
         console.log(page);
@@ -68,6 +83,7 @@ const actions: Record<string, any>[] = [
     {icon: LikeOutlined, text: '156'},
     {icon: MessageOutlined, text: '2'},
 ];
+getHotTopics();
 </script>
 
 <style scoped>

@@ -27,18 +27,23 @@
 
 <script lang="ts" setup>
 import {FileOutlined, PieChartOutlined} from '@ant-design/icons-vue';
-import {ref} from 'vue';
+import {onMounted, ref} from 'vue';
 import router from '../../router/index.ts';
 
 // 默认选中菜单项
-const selectedKeys = ref([]);
+const selectedKeys = ref(['articles']);
 
 // 处理菜单项选择
 const handleSelect = (info: { key: string }) => {
-    console.log('Selected key:', info.key); // 调试日志
     selectedKeys.value = [info.key]; // 更新选中项
     router.push('/writer/' + info.key); // 路由跳转
 };
+onMounted(() => {
+    if (router.currentRoute.value.path === '/writer') {
+        selectedKeys.value = ['articles']; // 默认选中菜单项
+        router.push('/writer/articles'); // 默认跳转到作品管理页面
+    }
+})
 </script>
 
 <style scoped>

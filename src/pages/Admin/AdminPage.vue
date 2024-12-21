@@ -51,7 +51,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
+import {onMounted, ref} from 'vue';
 import {
     UploadOutlined,
     UserOutlined,
@@ -60,13 +60,16 @@ import {
 } from '@ant-design/icons-vue';
 import router from "../../router";
 
-const selectedKeys = ref<string[]>([]);
+const selectedKeys = ref<string[]>(['dashboard']);
 
 const handleSelect = (info: { key: string }) => {
     //console.log('Selected key:', info.key); // 调试日志
     selectedKeys.value = [info.key];
     router.push('/admin/' + info.key);
 };
+onMounted(() => {
+    handleSelect({key: 'dashboard'});
+})
 </script>
 
 <style scoped>

@@ -10,6 +10,9 @@ export const useUserStore = defineStore("user", {
       token: "",
     },
   }),
+  actions:() => {
+    },
+
   persist: {
     storage: localStorage,
     key: "user",

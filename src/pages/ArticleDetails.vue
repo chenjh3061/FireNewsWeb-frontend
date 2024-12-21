@@ -15,9 +15,9 @@
             <p class="publish-date">{{ formatDate(articleData.createTime) }}</p>
             <!-- 字号调整 -->
             <div class="font-size-control">
-                <a-button type="text" @click="adjustFontSize('small')">A-</a-button>
-                <a-button type="text" @click="adjustFontSize('large')">A+</a-button>
-                <a-button type="text" @click="adjustFontSize('reset')">A</a-button>
+                <a-button type="text" @click="adjustFontSize('small')">A-小字体</a-button>
+                <a-button type="text" @click="adjustFontSize('large')">A+大字体</a-button>
+                <a-button type="text" @click="adjustFontSize('reset')">A恢复字号</a-button>
             </div>
             <!-- 分享功能 -->
             <div class="share-section">
@@ -165,7 +165,7 @@ const shareArticle = () => {
 }
 
 .article-title {
-    display: block;
+    display: inline-block;
     font-size: 28px;
     font-weight: bold;
     color: #333;
@@ -173,6 +173,7 @@ const shareArticle = () => {
 }
 
 .publish-date {
+    display: inline-block;
     font-size: 14px;
     color: #888;
     margin-bottom: 20px;

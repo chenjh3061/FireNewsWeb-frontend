@@ -13,26 +13,35 @@ import NotionManage from "../pages/Admin/NotionManage.vue";
 import CategoriesPage from "../pages/Admin/CategoriesPage.vue";
 import CarouselPage from "../pages/Admin/CarouselPage.vue";
 import AboutPage from "../pages/AboutPage.vue";
-import LoginPage from "../components/modals/LoginModal.vue";
 import CommentManage from "../pages/Admin/CommentManage.vue";
 import ErrorPage from "../pages/ErrorPage.vue";
 import UserPage from "../pages/UserPage.vue";
 import ArticleDetails from "../pages/ArticleDetails.vue";
+import ACCESS_ENUM from "../access/ACCESS_ENUM";
 
 const routes: Array<RouteRecordRaw> = [
     {
         path: "/",
         component: IndexPage,
+        meta: {
+            title: "首页",
+        }
     },
     {
         path: "/hotTopics",
         component: hotTopics,
         name: "hotTopics",
+        meta: {
+            title: "热门要闻",
+        }
     },
     {
         path: "/science",
         component: Science,
         name: "science",
+        meta: {
+            title: "科普园地",
+        }
     },
     {
         path: '/article',  // 动态路由参数，用来获取新闻 ID
@@ -41,19 +50,28 @@ const routes: Array<RouteRecordRaw> = [
         props: true, // 将路由参数作为组件的 props 传递
     },
     {
-      path: "/user",
-      name: "user",
-      component: UserPage,
+        path: "/user",
+        name: "user",
+        component: UserPage,
+        meta: {
+            title: "个人中心",
+        }
     },
     {
-      path: "/about",
-      name: "about",
-      component: AboutPage,
+        path: "/about",
+        name: "about",
+        component: AboutPage,
+        meta: {
+            title: "关于我们",
+        }
     },
     {
         path: "/writer",
         component: WriterPage,
         name: "writer",
+        meta: {
+            title: "作者页面",
+        },
         children: [
             {
                 path: "articles",
@@ -71,6 +89,9 @@ const routes: Array<RouteRecordRaw> = [
         path: "/admin",
         name: "admin",
         component: AdminPage,
+        meta: {
+            title: "管理员页面",
+        },
         children: [
             {
                 path: "dashboard",
@@ -123,7 +144,7 @@ const router = createRouter({
 });
 
 //全局路由守卫
-router.beforeEach((to, from, next) =>{
+router.beforeEach((to, from, next) => {
     console.log(to);
     next();
 });
