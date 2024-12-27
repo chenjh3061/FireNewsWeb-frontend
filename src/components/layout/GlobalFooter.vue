@@ -46,13 +46,13 @@
 <style scoped>
 #footer {
     width: 100%;
-    max-height: 15vh;
-    background-color: #343a40; /* 深色背景 */
+    background: linear-gradient(135deg, #343a40 0%, #495057 100%); /* 渐变背景 */
     color: white;
-    padding: 0 20px;
+    padding: 40px 20px;
     font-size: 14px;
     box-sizing: border-box;
     text-align: left;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 阴影效果 */
 }
 
 .footer-content {
@@ -68,20 +68,22 @@
 .footer-contact,
 .footer-social {
     flex: 1;
-    margin: 10px;
-    min-width: 200px;
+    margin: 15px;
+    min-width: 250px;
+    padding: 15px;
 }
 
 .footer-left h3 {
-    font-size: 22px;
-    margin: 0;
+    font-size: 26px;
     font-weight: bold;
     color: #f8f9fa;
+    margin-bottom: 10px;
 }
 
 .footer-left p {
     color: #dcdcdc;
     font-size: 14px;
+    line-height: 1.8;
 }
 
 .footer-links h4,
@@ -89,7 +91,8 @@
 .footer-social h4 {
     font-size: 18px;
     color: #f8f9fa;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
+    font-weight: 600;
 }
 
 .footer-links ul,
@@ -106,38 +109,47 @@
 .footer-contact a {
     color: #dcdcdc;
     text-decoration: none;
+    transition: color 0.3s ease;
 }
 
 .footer-links a:hover,
 .footer-contact a:hover {
-    color: #f8f9fa;
+    color: #ffcc00; /* 悬停时改变为金色 */
 }
 
 .footer-social .social-icons {
     display: flex;
-    gap: 15px;
+    gap: 20px;
 }
 
 .footer-social .social-icon {
-    padding: 10px 15px;
+    padding: 12px;
     background-color: #495057;
     color: white;
     border-radius: 50%;
     text-align: center;
-    width: 40px;
-    height: 40px;
-    line-height: 40px;
-    font-size: 16px;
+    width: 50px;
+    height: 50px;
+    line-height: 50px;
+    font-size: 18px;
     text-decoration: none;
+    transition: background-color 0.3s, transform 0.3s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* 增加阴影效果 */
 }
 
 .footer-social .social-icon:hover {
     background-color: #007bff;
+    transform: scale(1.1); /* 放大效果 */
 }
 
 @media screen and (max-width: 768px) {
+    #footer {
+        padding: 30px 10px;
+    }
+
     .footer-content {
         flex-direction: column;
+        align-items: center;
         text-align: center;
     }
 
@@ -145,12 +157,31 @@
     .footer-links,
     .footer-contact,
     .footer-social {
-        flex: none;
         margin: 10px 0;
+    }
+
+    .footer-left h3 {
+        font-size: 22px;
+    }
+
+    .footer-links h4,
+    .footer-contact h4,
+    .footer-social h4 {
+        font-size: 16px;
+    }
+
+    .footer-links li {
+        margin: 5px 0;
     }
 
     .footer-social .social-icons {
         justify-content: center;
+    }
+
+    .footer-left p,
+    .footer-links a,
+    .footer-contact p {
+        font-size: 14px;
     }
 }
 </style>

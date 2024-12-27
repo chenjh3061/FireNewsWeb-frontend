@@ -1,32 +1,47 @@
 <template>
     <div id="home">
-        <!-- 顶部搜索框 -->
-        <div class="search-container">
-            <a-input-search
+        <!-- 顶部搜索框和轮播图部分 -->
+        <div class="upper-container">
+            <!-- 轮播图部分 -->
+            <div class="carousel-container">
+                <a-carousel arrows autoplay class="custom-carousel">
+                    <div v-for="(item, index) in carouselNews" :key="index" class="carousel-item">
+                        <img :src="item.imgUrl" alt="Fire" class="carousel-image"/>
+                        <div class="carousel-overlay">
+                            <div class="carousel-content">
+                                <h3 class="carousel-title">{{ item.articleTitle }}</h3>
+                                <p class="carousel-description">{{ item.articleDesc }}</p>
+                                <a class="carousel-link" @click.prevent="viewNewsDetail(index, item)">查看详情</a>
+                            </div>
+                        </div>
+                    </div>
+                </a-carousel>
+            </div>
+
+            <!-- 搜索栏部分 -->
+            <div class="search-container">
+                <a-input-search
                     v-model:value="searchParams.text"
                     class="search-bar"
                     enter-button="搜索"
                     placeholder="请输入搜索内容"
                     size="large"
                     @search="onSearch"
-            />
-        </div>
-
-        <!-- 轮播图部分 -->
-        <div class="carousel-container">
-            <a-carousel arrows autoplay class="custom-carousel">
-                <div v-for="(item, index) in carouselNews" :key="index" class="carousel-item">
-                    <img :src="item.imgUrl" alt="Fire" class="carousel-image"/>
-                    <div class="carousel-overlay">
-                        <div class="carousel-content">
-                            <h3 class="carousel-title">{{ item.articleTitle }}</h3>
-                            <p class="carousel-description">{{ item.articleTitle }}</p>
-                            <a @click.prevent="viewNewsDetail(index, item)" class="carousel-link">查看详情</a>
+                />
+                <!-- 热点新闻榜 -->
+                <div class="hot-news-container">
+                    <h2>热点新闻榜</h2>
+                    <div class="hot-news-list">
+                        <div v-for="(article, index) in secondaryArticles" :key="index" class="hot-news-item">
+                            <h3>{{ article.articleTitle }}</h3>
+                            <a class="read-more" @click.prevent="viewNewsDetail(article.id, article)">阅读全文</a>
                         </div>
                     </div>
                 </div>
-            </a-carousel>
+            </div>
         </div>
+
+
 
         <!-- 主要新闻展示区 -->
         <div class="main-news-container">
@@ -60,41 +75,24 @@
 </template>
 
 <script setup>
-import {onMounted, ref} from 'vue';
-import {useArticleStore, useHistoryStore} from "../store/index";
-import {useRouter} from 'vue-router';
-import myAxios from "../plugins/myAxios";  // 导入 Vue Router
+import { onMounted, ref } from 'vue';
+import { useArticleStore, useHistoryStore } from "../store/index";
+import { useRouter } from 'vue-router';
+import myAxios from "../plugins/myAxios";
 
-const router = useRouter();  // 使用 Vue Router
+const router = useRouter();
+
 // 搜索框的输入数据
 const searchParams = ref({
     text: '',
 });
 
 const carouselNews = ref([
-    {
-        articleTitle: '全国火灾数据统计',
-        articleDesc: '今年上半年全国发生了超过1000起火灾事故。',
-        createTime: '2023-04-15',
-        newsUrl: '#/article',
-        imgUrl: 'https://via.placeholder.com/1200x500?text=Fire+Prevention',
-    },
-    {
-        articleTitle: '火灾应急预警系统升级',
-        articleDesc: '新的预警系统将在全国范围内启动，帮助更快应对火灾灾难。',
-        createTime: '2023-04-15',
-        newsUrl: '#/article',
-        imgUrl: 'https://via.placeholder.com/1200x500?text=Fire+Prevention',
-    },
-    {
-        articleTitle: '森林火灾防控加强',
-        articleDesc: '森林火灾防控政策得到进一步加强，严防火灾蔓延。',
-        createTime: '2023-04-15',
-        newsUrl: '#/article',
-        imgUrl: 'https://via.placeholder.com/1200x500?text=Fire+Prevention',
-    },
+    { articleTitle: '全国火灾数据统计', articleDesc: '今年上半年全国发生了超过1000起火灾事故。', createTime: '2023-04-15', newsUrl: '#/article', imgUrl: 'https://via.placeholder.com/1200x500?text=Fire+Prevention' },
+    { articleTitle: '火灾应急预警系统升级', articleDesc: '新的预警系统将在全国范围内启动，帮助更快应对火灾灾难。', createTime: '2023-04-15', newsUrl: '#/article', imgUrl: 'https://via.placeholder.com/1200x500?text=Fire+Prevention' },
+    { articleTitle: '森林火灾防控加强', articleDesc: '森林火灾防控政策得到进一步加强，严防火灾蔓延。', createTime: '2023-04-15', newsUrl: '#/article', imgUrl: 'https://via.placeholder.com/1200x500?text=Fire+Prevention' },
 ]);
-// 假设从后端获取到的主要新闻
+
 const mainNews = ref({
     id: '',
     articleTitle: '',
@@ -103,81 +101,49 @@ const mainNews = ref({
     articleContent: '',
     createTime: '',
 });
-// 假设我们从后端获取到的文章数据
+
 const secondaryArticles = ref([
-    {
-        id: 1,
-        title: '全国火灾数据统计',
-        description: '今年上半年全国发生了超过1000起火灾事故。',
-        image: 'https://via.placeholder.com/400x200',
-        url: '#',
-    },
-    {
-        id: 2,
-        title: '火灾应急预警系统升级',
-        description: '新的预警系统将在全国范围内启动，帮助更快应对火灾灾难。',
-        image: 'https://via.placeholder.com/400x200',
-        url: '#',
-    },
-    {
-        id: 3,
-        title: '森林火灾防控加强',
-        description: '森林火灾防控政策得到进一步加强，严防火灾蔓延。',
-        image: 'https://via.placeholder.com/400x200',
-        url: '#',
-    },
+    { id: 1, articleTitle: '全国火灾数据统计', articleDesc: '今年上半年全国发生了超过1000起火灾事故。', image: 'https://via.placeholder.com/400x200', url: '#' },
+    { id: 2, articleTitle: '火灾应急预警系统升级', articleDesc: '新的预警系统将在全国范围内启动，帮助更快应对火灾灾难。', image: 'https://via.placeholder.com/400x200', url: '#' },
+    { id: 3, articleTitle: '森林火灾防控加强', articleDesc: '森林火灾防控政策得到进一步加强，严防火灾蔓延。', image: 'https://via.placeholder.com/400x200', url: '#' },
+    { id: 4, articleTitle: '城市火灾预防指南', articleDesc: '提供实用的防火建议和逃生技巧。', image: 'https://via.placeholder.com/', url: '#'},
+    { id: 5, articleTitle: '火灾后的重建与恢复', articleDesc: '探讨如何在火灾后进行有效的社区和建筑重建。', image: 'https://via.placeholder.com/400x200', url: '#' },
 ]);
 
 const onSearch = () => {
     console.log(searchParams.value.text);
-    // 在这里处理搜索逻辑，例如通过API请求获取数据
-    // 搜索完成后添加搜索记录并清空输入框
     useHistoryStore().addSearchHistory(searchParams.value.text);
     console.log(useHistoryStore().history);
     searchParams.value.text = '';
 };
 
-// 点击新闻详情，跳转到新闻详情页面
 const viewNewsDetail = (newsId, newsData) => {
     useArticleStore().setSelectedArticle(newsData);
-    console.log(newsData)
     router.push({
         path: '/article',
         params: { id: newsId },
     });
 };
 
-// 获取新闻数据
 const getNews = async () => {
     try {
-        // 假设后端接口返回分页新闻
         myAxios.get("/article/getAllArticles").then((res) => {
             if (res.data.code === 0) {
-                // 按照时间排序，假设返回的数据有时间字段 `createTime`
-
                 const sortedArticles = res.data.data.sort((a, b) => new Date(b.createTime) - new Date(a.createTime));
-                console.log(res.data);
-                // 将最新的新闻作为主要新闻，其余作为次要新闻
                 mainNews.value = sortedArticles[0];
-                secondaryArticles.value = sortedArticles.slice(1);
-                console.log("main：", mainNews.value);
-                console.log(secondaryArticles);
+                //secondaryArticles.value = sortedArticles.slice(1);
             } else {
                 console.log('获取新闻失败');
             }
-
-        })
+        });
     } catch (error) {
         console.log(error);
     }
-
 };
 
-// 初始加载时请求新闻数据
 onMounted(() => {
-        getNews();
-    }
-);
+    getNews();
+});
 </script>
 
 <style scoped>
@@ -186,28 +152,32 @@ onMounted(() => {
     background-color: #f8f9fa;
 }
 
+.upper-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+}
+
 .search-container {
-    padding: 20px 0;
-    text-align: center;
+    flex-grow: 1;
+    max-width: 400px;
+    margin-left: 20px;
 }
 
 .search-bar {
-    max-width: 800px;
-    margin: 0 auto;
+    width: 100%;
 }
 
-/* 轮播图样式 */
 .carousel-container {
     position: relative;
-    max-width: 1200px;
-    margin: 20px auto;
-    overflow: hidden;
-    border-radius: 8px;
+    max-width: 1000px;
+    min-width: 300px;
+    margin: 0;
 }
 
 .carousel-item {
     position: relative;
-    width: 100%;
 }
 
 .carousel-image {
@@ -253,6 +223,35 @@ onMounted(() => {
 
 .carousel-link:hover {
     text-decoration: none;
+}
+
+/* 热点新闻榜样式 */
+.hot-news-container {
+    padding: 20px;
+    background-color: #fff;
+    margin-top: 30px;
+}
+
+.hot-news-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.hot-news-item {
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.read-more {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.read-more:hover {
+    text-decoration: underline;
 }
 
 /* 主要新闻区域样式 */
@@ -306,8 +305,8 @@ onMounted(() => {
 
 /* 次要新闻区域样式 */
 .secondary-news-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    column-count: 3;
+    column-width: 300px;
     gap: 20px;
     padding: 20px;
 }

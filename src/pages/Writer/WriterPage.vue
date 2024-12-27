@@ -1,6 +1,6 @@
 <template>
     <a-layout class="writer-page">
-        <a-layout-sider class="writer-sider" width="20%">
+        <a-layout-sider class="writer-sider" :width="siderWidth">
             <div class="side-title">作者管理页面</div>
             <a-menu
                 v-model:selectedKeys="selectedKeys"
@@ -33,11 +33,15 @@ import router from '../../router/index.ts';
 // 默认选中菜单项
 const selectedKeys = ref(['articles']);
 
+// 控制侧边栏的宽度
+const siderWidth = ref('20%');
+
 // 处理菜单项选择
 const handleSelect = (info: { key: string }) => {
     selectedKeys.value = [info.key]; // 更新选中项
     router.push('/writer/' + info.key); // 路由跳转
 };
+
 onMounted(() => {
     if (router.currentRoute.value.path === '/writer') {
         selectedKeys.value = ['articles']; // 默认选中菜单项
@@ -52,13 +56,13 @@ a-menu {
 }
 /* 整体布局 */
 .writer-page {
-    min-height: 80vh; /* 占满整个视口高度 */
+    min-height: 85vh; /* 占满整个视口高度 */
     background-color: #f0f2f5; /* 页面背景 */
 }
 
 /* 侧边栏 */
 .writer-sider {
-    background-color: #001529; /* 深色背景 */
+    background-color: #001529;
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15); /* 添加阴影 */
     display: flex;
     flex-direction: column;
@@ -66,11 +70,14 @@ a-menu {
 }
 
 .side-title {
-    color: #ffffff;
+    height: 64px;
+    width: 100%;
     font-size: 20px;
     font-weight: bold;
+    color: white;
     text-align: center;
-    margin-bottom: 20px; /* 标题和菜单之间间距 */
+    line-height: 64px;
+    margin-bottom: 16px;
 }
 
 /* 主内容 */
@@ -84,13 +91,29 @@ a-menu {
 }
 
 /* 响应式调整 */
+@media screen and (max-width: 1024px) {
+    .writer-sider {
+        width: 250px; /* 在较小的屏幕上调整宽度 */
+    }
+}
+
 @media screen and (max-width: 768px) {
     .writer-sider {
-        width: 200px;
+        width: 60vw; /* 使用视口宽度的60% */
     }
     .writer-content {
         margin: 10px;
         padding: 16px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .writer-sider {
+        width: 80vw; /* 在超小屏幕上使用80%的宽度 */
+    }
+    .writer-content {
+        margin: 5px;
+        padding: 12px;
     }
 }
 </style>

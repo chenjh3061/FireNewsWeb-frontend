@@ -1,23 +1,44 @@
 <template>
-    <div id="app">
-        <GlobalHeader/>
-        <router-view/>
-        <GlobalFooter/>
+    <div :class="appClass">
+        <GlobalHeader />
+        <float-buttons />
+        <router-view />
+        <GlobalFooter />
     </div>
 </template>
 
 <script lang="ts" setup>
-import GlobalHeader from "./components/layout/GlobalHeader.vue";
-import GlobalFooter from "./components/layout/GlobalFooter.vue";
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
+import GlobalHeader from './components/layout/GlobalHeader.vue';
+import GlobalFooter from './components/layout/GlobalFooter.vue';
+import FloatButtons from './plugins/FloatButtons.vue';
+
+const route = useRoute();
+
+const appClass = computed(() => {
+    // 判断当前路由是否是后台页面
+    return route.path.startsWith('/admin') | route.path.startsWith('/writer') ? 'back-layout' : 'frontend-layout';
+});
 </script>
+
 <style scoped>
 #app {
+    margin: 0 auto;
+    height: 100vh;
+}
+
+
+
+/* 前端页面设置宽度为80vw */
+.frontend-layout {
     max-width: 80vw;
     margin: 0 auto;
-
-a-layout-content {
-    min-height: 280px;
 }
+
+/* 后台页面设置宽度为100vw */
+.back-layout {
+    max-width: 100vw;
 }
 
 /* Webkit 浏览器自定义滚动条 */

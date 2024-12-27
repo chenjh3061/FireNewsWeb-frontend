@@ -1,28 +1,40 @@
 <!-- UserProfile.vue -->
 <template>
-    <div class="user-profile">
-        <div class="profile-header">
-            <img :src="user.avatar" alt="Avatar" class="avatar" />
-            <div class="user-info">
-                <h2>{{ user.username }}</h2>
-                <p>{{ user.bio }}</p>
+    <div class="personal-page">
+        <h1 class="page-title">个人页面</h1>
+        <div class="user-profile">
+            <div class="profile-header">
+                <img :src="user.userAvatar" alt="Avatar" class="avatar"/>
+                <div class="user-info">
+                    <h1>{{ user.userAccount }}</h1>
+                    <h2>{{ user.userName }}</h2>
+                    <span class="user-role">{{ user.userRole }}</span>
+                    <span class="user-email">{{ user.userEmail }}</span>
+                    <p>{{ user.userProfile }}</p>
+                </div>
+            </div>
+            <div class="profile-settings">
+                <button @click="editProfile">编辑资料</button>
+                <button @click="changePassword">修改密码</button>
+            </div>
+            <div class="user-action">
+                动态
             </div>
         </div>
-        <div class="profile-settings">
-            <h3>Account Settings</h3>
-            <button @click="editProfile">Edit Profile</button>
-            <button @click="changePassword">Change Password</button>
-        </div>
     </div>
+
 </template>
 
-<script setup lang="ts">
-import { ref } from 'vue';
+<script lang="ts" setup>
+import {ref} from 'vue';
 
 const user = ref({
-    avatar: 'https://example.com/avatar.jpg',
-    username: 'JohnDoe',
-    bio: 'Software Developer at Example Inc.',
+    userAccount: "john_doe",
+    userAvatar: 'https://example.com/avatar.jpg',
+    userName: 'JohnDoe',
+    userProfile: 'Software Developer at Example Inc.',
+    userRole: "user",
+    userEmail: 'john.doe@example.com',
 });
 
 const editProfile = () => {
@@ -35,7 +47,20 @@ const changePassword = () => {
 </script>
 
 <style scoped>
+.personal-page {
+    max-width: 70vw;
+    min-height: 75vh;
+    margin: 0 auto;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.page-title {
+    padding: 20px;
+
+}
+
 .user-profile {
+
     padding: 20px;
 }
 

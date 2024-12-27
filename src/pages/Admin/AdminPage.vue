@@ -13,6 +13,7 @@
                 v-model:selectedKeys="selectedKeys"
                 mode="inline"
                 theme="dark"
+                inline-collapsed
                 @select="handleSelect"
             >
                 <a-menu-item key="dashboard">
@@ -43,6 +44,12 @@
 
         <!-- 主内容 -->
         <a-layout-content class="admin-content">
+            <a-breadcrumb class="guide" :routes="router">
+                <template #itemRender="{ route, paths }">
+                    {{ route.paths }}
+                </template>
+            </a-breadcrumb>
+
             <div class="content-wrapper">
                 <router-view />
             </div>
@@ -62,6 +69,10 @@ import router from "../../router";
 
 const selectedKeys = ref<string[]>(['dashboard']);
 
+const checkRouter = (to: any) => {
+    console.log(router)
+};
+
 const handleSelect = (info: { key: string }) => {
     //console.log('Selected key:', info.key); // 调试日志
     selectedKeys.value = [info.key];
@@ -75,7 +86,7 @@ onMounted(() => {
 <style scoped>
 /* 整体布局 */
 .admin-page {
-    min-height: 80vh;
+    min-height: 85vh;
 }
 
 /* 侧边栏 */
@@ -100,8 +111,10 @@ onMounted(() => {
 
 /* 主内容 */
 .admin-content {
-    padding: 24px;
     background-color: #f0f2f5;
+    padding-right: 24px;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15); /* 添加阴影 */
+    overflow-x: hidden;
     overflow-y: auto;
 }
 
