@@ -17,7 +17,7 @@ import CommentManage from "../pages/Admin/CommentManage.vue";
 import ErrorPage from "../pages/ErrorPage.vue";
 import UserPage from "../pages/UserPage.vue";
 import ArticleDetails from "../pages/ArticleDetails.vue";
-import ACCESS_ENUM from "../access/ACCESS_ENUM";
+import SearchPage from "../pages/SearchPage.vue";
 
 const routes: Array<RouteRecordRaw> = [
     {
@@ -41,6 +41,14 @@ const routes: Array<RouteRecordRaw> = [
         name: "science",
         meta: {
             title: "科普园地",
+        }
+    },
+    {
+        path: "/search",
+        name: "search",
+        component: SearchPage,
+        meta: {
+            title: "搜索结果",
         }
     },
     {

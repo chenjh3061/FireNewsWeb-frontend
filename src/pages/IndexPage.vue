@@ -100,18 +100,15 @@ const mainNews = ref({
     createTime: '',
 });
 
-const secondaryArticles = ref([
-    { id: 1, articleTitle: '全国火灾数据统计', articleDesc: '今年上半年全国发生了超过1000起火灾事故。', image: 'https://via.placeholder.com/400x200', url: '#' },
-    { id: 2, articleTitle: '火灾应急预警系统升级', articleDesc: '新的预警系统将在全国范围内启动，帮助更快应对火灾灾难。', image: 'https://via.placeholder.com/400x200', url: '#' },
-    { id: 3, articleTitle: '森林火灾防控加强', articleDesc: '森林火灾防控政策得到进一步加强，严防火灾蔓延。', image: 'https://via.placeholder.com/400x200', url: '#' },
-    { id: 4, articleTitle: '城市火灾预防指南', articleDesc: '提供实用的防火建议和逃生技巧。', image: 'https://via.placeholder.com/', url: '#'},
-    { id: 5, articleTitle: '火灾后的重建与恢复', articleDesc: '探讨如何在火灾后进行有效的社区和建筑重建。', image: 'https://via.placeholder.com/400x200', url: '#' },
-]);
+const secondaryArticles = ref([]);
 
 const onSearch = () => {
     console.log(searchParams.value.text);
     useHistoryStore().addSearchHistory(searchParams.value.text);
-    console.log(useHistoryStore().history);
+    router.push({
+        path: '/search',
+        query: { text: searchParams.value.text },
+    });
     searchParams.value.text = '';
 };
 
