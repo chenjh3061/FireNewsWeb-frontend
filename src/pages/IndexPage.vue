@@ -6,7 +6,7 @@
             <div class="carousel-container">
                 <a-carousel arrows autoplay class="custom-carousel">
                     <div v-for="(item, index) in carouselNews" :key="index" class="carousel-item">
-                        <img :src="item.imgUrl" alt="Fire" class="carousel-image"/>
+                        <img :src="item.articleAvatar" alt="Fire" class="carousel-image"/>
                         <div class="carousel-overlay">
                             <div class="carousel-content">
                                 <h3 class="carousel-title">{{ item.articleTitle }}</h3>
@@ -32,7 +32,7 @@
                 <div class="hot-news-container">
                     <h2>热点新闻榜</h2>
                     <div class="hot-news-list">
-                        <div v-for="(article, index) in secondaryArticles" :key="index" class="hot-news-item">
+                        <div v-for="(article, index) in hotArticles" :key="index" class="hot-news-item">
                             <h3>{{ article.articleTitle }}</h3>
                             <a class="read-more" @click.prevent="viewNewsDetail(article.id, article)">阅读全文</a>
                         </div>
@@ -87,11 +87,9 @@ const searchParams = ref({
     text: '',
 });
 
-const carouselNews = ref([
-    { articleTitle: '全国火灾数据统计', articleDesc: '今年上半年全国发生了超过1000起火灾事故。', createTime: '2023-04-15', newsUrl: '#/article', imgUrl: 'https://via.placeholder.com/1200x500?text=Fire+Prevention' },
-    { articleTitle: '火灾应急预警系统升级', articleDesc: '新的预警系统将在全国范围内启动，帮助更快应对火灾灾难。', createTime: '2023-04-15', newsUrl: '#/article', imgUrl: 'https://via.placeholder.com/1200x500?text=Fire+Prevention' },
-    { articleTitle: '森林火灾防控加强', articleDesc: '森林火灾防控政策得到进一步加强，严防火灾蔓延。', createTime: '2023-04-15', newsUrl: '#/article', imgUrl: 'https://via.placeholder.com/1200x500?text=Fire+Prevention' },
-]);
+const carouselNews = ref([]);
+
+const hotArticles = ref([]);
 
 const mainNews = ref({
     id: '',
@@ -131,9 +129,24 @@ const getNews = async () => {
             if (res.data.code === 0) {
                 const sortedArticles = res.data.data.sort((a, b) => new Date(b.createTime) - new Date(a.createTime));
                 mainNews.value = sortedArticles[0];
-                //secondaryArticles.value = sortedArticles.slice(1);
+                secondaryArticles.value = sortedArticles.slice(1);
             } else {
                 console.log('获取新闻失败');
+            }
+        });
+        myAxios.get("/article/getCarouselArticles").then((res) => {
+            if (res.data.code === 0) {
+                carouselNews.value = res.data.data;
+            } else {
+                console.log('获取轮播图新闻失败');
+            }
+        });
+        myAxios.get("/article/getHotNews").then((res) => {
+            if (res.data.code === 0) {
+                hotArticles.value = res.data.data.slice(0, 5);
+                console.log(hotArticles.value);
+            } else {
+                console.log('获取热点新闻失败');
             }
         });
     } catch (error) {
@@ -183,7 +196,7 @@ onMounted(() => {
 .carousel-image {
     width: 100%;
     height: 500px;
-    object-fit: cover;
+    object-fit: contain;
     border-radius: 8px;
 }
 

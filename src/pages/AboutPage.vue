@@ -27,17 +27,17 @@
             <h2>技术支持</h2>
             <div class="team-members">
                 <div class="team-member">
-                    <img src="https://via.placeholder.com/150" alt="Team Member" />
+                    <img src=".././assets/电视台台标.png" alt="Team Member" style="transform: scale(1.2);" />
                     <p class="name">XX电视台</p>
                     <p class="role">权威新闻报道</p>
                 </div>
                 <div class="team-member">
-                    <img src="https://via.placeholder.com/150" alt="Team Member" />
+                    <img src=".././assets/救援队logo.png" alt="Team Member" />
                     <p class="name">XX救援队</p>
                     <p class="role">消防专业知识</p>
                 </div>
                 <div class="team-member">
-                    <img src="https://via.placeholder.com/150" alt="Team Member" />
+                    <img src=".././assets/Logo.png" alt="Team Member" />
                     <p class="name">火灾新闻网团队</p>
                     <p class="role">网络技术支持</p>
                 </div>
@@ -121,9 +121,10 @@
 }
 
 .team-member img {
-    width: 150px;
+    width: 160px;
     height: 150px;
     border-radius: 50%;
+    object-fit: cover;
     margin-bottom: 10px;
 }
 
