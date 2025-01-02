@@ -4,7 +4,7 @@
         <div class="back-button" @click="goBack">
             <a-button type="primary">
                 <template #icon>
-                    <StepBackwardOutlined />
+                    <StepBackwardOutlined/>
                 </template>
                 返回
             </a-button>
@@ -29,20 +29,21 @@
         </div>
 
         <!-- 文章详情 -->
-        <div :style="{ fontSize: fontSize + 'px' }" class="news-content" v-html="articleData.articleContent"></div>
+        <div :style="{ fontSize: fontSize + 'px' }" class="news-content" v-html="sanitizedArticleContent"></div>
 
         <!-- 可拖动、可折叠的AI总结与提问窗口 -->
         <div
-            class="ai-window"
-            :style="{ top: aiWindowPosition.top + 'px', left: aiWindowPosition.left + 'px' }"
-            v-show="isAiWindowVisible"
-            ref="aiWindow"
-            @mousedown="startDrag"
-            @mouseup="stopDrag"
+                v-show="isAiWindowVisible"
+                ref="aiWindow"
+                :style="{ top: aiWindowPosition.top + 'px', left: aiWindowPosition.left + 'px',
+                      width: aiWindowSize.width + 'px', height: aiWindowSize.height + 'px' }"
+                class="ai-window"
+                @mousedown="startDrag"
+                @mouseup="stopDrag"
         >
             <div class="ai-header">
                 <span>AI总结与提问</span>
-                <a-icon type="minus" @click="toggleAiWindow" />
+                <a-icon type="minus" @click="toggleAiWindow"/>
             </div>
 
             <div class="ai-content">
@@ -52,10 +53,10 @@
                 <div class="question-section">
                     <h3>提问AI</h3>
                     <a-input
-                        v-model="userQuestion"
-                        placeholder="请输入您的问题"
-                        @pressEnter="askQuestion"
-                        allow-clear
+                            v-model:value="userQuestion"
+                            allow-clear
+                            placeholder="请输入您的问题"
+                            @pressEnter="askQuestion"
                     />
                     <a-button type="primary" @click="askQuestion">提问</a-button>
                 </div>
@@ -64,58 +65,76 @@
                     <h3>AI回答</h3>
                     <p>{{ aiAnswer }}</p>
                 </div>
+
+                <div class="ai-footer">
+                    <a-button type="primary" @click="getAiSummary">获取AI总结</a-button>
+                </div>
             </div>
+            <!-- 可调节大小的手柄 -->
+            <div class="resize-handle top-left" @mousedown="startResize('top-left')"></div>
+            <div class="resize-handle top-right" @mousedown="startResize('top-right')"></div>
+            <div class="resize-handle bottom-left" @mousedown="startResize('bottom-left')"></div>
+            <div class="resize-handle bottom-right" @mousedown="startResize('bottom-right')"></div>
+            <div class="resize-handle top" @mousedown="startResize('top')"></div>
+            <div class="resize-handle right" @mousedown="startResize('right')"></div>
+            <div class="resize-handle bottom" @mousedown="startResize('bottom')"></div>
+            <div class="resize-handle left" @mousedown="startResize('left')"></div>
         </div>
 
-        <!-- 评论区 -->
-        <div class="comment-section">
-            <h2 class="comment-title">评论区</h2>
+    </div>
 
-            <!-- 评论输入框 -->
-            <div v-if="isLoggedIn" class="comment-input">
-                <a-textarea
+  <!-- 评论区 -->
+    <div class="comment-section">
+        <h2 class="comment-title">评论区</h2>
+
+        <!-- 评论输入框 -->
+        <div v-if="isLoggedIn" class="comment-input">
+            <a-textarea
                     v-model="newComment"
                     class="comment-textarea"
                     placeholder="发表你的评论..."
                     rows="4"
-                />
-                <div class="comment-actions">
-                    <a-button type="primary" @click="submitComment">发表评论</a-button>
-                </div>
+            />
+            <div class="comment-actions">
+                <a-button type="primary" @click="submitComment">发表评论</a-button>
             </div>
+        </div>
 
-            <!-- 未登录状态提示 -->
-            <div v-else class="comment-not-logged-in">
-                <a-alert message="请登录后发表评论" show-icon type="info"/>
-            </div>
+        <!-- 未登录状态提示 -->
+        <div v-else class="comment-not-logged-in">
+            <a-alert message="请登录后发表评论" show-icon type="info"/>
+        </div>
 
-            <!-- 评论列表 -->
-            <div v-if="comments.length" class="comment-list">
-                <div
+        <!-- 评论列表 -->
+        <div v-if="comments.length" class="comment-list">
+            <div
                     v-for="(comment, index) in comments"
                     :key="index"
                     class="comment-item"
-                >
-                    <div class="comment-author">
-                        <span class="author-name">{{ comment.user }}</span>
-                        <span class="comment-date">{{ formatDate(comment.date) }}</span>
-                    </div>
-                    <p class="comment-text">{{ comment.content }}</p>
+            >
+                <div class="comment-author">
+                    <span class="author-name">{{ comment.user }}</span>
+                    <span class="comment-date">{{ formatDate(comment.createTime) }}</span>
                 </div>
+                <p class="comment-text">{{ comment.content }}</p>
             </div>
-            <div v-else class="no-comments">暂无评论，快来抢沙发吧！</div>
         </div>
+        <div v-else class="no-comments">暂无评论，快来抢沙发吧！</div>
     </div>
 </template>
 
 
-
 <script lang="ts" setup>
-import { computed, ref, onMounted, reactive } from "vue";
-import { useArticleStore, useUserStore } from "../store/index";
-import { useRouter } from "vue-router";
-import { StepBackwardOutlined } from "@ant-design/icons-vue";
+import {computed, onMounted, reactive, ref} from "vue";
+import {useArticleStore, useUserStore} from "../store/index";
+import {useRouter} from "vue-router";
+import {StepBackwardOutlined} from "@ant-design/icons-vue";
 import myAxios from "../plugins/myAxios";
+import MyAxios from "../plugins/myAxios";
+import DOMPurify from "dompurify";
+import {adjustFontSize, formatDate} from '.././utils/utils.js';
+import {_} from "lodash";
+
 
 // 获取路由和文章数据
 const router = useRouter();
@@ -125,22 +144,29 @@ const userStore = useUserStore();
 const articleData = ref(articleStore.getSelectedArticle());
 const isLoggedIn = computed(() => userStore); // 检查用户是否已登录
 
+// 处理文章内容
+const sanitizedArticleContent = computed(() => {
+    const rawHTML = articleData.value.articleContent;
+    return DOMPurify.sanitize(rawHTML); // 使用DOMPurify清理HTML
+});
+
 // 评论功能
-const comments = ref([
-    { user: "张三", content: "这是一个很棒的文章！", date: "2024-12-18" },
-    { user: "李四", content: "内容很有帮助，谢谢！", date: "2024-12-18" },
-]);
+const comments = ref([]);
 const newComment = ref([]);
 
 // 获取评论
 const getComments = () => {
     const commentData = ref();
     try {
-        myAxios.get("/comments/getCommentsByArticleId", {
-            params: { articleId: articleData.value.articleId },
+        myAxios.get("/comments/getCommentsByArticleId",
+            {
+            params: {
+                id: articleData.value.id,
+            },
         }).then((res) => {
-            if (res.data) {
-                commentData.value = res.data;
+            console.log(res);
+            if (res.data.code === 0) {
+                commentData.value = res.data.data;
                 comments.value.push(...commentData.value);
             } else {
                 console.log("获取评论失败！");
@@ -150,11 +176,37 @@ const getComments = () => {
         console.error(err);
     }
 };
+getComments();
+
+// 提交评论
+const submitComment = () => {
+    if (newComment.value === "") {
+        return; // 评论为空不提交
+    } else {
+        try {
+            MyAxios.post("/comments/addComment", {
+                articleId: articleData.value.articleId,
+                userId: userStore.userInfo.username,
+                content: newComment.value,
+            }).then((res) => {
+                if (res.data) {
+                    getComments();
+                } else {
+                    console.log("提交评论失败！");
+                }
+            });
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    newComment.value = null; // 清空输入框
+};
 
 // 字号调整功能
 const fontSize = ref(16);
 const adjustFontSize = (size: "small" | "large" | "reset") => {
-    const sizes = { small: 14, large: 20, reset: 16 };
+    const sizes = {small: 14, large: 20, reset: 16};
     fontSize.value = sizes[size];
 };
 
@@ -169,14 +221,6 @@ const goBack = () => {
     router.back();
 };
 
-// 提交评论
-const submitComment = () => {
-    if (newComment.value === "") {
-        return; // 评论为空不提交
-    }
-
-    newComment.value = null; // 清空输入框
-};
 
 // 分享功能
 const shareArticle = () => {
@@ -191,7 +235,8 @@ const aiSummary = ref("");
 const aiAnswer = ref("");
 const userQuestion = ref("");
 const isAiWindowVisible = ref(true); // 控制窗口显示与否
-const aiWindowPosition = reactive({ top: 200, left: 50 }); // 控制窗口的初始位置
+const aiWindowPosition = reactive({top: 200, left: 50}); // 控制窗口的初始位置
+const aiWindowSize = reactive({width: 300, height: 200}); // 控制窗口的初始大小
 const AIUrl = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
 const apiKey = "cd3e9fa7f67988e4c4a87e6adaad7d4f.tXpGrIlHvyIoqIlL"
 
@@ -205,7 +250,7 @@ const getAiSummary = async () => {
                 messages: [
                     {
                         "role": "user",
-                        "content": "你是一位记者，需要给出下面文章的总结：" +  articleData.value.articleContent,
+                        "content": "你是一位记者，需要给出下面文章的总结：" + articleData.value.articleContent,
                     }
                 ]
             },
@@ -223,14 +268,18 @@ const getAiSummary = async () => {
     }
 };
 
+const isQuestionLoading = ref(false); // 控制提问按钮的加载状态
+
 // 提问功能
-const askQuestion = async () => {
-    if (!userQuestion.value.trim()) {
+const askQuestion = _.debounce(async () => {
+    if (!userQuestion.value) {
+        console.log(userQuestion.value)
         return; // 如果问题为空，则不发送请求
     }
     console.log("题目：", userQuestion.value); // 输出返回的响应
 
     try {
+        isQuestionLoading.value = true; // 开始加载
         const res = await myAxios.post(
             AIUrl, // 这里的 URL 需要根据你的 API 地址进行调整
             {
@@ -249,12 +298,13 @@ const askQuestion = async () => {
                 }
             }
         );
+
         aiAnswer.value = res.data.choices[0].message.content; // 假设返回的结构类似
-        console.log("AI回答：", aiAnswer.value); // 输出返回的回答
+        isQuestionLoading.value = false; // 结束加载
     } catch (err) {
         console.error("AI回答失败", err);
     }
-};
+}, 500);
 
 
 // 拖动窗口的相关操作
@@ -274,6 +324,17 @@ const dragWindow = (e: MouseEvent) => {
     if (isDragging) {
         aiWindowPosition.left = e.clientX - offsetX;
         aiWindowPosition.top = e.clientY - offsetY;
+
+        let left = aiWindowPosition.left;
+        let top = aiWindowPosition.top;
+
+        // 吸附到屏幕边缘
+        const margin = 20; // 吸附边距
+        if (left < margin) left = 0;
+        if (top < margin) top = 0;
+
+        aiWindowPosition.left = left;
+        aiWindowPosition.top = top;
     }
 };
 
@@ -281,6 +342,46 @@ const stopDrag = () => {
     isDragging = false;
     document.removeEventListener("mousemove", dragWindow);
     document.removeEventListener("mouseup", stopDrag);
+};
+
+// 窗口大小调整
+let resizing = false;
+let resizeDirection = "";
+let startSize = { width: 0, height: 0 };
+let startPos = { x: 0, y: 0 };
+
+const startResize = (direction: string) => {
+    resizing = true;
+    resizeDirection = direction;
+    startSize = { ...aiWindowSize };
+    startPos = { x: event.clientX, y: event.clientY };
+    document.addEventListener("mousemove", resizeWindow);
+    document.addEventListener("mouseup", stopResize);
+};
+
+const resizeWindow = (event: MouseEvent) => {
+    if (resizing) {
+        const dx = event.clientX - startPos.x;
+        const dy = event.clientY - startPos.y;
+        if (resizeDirection.includes("right")) {
+            aiWindowSize.width = startSize.width + dx;
+        }
+        if (resizeDirection.includes("bottom")) {
+            aiWindowSize.height = startSize.height + dy;
+        }
+        if (resizeDirection === "left") {
+            aiWindowSize.width = startSize.width - dx;
+        }
+        if (resizeDirection === "top") {
+            aiWindowSize.height = startSize.height - dy;
+        }
+    }
+};
+
+const stopResize = () => {
+    resizing = false;
+    document.removeEventListener("mousemove", resizeWindow);
+    document.removeEventListener("mouseup", stopResize);
 };
 
 // 控制AI模块的折叠与展开
@@ -313,6 +414,11 @@ onMounted(() => {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+}
+.resize-handle {
+    position: absolute;
+    background-color: #ccc;
+    cursor: pointer;
 }
 
 .font-size-control {
@@ -347,7 +453,8 @@ onMounted(() => {
 }
 
 .comment-section {
-    margin-top: 40px;
+    margin: 0 auto;
+    width: 70%;
 }
 
 .comment-title {
@@ -411,6 +518,7 @@ onMounted(() => {
 .share-section a-icon {
     color: #007bff;
 }
+
 .ai-window {
     position: absolute;
     width: 300px;

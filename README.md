@@ -1,5 +1,7 @@
 # firenews
 
+A fire news website built with Vue 3 and Vite. You can browse, search and read news.
+
 This template should help get you started developing with Vue 3 in Vite.
 
 ## Recommended IDE Setup

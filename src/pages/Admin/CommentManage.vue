@@ -5,7 +5,7 @@
         <!-- 搜索框 -->
         <div class="search-bar">
             <a-input-search
-                v-model="searchQuery"
+                v-model:value="searchQuery"
                 placeholder="请输入用户名称或文章标题"
                 enter-button="搜索"
                 @search="handleSearch"
@@ -15,9 +15,9 @@
         <!-- 评论列表表格 -->
         <a-table
             :columns="columns"
-            :data-source="filteredComments"
+            :data-source="allComments"
             :pagination="pagination"
-            row-key="id"
+            :rowKey="record => record.id"
         >
             <template #bodyCell="{ column, record }">
                 <template v-if="column.dataIndex === 'content'">
@@ -51,6 +51,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { message, Modal } from "ant-design-vue";
+import myAxios from "../../plugins/myAxios";
 
 // 搜索关键字
 const searchQuery = ref("");
@@ -99,25 +100,17 @@ const allComments = ref([
     },
 ]);
 
-// 当前显示的评论数据（支持分页和搜索）
-const filteredComments = computed(() => {
-    // 按搜索条件过滤
-    let result = allComments.value;
-    if (searchQuery.value) {
-        result = result.filter(
-            (comment) =>
-                comment.username.includes(searchQuery.value) ||
-                comment.articleTitle.includes(searchQuery.value)
-        );
+// 从后端获取评论
+const getComments = () => {
+    try {
+        myAxios.get("/comments/getAllComments").then((res) => {
+            allComments.value = res.data.data;
+        });
+    } catch (error) {
+        message.error("获取评论失败！");
     }
-
-    // 模拟分页
-    const startIndex =
-        (pagination.value.current - 1) * pagination.value.pageSize;
-    const endIndex = startIndex + pagination.value.pageSize;
-    return result.slice(startIndex, endIndex);
-});
-
+}
+getComments();
 // 表格列配置
 const columns = ref([
     { title: "评论内容", dataIndex: "content", key: "content", width: 300 },
@@ -140,14 +133,25 @@ const columns = ref([
 ]);
 
 // 分页配置
-const pagination = ref({
-    current: 1,
-    pageSize: 5,
-    total: allComments.value.length,
-    onChange: (page: number, pageSize: number) => {
-        pagination.value.current = page;
-        pagination.value.pageSize = pageSize;
-    },
+const currentPage = ref(1);
+const pageSize = ref(10);
+const pagination = computed(() => {
+    return {
+        current: currentPage.value,
+        pageSize: pageSize.value,
+        total: allComments.value.length,
+        showTotal: (total) => '共'+total+'条记录',
+        showSizeChanger: true,
+        pageSizeOptions: ['10', '20', '30', '50'],
+        onChange: (page: number, pageSize: number) => {
+            pagination.value.current = page;
+            pagination.value.pageSize = pageSize;
+        },
+        onShowSizeChange: (current: number, size: number) => {
+            currentPage.value = current;  // 更新当前页
+            pageSize.value = size;         // 更新每页条数
+        },
+    }
 });
 
 // 切换评论状态
@@ -171,8 +175,15 @@ const deleteComment = (record: any) => {
     });
 };
 
+const searchList = ref([]);
 // 搜索评论
 const handleSearch = () => {
+    if (!searchQuery.value) return;
+    console.log(searchQuery.value);
+    searchList.value = allComments.value;
+    allComments.value = allComments.value.filter((item) =>
+        item.articleTitle.includes(searchQuery.value)
+    );
     pagination.value.current = 1; // 搜索后重置到第一页
 };
 </script>

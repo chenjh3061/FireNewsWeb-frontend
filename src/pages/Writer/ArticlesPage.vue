@@ -30,15 +30,6 @@
             :article="selectedArticle"
         />
 
-        <!-- 引入的文章编辑弹窗 -->
-        <ArticleEditModal
-            :visible="isEditVisible"
-            @close="isEditVisible = false"
-            :article="selectedArticle"
-            @save="handleOk"
-            @cancel="handleCancel"
-        />
-
     </div>
 </template>
 
@@ -46,10 +37,11 @@
 import {computed, onMounted, ref} from "vue";
 import ArticleModal from "../../components/modals/ArticleDetailModal.vue";
 import myAxios from "../../plugins/myAxios";
-import dayjs from "dayjs"; // 引入弹窗组件
+import dayjs from "dayjs";
 import { fieldMappings } from "../../utils/mapping.js";
 import {message} from "ant-design-vue";
-import ArticleEditModal from "../../components/modals/ArticleEditModal.vue";
+import { useArticleStore } from "../../store";
+import { useRouter } from "vue-router";
 
 const mappings = fieldMappings;
 const pagination = computed(() => {
@@ -57,12 +49,11 @@ const pagination = computed(() => {
         current: 1,
         pageSize: 10,
         total: dataSource.value.length,
-        showTotal: (total) => total,
+        showTotal: (total) => '共'+total+'条记录',
         showSizeChanger: true,
         onChange: (page: number, pageSize: number) => {
             pagination.value.current = page;
             pagination.value.pageSize = pageSize;
-            getArticles(); // 分页更新时重新请求数据
         },
     }
 });
@@ -117,11 +108,14 @@ const viewDetails = (record: any) => {
     isDetailVisible.value = true; // 打开弹窗
 };
 
+const articleStore = useArticleStore();
+const router = useRouter();
 // 修改文章
 const editeArticle = (record: any) => {
-    selectedArticle.value = record; // 设置当前文章
-    isEditVisible.value = true; // 打开弹窗
-
+    articleStore.selectedArticle = record;
+    router.push({
+        path: "/articleEditor",
+    });
 };
 // 取消 Modal
 const handleCancel = () => {

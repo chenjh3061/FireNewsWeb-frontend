@@ -17,18 +17,18 @@
                 @select="handleSelect"
             >
                 <a-menu-item key="dashboard">
-                    <user-outlined />
+                    <PieChartOutlined />
                     <span>系统首页</span>
                 </a-menu-item>
 
                 <a-sub-menu key="articles-management">
                     <template #title>
                         <upload-outlined />
-                        <span>文章管理</span>
+                        <span>文本管理</span>
                     </template>
                     <a-menu-item key="carousel">轮播新闻</a-menu-item>
                     <a-menu-item key="categories">分类管理</a-menu-item>
-                    <a-menu-item key="newsManage">新闻管理</a-menu-item>
+                    <a-menu-item key="newsManage">文章管理</a-menu-item>
                     <a-menu-item key="notionManage">通知管理</a-menu-item>
                 </a-sub-menu>
                 <a-menu-item key="commentManage">
@@ -63,6 +63,7 @@ import {
     UploadOutlined,
     UserOutlined,
     CommentOutlined,
+    PieChartOutlined,
     VideoCameraOutlined,
 } from '@ant-design/icons-vue';
 import router from "../../router";

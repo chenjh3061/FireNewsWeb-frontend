@@ -5,18 +5,38 @@
         <!-- 已选轮播新闻 -->
         <div class="selected-news">
             <h3>已选择的轮播新闻</h3>
-            <a-table :data-source="selectedNews" bordered :pagination="{ pageSize: 5 }">
-                <template #render-item="{ item }">
-                    <div class="news-item">
-                        <span>{{ item.title }}</span>
-                        <a-button
-                            type="link"
-                            @click="removeFromCarousel(item)"
-                            class="remove-button"
-                        >
-                            移除
-                        </a-button>
-                    </div>
+            <a-table
+                    :columns="columns"
+                    :data-source="selectedNews"
+                    :pagination="{ pageSize: 5 }"
+                    bordered
+                    rowKey="id"
+            >
+                <template #bodyCell="{ column, record }">
+                    <template v-if="column.dataIndex === 'createTime'">
+                        {{ dayjs(record.createTime).format("YYYY-MM-DD HH:mm") }}
+                    </template>
+                    <template v-else-if="column.dataIndex === 'isCarousel'">
+                        <a-tag v-bind="mappings[column.dataIndex](record)">
+                            {{ mappings[column.dataIndex](record).text }}
+                        </a-tag>
+                    </template>
+                    <template v-else-if="column.dataIndex === 'action'">
+                        <a-popconfirm
+                            title="确定要移除该轮播文章吗？"
+                            okText="确定"
+                            cancelText="取消"
+                            @confirm="removeFromCarousel(record)"
+                            @cancel="cancel">
+                            <a-button
+                                danger
+                                type="primary"
+                            >
+                                移除
+                            </a-button>
+                        </a-popconfirm>
+
+                    </template>
                 </template>
             </a-table>
         </div>
@@ -24,65 +44,214 @@
         <!-- 可选新闻 -->
         <div class="news-list">
             <h3>可添加到轮播的新闻</h3>
-            <a-table :data-source="newsList" bordered :pagination="{ pageSize: 10 }">
-                <template #render-item="{ item }">
-                    <div class="news-item">
-                        <span>{{ item.title }}</span>
-                        <a-button
-                            type="link"
-                            @click="addToCarousel(item)"
-                            class="add-button"
-                        >
-                            添加到轮播
+            <a-input-search class="search-input" v-model:value="searchParams"
+                            placeholder="搜索新闻" @search="onSearch" />
+            <a-button type="primary" @click="cancelSearch">清空搜索</a-button>
+            <a-table
+                    :columns="columns"
+                    :data-source="carouselList"
+                    :pagination="pagination"
+                    bordered
+                    rowKey="id"
+            >
+                <template #bodyCell="{ column, record }">
+                    <template v-if="column.dataIndex === 'createTime'">
+                        {{ dayjs(record.createTime).format("YYYY-MM-DD HH:mm") }}
+                    </template>
+                    <template v-else-if="column.dataIndex === 'isCarousel'">
+                        <a-tag v-bind="mappings[column.dataIndex](record)">
+                            {{ mappings[column.dataIndex](record).text }}
+                        </a-tag>
+                    </template>
+                    <template v-if="column.dataIndex === 'action'">
+                        <a-button type="default" @click="previewNews(record)">
+                            预览文章
                         </a-button>
-                    </div>
+                        <a-popconfirm
+                            title="确定要添加到轮播吗？"
+                            okText="确定"
+                            cancelText="取消"
+                            @confirm="addToCarousel(record)"
+                            @cancel="cancel"
+                        >
+                            <a-button
+                                    :disabled="selectedNews.length >= 5 || isAlreadyInCarousel(record.id)"
+                                    type="primary"
+                            >
+                                添加到轮播
+                            </a-button>
+                        </a-popconfirm>
+
+                    </template>
                 </template>
             </a-table>
         </div>
+        <ArticleModal
+                v-model:visible="isDetailVisible"
+                :article="selectedArticle"
+        />
     </div>
 </template>
 
-<script setup lang="ts">
-import { ref } from "vue";
-import { message } from "ant-design-vue";
 
-interface News {
-    id: number;
-    title: string;
-}
+<script lang="ts" setup>
+import {ref} from "vue";
+import {message, TableColumnsType} from "ant-design-vue";
+import myAxios from "../../plugins/myAxios";
+import dayjs from "dayjs";
+import {fieldMappings} from "../../utils/mapping.js";
+import ArticleModal from "../../components/modals/ArticleDetailModal.vue";
+import {computed} from "vue";
 
-// 示例新闻数据
-const newsList = ref<News[]>([
-    { id: 1, title: "火灾新闻1" },
-    { id: 2, title: "火灾新闻2" },
-    { id: 3, title: "火灾新闻3" },
-    { id: 4, title: "火灾新闻4" },
-    { id: 5, title: "火灾新闻5" },
-    { id: 6, title: "火灾新闻6" },
+const mappings = fieldMappings;
+
+const columns = ref<TableColumnsType>([
+    {title: "文章标题", dataIndex: "articleTitle", key: "articleTitle"},
+    {title: "提交时间", dataIndex: "createTime", key: "createTime",
+        sorter: (a, b) => {
+            const dateA = new Date(a.createTime).getTime();  // 转换为时间戳
+            const dateB = new Date(b.createTime).getTime();
+            return dateA - dateB;  // 比较时间戳，升序排列
+        },
+        sortDirections: ['descend', 'ascend'],},
+    {title: "状态", dataIndex: "isCarousel", key: "isCarousel"},
+    {title: "操作", key: "action", dataIndex: "action"},
 ]);
 
-const selectedNews = ref<News[]>(newsList.value);
+const pagination = computed(() => {
+    return {
+        current: 1,
+        pageSize: 10,
+        total: carouselList.value.length,
+        showTotal: (total) => '共'+total+'条记录',
+        showSizeChanger: true,
+        onChange: (page: number, pageSize: number) => {
+            pagination.value.current = page;
+            pagination.value.pageSize = pageSize;
+        },
+    }
+});
+
+const selectedNews = ref([]);
+const carouselList = ref([]);
+
+const isDetailVisible = ref(false);
+const selectedArticle = ref(null);
+const previewNews = (record: any) => {
+    selectedArticle.value = record; // 设置当前文章
+    console.log(selectedArticle.value);
+    isDetailVisible.value = true; // 打开弹窗
+};
+
+const searchList = ref([]);
+const searchParams = ref();
+// 搜索新闻
+const onSearch = () => {
+    if (!searchParams.value) return;
+    console.log(searchParams.value);
+    searchList.value = carouselList.value;
+    carouselList.value = carouselList.value.filter((item) =>
+        item.articleTitle.includes(searchParams.value)
+    );
+};
+
+const cancelSearch = (value) => {
+    searchParams.value = "";
+    carouselList.value = searchList.value;
+};
+
+// 判断新闻是否已经在轮播中
+const isAlreadyInCarousel = (id) => {
+    return selectedNews.value.some((item) => item.articleId === id);
+}
+
+
+// 获取已选轮播新闻
+const getCarouselNews = async () => {
+    try {
+        const res = await myAxios.get("/article/getCarouselArticles");
+        if (res.data.code === 0) {
+            selectedNews.value = res.data.data;
+        } else {
+            message.error("获取轮播新闻失败！");
+        }
+    } catch (error) {
+        message.error("获取轮播新闻失败！");
+    }
+};
+
+// 获取可添加新闻列表
+const getCarouselList = async () => {
+    try {
+        const res = await myAxios.get("/article/getAllArticles");
+        if (res.data.code === 0) {
+            carouselList.value = res.data.data.filter(
+                (item) => item.isCarousel === 0
+            );
+            searchList.value = carouselList.value;
+        } else {
+            message.error("获取新闻列表失败！");
+        }
+    } catch (error) {
+        message.error("获取新闻列表失败！");
+    }
+};
 
 // 添加到轮播新闻
-const addToCarousel = (news: News) => {
-    if (selectedNews.value.length >= 5) {
-        message.warning("最多只能选择5条轮播新闻！");
-        return;
+const addToCarousel = async (item) => {
+    try {
+        const res = await myAxios.post("/article/setCarouselArticles", null,
+            {
+                params: {
+                    id: item.articleId,
+                },
+            }
+        );
+        if (res.data.code === 0) {
+            message.success("新闻已添加到轮播！");
+            await getCarouselNews();
+            await getCarouselList();
+        } else {
+            message.error("添加失败，请重试！");
+        }
+    } catch (error) {
+        message.error("添加失败，请重试！");
     }
-    if (selectedNews.value.some((n) => n.id === news.id)) {
-        message.warning("该新闻已在轮播中！");
-        return;
-    }
-    selectedNews.value.push(news);
-    message.success("新闻添加到轮播成功！");
 };
 
 // 从轮播新闻移除
-const removeFromCarousel = (news: News) => {
-    selectedNews.value = selectedNews.value.filter((n) => n.id !== news.id);
-    message.success("新闻已从轮播中移除！");
+const removeFromCarousel = async (item) => {
+    console.log(item);
+    try {
+        const res = await myAxios.post("/article/cancelCarouselArticles", null,
+            {
+                params: {
+                    id: item.id,
+                },
+            }
+        );
+        if (res.data.code === 0) {
+            message.success("新闻已从轮播中移除！");
+            await getCarouselNews();
+            await getCarouselList();
+        } else {
+            message.error("移除失败，请重试！");
+        }
+    } catch (error) {
+        message.error("移除失败，请重试！");
+    }
 };
+
+const cancel = (e: MouseEvent) => {
+    console.log(e);
+    message.error('Click on No');
+};
+
+// 初始化数据
+getCarouselNews();
+getCarouselList();
 </script>
+
 
 <style scoped>
 .carousel-news-management {
@@ -126,6 +295,10 @@ h3 {
 
 .news-item:hover {
     background: #f1f1f1;
+}
+
+.search-input {
+    width: 80%;
 }
 
 a-button {

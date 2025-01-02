@@ -3,7 +3,7 @@
         <h2 class="title">用户管理</h2>
 
         <!-- 操作按钮，点击弹出用户编辑的Modal -->
-        <a-button type="primary" @click="openModal">新增用户</a-button>
+        <a-button type="primary" @click="openAddModal">新增用户</a-button>
 
         <!-- 用户搜索 -->
         <a-input-search
@@ -217,14 +217,25 @@ const formData = ref({
 });
 const form = ref(null);
 
+const isAdd = ref(false);
 // 打开 Modal 用于新增或编辑
-const openModal = (record: any = {}) => {
-    formData.value = null;
+const openAddModal = () => {
+    formData.value = {
+        id: 0,
+        userAccount: "",
+        userPassword: "",
+        userName: "",
+        userAvatar: "",
+        email: "",
+        userRole: "",
+    };
+    isAdd.value = true;
     isModalVisible.value = true;
 };
 
 // 取消 Modal
 const handleCancel = () => {
+    isAdd.value = false;
     isModalVisible.value = false;
 };
 

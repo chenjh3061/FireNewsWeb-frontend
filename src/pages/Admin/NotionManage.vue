@@ -51,6 +51,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { Modal, Button, Table, Input, Form, message, Select, SelectOption, } from "ant-design-vue";
+import { computed } from "vue";
 
 // 通知数据
 const notificationData = ref([
@@ -82,14 +83,18 @@ function handleResizeColumn(w, column){
 }
 
 // 分页设置
-const pagination = ref({
-    current: 1,
-    pageSize: 10,
-    total: notificationData.value.length,
-    onChange: (page: number, pageSize: number) => {
-        pagination.value.current = page;
-        pagination.value.pageSize = pageSize;
-    },
+const pagination = computed(() => {
+    return {
+        current: 1,
+        pageSize: 10,
+        total: notificationData.value.length,
+        showTotal: (total) => '共'+total+'条记录',
+        showSizeChanger: true,
+        onChange: (page: number, pageSize: number) => {
+            pagination.value.current = page;
+            pagination.value.pageSize = pageSize;
+        },
+    }
 });
 
 // Modal 控制

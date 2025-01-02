@@ -5,8 +5,22 @@ import Antd from 'ant-design-vue'
 import 'ant-design-vue/dist/reset.css';
 import { createPinia } from 'pinia';
 import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
+import {useUserStore} from "./store/index";
+
+const app = createApp(App);
 
 const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
 
-createApp(App).use(router).use(Antd).use(pinia).mount("#app");
+// 注册全局指令
+app.directive('allow', {
+    mounted(el, binding) {
+        const userStore = useUserStore(); // 获取 store 实例
+        const role = userStore.userInfo.role; // 获取用户角色
+        if (!role.includes(binding.value)) {
+            el.parentNode && el.parentNode.removeChild(el); // 检查父节点是否存在后移除
+        }
+    }
+});
+
+app.use(router).use(Antd).use(pinia).mount("#app");

@@ -3,9 +3,11 @@ import { ref } from "vue";
 
 const instance = axios.create({
     baseURL: "http://localhost:8089",
-    timeout: 5000,
+    timeout: 10000,
     //withCredentials: true,
-    headers: {},
+    headers: {
+        'Content-Type': 'application/json',
+    },
 })
 export const loadingInstance = ref(false);
 // 添加请求拦截器

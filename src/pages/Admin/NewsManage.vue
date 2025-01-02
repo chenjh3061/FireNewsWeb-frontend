@@ -18,7 +18,7 @@
             >
                 <template #bodyCell="{ column, record }">
                     <template v-if="column.dataIndex === 'articleAvatar'">
-                        <img :src="record.articleAvarar" alt="" class="avatar"/>
+                        <img :src="record.articleAvatar" alt="文章封面" class="article-avatar"/>
                     </template>
                     <template v-if="column.dataIndex === 'articleCategory'">
                         {{ mappings[column.dataIndex](record).text }}
@@ -117,12 +117,10 @@ const pagination = computed(() => {
         onChange: (page: number, size: number) => {
             currentPage.value = page;  // 更新当前页
             pageSize.value = size;      // 更新每页条数
-            getArticles(); // 分页更新时重新请求数据
         },
         onShowSizeChange: (current: number, size: number) => {
             currentPage.value = current;  // 更新当前页
             pageSize.value = size;         // 更新每页条数
-            getArticles();  // 当改变每页条数时重新请求数据
         },
     };
 });
@@ -235,6 +233,11 @@ onMounted(() => {
 
 .tag {
     font-size: 18px;
+}
+
+.article-avatar {
+    width: 200px;
+    height: 150px;
 }
 
 .modal-content {

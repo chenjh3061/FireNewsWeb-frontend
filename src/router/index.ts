@@ -18,6 +18,7 @@ import ErrorPage from "../pages/ErrorPage.vue";
 import UserPage from "../pages/UserPage.vue";
 import ArticleDetails from "../pages/ArticleDetails.vue";
 import SearchPage from "../pages/SearchPage.vue";
+import ArticleEditPage from "../pages/ArticleEditPage.vue";
 
 const routes: Array<RouteRecordRaw> = [
     {
@@ -47,14 +48,17 @@ const routes: Array<RouteRecordRaw> = [
         path: "/search",
         name: "search",
         component: SearchPage,
-        meta: {
-            title: "搜索结果",
-        }
     },
     {
         path: '/article',  // 动态路由参数，用来获取新闻 ID
         name: 'ArticleDetail',
         component: ArticleDetails,
+        props: true, // 将路由参数作为组件的 props 传递
+    },
+    {
+        path: '/articleEditor',  // 动态路由参数，用来获取新闻 ID
+        name: 'ArticleEditor',
+        component: ArticleEditPage,
         props: true, // 将路由参数作为组件的 props 传递
     },
     {

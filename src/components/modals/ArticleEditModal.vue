@@ -17,7 +17,7 @@
                 <a-button @click="startEdit">{{ isEdit ? '切换为可编辑' : '切换为只读' }}</a-button>
 
                 <a-form-item label="文章内容">
-                    <jodit-editor :key="jodit" v-model="article.articleContent" :config="{readonly: isEdit}" />
+                    <jodit-editor :key="jodit" v-model="article.articleContent" />
                 </a-form-item>
             </a-form>
             <div class="modal-footer">

@@ -17,7 +17,7 @@
                     </div>
                 </a-carousel>
             </div>
-
+            <a-button v-allow="'admin'" type="primary" @click="addNews">添加新闻</a-button>
             <!-- 搜索栏部分 -->
             <div class="search-container">
                 <a-input-search
@@ -40,7 +40,6 @@
                 </div>
             </div>
         </div>
-
 
 
         <!-- 主要新闻展示区 -->
@@ -91,14 +90,7 @@ const carouselNews = ref([]);
 
 const hotArticles = ref([]);
 
-const mainNews = ref({
-    id: '',
-    articleTitle: '',
-    articleDesc: '',
-    articleAvatar: '',
-    articleContent: '',
-    createTime: '',
-});
+const mainNews = ref({});
 
 const secondaryArticles = ref([]);
 
