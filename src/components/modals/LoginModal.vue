@@ -4,8 +4,8 @@
             <button class="close-button" @click="closeModal">&times;</button>
             <h2 class="login-title">{{ isRegister ? '注册' : '登录' }}</h2>
 
-            <form @submit.prevent="submitForm">
-                <label class="input-container">
+            <a-form @submit.prevent="submitForm">
+                <a-form-item class="input-container">
                     <span :class="{ label: true, active: userForm.userName || isFocused.userName }">
                         请输入用户名
                     </span>
@@ -17,13 +17,13 @@
                         type="text"
                     />
                     <div :class="{ line: true, active: isFocused.userName }"></div>
-                </label>
+                </a-form-item>
 
-                <label class="input-container">
+                <a-form-item class="input-container">
                     <span :class="{ label: true, active: userForm.password || isFocused.password }">
                         请输入密码
                     </span>
-                    <div class="password-wrapper">
+                    <template class="password-wrapper">
                         <input
                             class="input"
                             @focus="onFocus('password')"
@@ -34,9 +34,9 @@
                         <button type="button" class="toggle-password" @click="togglePasswordVisibility">
                             {{ showPassword ? '隐藏' : '显示' }}
                         </button>
-                    </div>
+                    </template>
                     <div :class="{ line: true, active: isFocused.password }"></div>
-                </label>
+                </a-form-item>
 
                 <label v-if="isRegister" class="input-container">
                     <span :class="{ label: true, active: userForm.confirmPassword || isFocused.confirmPassword }">
@@ -55,7 +55,7 @@
                 <button class="login-button" type="submit">
                     {{ isRegister ? '注册' : '登录' }}
                 </button>
-            </form>
+            </a-form>
 
             <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
             <p @click="toggleForm" class="toggle-form">
@@ -158,7 +158,7 @@ const toggleForm = () => {
 
 .login-form {
     position: relative;
-    width: 500px;
+    width: 50rem;
     background: linear-gradient(145deg, #ffffff, #f1f1f1);
     border-radius: 15px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
@@ -184,6 +184,7 @@ const toggleForm = () => {
 }
 
 .input-container {
+    margin-top: 20px;
     margin-bottom: 20px;
     position: relative;
     width: 100%;

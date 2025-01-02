@@ -27,8 +27,11 @@
 
 <script lang="ts" setup>
 import {FileOutlined, PieChartOutlined} from '@ant-design/icons-vue';
-import {onMounted, ref} from 'vue';
+import {onMounted, ref, watch} from 'vue';
 import router from '../../router/index.ts';
+import {useRoute} from 'vue-router';
+
+const route = useRoute();
 
 // 默认选中菜单项
 const selectedKeys = ref(['articles']);
@@ -48,6 +51,15 @@ onMounted(() => {
         router.push('/writer/articles'); // 默认跳转到作品管理页面
     }
 })
+// 根据路由动态更新选中项
+watch(
+    () => route.path, // 监听路由的变化
+    (newPath) => {
+        const key = newPath.split('/')[2]; // 从路由路径获取菜单项
+        selectedKeys.value = [key || 'articles']; // 更新选中项
+    },
+    { immediate: true } // 初次加载时就执行一次
+);
 </script>
 
 <style scoped>
@@ -82,7 +94,6 @@ a-menu {
 
 /* 主内容 */
 .writer-content {
-    padding: 24px;
     background-color: #ffffff; /* 内容背景 */
     box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1); /* 内容区域阴影 */
     border-radius: 8px; /* 圆角边框 */

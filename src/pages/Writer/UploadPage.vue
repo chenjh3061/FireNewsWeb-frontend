@@ -5,7 +5,7 @@
 
             <!-- 在线编辑选项卡 -->
             <a-tab-pane key="edit" tab="在线编辑">
-                <span>支持从word文档粘贴,图片插入推荐使用url导入</span>
+                <span>支持从word文档粘贴，图片插入推荐使用url导入</span>
                 <div class="editor-container">
                     <a-input
                         v-model:value="title"
@@ -114,8 +114,8 @@ const clearEditor = () => {
 
 <style scoped>
 .upload-article-page {
-    padding: 16px;
-    min-height: 700px;
+    padding: 0 40px;
+    height: 62rem;
     background-color: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -135,7 +135,7 @@ h2 {
 
 .editor-container {
     padding: 16px;
-    min-height: 500px;
+    min-height: 550px;
     background-color: #fafafa;
     border: 1px solid #d9d9d9;
     border-radius: 8px;

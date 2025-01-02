@@ -58,7 +58,7 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted, ref} from 'vue';
+import {onMounted, ref, watch} from 'vue';
 import {
     UploadOutlined,
     UserOutlined,
@@ -67,6 +67,9 @@ import {
     VideoCameraOutlined,
 } from '@ant-design/icons-vue';
 import router from "../../router";
+import {useRoute} from "vue-router";
+
+const route = useRoute();
 
 const selectedKeys = ref<string[]>(['dashboard']);
 
@@ -80,8 +83,21 @@ const handleSelect = (info: { key: string }) => {
     router.push('/admin/' + info.key);
 };
 onMounted(() => {
-    handleSelect({key: 'dashboard'});
-})
+    // handleSelect({key: 'dashboard'});
+    if (router.currentRoute.value.path === '/admin') {
+        selectedKeys.value = ['dashboard']; // 默认选中菜单项
+        router.push('/admin/dashboard'); // 默认跳转到作品管理页面
+    }
+});
+
+watch(
+    () => route.path, // 监听路由的变化
+    (newPath) => {
+        const key = newPath.split('/')[2]; // 从路由路径获取菜单项
+        selectedKeys.value = [key || 'articles']; // 更新选中项
+    },
+    { immediate: true } // 初次加载时就执行一次
+);
 </script>
 
 <style scoped>
