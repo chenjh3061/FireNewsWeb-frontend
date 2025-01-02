@@ -26,21 +26,27 @@
                 <p>电话: 123-456-7890</p>
             </div>
 
-            <!-- 社交媒体部分 -->
-            <div class="footer-social">
-                <h4>关注我们</h4>
-                <div class="social-icons">
-                    <a href="#" class="social-icon">FB</a>
-                    <a href="#" class="social-icon">TW</a>
-                    <a href="#" class="social-icon">IN</a>
-                    <a href="#" class="social-icon">YT</a>
-                </div>
+            <!-- 网站地图部分（替代了原“关注我们”） -->
+            <div class="footer-sitemap">
+                <h4>网站地图</h4>
+                <ul>
+                    <li ><router-link to="/">首页</router-link></li>
+                    <li><router-link to="/hotTopics">热点中心</router-link></li>
+                    <li @click="scrollToTop"><router-link to="/science">科普园地</router-link></li>
+                    <li @click="scrollToTop"><router-link to="/about">关于我们</router-link></li>
+                </ul>
             </div>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
+const scrollToTop = () => {
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth", // 平滑滚动
+    });
+};
 </script>
 
 <style scoped>
@@ -48,7 +54,7 @@
     width: 100%;
     background: linear-gradient(135deg, #343a40 0%, #495057 100%); /* 渐变背景 */
     color: white;
-    padding: 40px 20px;
+    padding: 0px 20px;
     font-size: 14px;
     box-sizing: border-box;
     text-align: left;
@@ -66,7 +72,7 @@
 .footer-left,
 .footer-links,
 .footer-contact,
-.footer-social {
+.footer-sitemap {  /* 修改为 footer-sitemap */
     flex: 1;
     margin: 15px;
     min-width: 250px;
@@ -88,7 +94,7 @@
 
 .footer-links h4,
 .footer-contact h4,
-.footer-social h4 {
+.footer-sitemap h4 {  /* 修改为 footer-sitemap h4 */
     font-size: 18px;
     color: #f8f9fa;
     margin-bottom: 15px;
@@ -96,24 +102,28 @@
 }
 
 .footer-links ul,
-.footer-contact p {
+.footer-contact p,
+.footer-sitemap ul {  /* 修改为 footer-sitemap ul */
     list-style: none;
     padding-left: 0;
 }
 
-.footer-links li {
+.footer-links li,
+.footer-sitemap li {  /* 修改为 footer-sitemap li */
     margin: 8px 0;
 }
 
 .footer-links a,
-.footer-contact a {
+.footer-contact a,
+.footer-sitemap a {  /* 修改为 footer-sitemap a */
     color: #dcdcdc;
     text-decoration: none;
     transition: color 0.3s ease;
 }
 
 .footer-links a:hover,
-.footer-contact a:hover {
+.footer-contact a:hover,
+.footer-sitemap a:hover {  /* 修改为 footer-sitemap a:hover */
     color: #ffcc00; /* 悬停时改变为金色 */
 }
 
@@ -156,7 +166,7 @@
     .footer-left,
     .footer-links,
     .footer-contact,
-    .footer-social {
+    .footer-sitemap {  /* 修改为 footer-sitemap */
         margin: 10px 0;
     }
 
@@ -166,11 +176,12 @@
 
     .footer-links h4,
     .footer-contact h4,
-    .footer-social h4 {
+    .footer-sitemap h4 {  /* 修改为 footer-sitemap h4 */
         font-size: 16px;
     }
 
-    .footer-links li {
+    .footer-links li,
+    .footer-sitemap li {  /* 修改为 footer-sitemap li */
         margin: 5px 0;
     }
 
@@ -180,7 +191,8 @@
 
     .footer-left p,
     .footer-links a,
-    .footer-contact p {
+    .footer-contact p,
+    .footer-sitemap a {  /* 修改为 footer-sitemap a */
         font-size: 14px;
     }
 }
