@@ -160,10 +160,10 @@ const getComments = () => {
     try {
         myAxios.get("/comments/getCommentsByArticleId",
             {
-            params: {
-                id: articleData.value.id,
-            },
-        }).then((res) => {
+                params: {
+                    id: articleData.value.id,
+                },
+            }).then((res) => {
             console.log(res);
             if (res.data.code === 0) {
                 commentData.value = res.data.data;
@@ -186,7 +186,7 @@ const submitComment = () => {
         try {
             MyAxios.post("/comments/addComment", {
                 articleId: articleData.value.articleId,
-                userId: userStore.userInfo.username,
+                userId: userStore.userInfo.userName,
                 content: newComment.value,
             }).then((res) => {
                 if (res.data) {
@@ -236,37 +236,41 @@ const aiAnswer = ref("");
 const userQuestion = ref("");
 const isAiWindowVisible = ref(true); // 控制窗口显示与否
 const aiWindowPosition = reactive({top: 200, left: 50}); // 控制窗口的初始位置
-const aiWindowSize = reactive({width: 300, height: 200}); // 控制窗口的初始大小
+const aiWindowSize = reactive({width: 350, height: 350}); // 控制窗口的初始大小
 const AIUrl = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
 const apiKey = "cd3e9fa7f67988e4c4a87e6adaad7d4f.tXpGrIlHvyIoqIlL"
 
 // 获取文章内容的AI总结
-const getAiSummary = async () => {
+const getAiSummary =  _.debounce(async () => {
     try {
         const res = await myAxios.post(
-            AIUrl,
+            "/ai/generateSummary",
             {
-                model: "glm-4-flash",
-                messages: [
-                    {
-                        "role": "user",
-                        "content": "你是一位记者，需要给出下面文章的总结：" + articleData.value.articleContent,
-                    }
-                ]
+                "content": "你是一位记者，需要给出下面文章的总结：" +
+                    "标题：" + articleData.value.articleTitle + "内容：" + articleData.value.articleContent,
             },
-            {
-                headers: {
-                    "Authorization": "Bearer " + apiKey,
-                    "Content-Type": "application/json"
-                }
-            }
         );
-        aiSummary.value = res.data.choices[0].message.content; // 假设AI返回的摘要字段为summary
-        console.log("AI总结：", aiSummary.value.choices[0].message.content);
+        // 打印完整的返回数据来检查字段
+        console.log("AI返回的数据：", res.data);
+
+        // 获取summary字段的内容并提取其中的content
+        if (res.data && res.data.data && res.data.data.summary) {
+            // 正则表达式提取content字段的内容
+            const summaryString = res.data.data.summary;
+            const contentMatch = summaryString.match(/content=([^,]+)/);  // 提取"content"后的内容
+            if (contentMatch && contentMatch[1]) {
+                aiSummary.value = contentMatch[1].trim(); // 获取并去掉前后空白字符
+                console.log("AI总结：", aiSummary.value);
+            } else {
+                console.error("AI总结生成失败: content提取失败", summaryString);
+            }
+        } else {
+            console.error("AI总结生成失败: 返回数据结构不符合预期", res.data);
+        }
     } catch (err) {
         console.error("AI总结生成失败", err);
     }
-};
+}, 500);
 
 const isQuestionLoading = ref(false); // 控制提问按钮的加载状态
 
@@ -286,7 +290,7 @@ const askQuestion = _.debounce(async () => {
                 model: "glm-4-flash", // 使用相同的模型
                 messages: [
                     {
-                        role: "user",
+                        userRole: "user",
                         content: "你是一位消防记者，帮助回答以下问题：\n问题：" + userQuestion.value + "\n文章内容：" + articleData.value.articleContent
                     }
                 ]
@@ -347,14 +351,14 @@ const stopDrag = () => {
 // 窗口大小调整
 let resizing = false;
 let resizeDirection = "";
-let startSize = { width: 0, height: 0 };
-let startPos = { x: 0, y: 0 };
+let startSize = {width: 0, height: 0};
+let startPos = {x: 0, y: 0};
 
 const startResize = (direction: string) => {
     resizing = true;
     resizeDirection = direction;
-    startSize = { ...aiWindowSize };
-    startPos = { x: event.clientX, y: event.clientY };
+    startSize = {...aiWindowSize};
+    startPos = {x: event.clientX, y: event.clientY};
     document.addEventListener("mousemove", resizeWindow);
     document.addEventListener("mouseup", stopResize);
 };
@@ -415,6 +419,7 @@ onMounted(() => {
     align-items: center;
     margin-bottom: 20px;
 }
+
 .resize-handle {
     position: absolute;
     background-color: #ccc;
@@ -453,7 +458,7 @@ onMounted(() => {
 }
 
 .comment-section {
-    margin: 0 auto;
+    margin: 5rem auto;
     width: 70%;
 }
 
@@ -521,7 +526,8 @@ onMounted(() => {
 
 .ai-window {
     position: absolute;
-    width: 300px;
+    width: 30rem;
+    height: 30rem;
     background-color: #ffffff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     border-radius: 8px;

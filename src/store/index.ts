@@ -1,16 +1,23 @@
 import { defineStore } from "pinia";
 
-// @ts-ignore
 export const useUserStore = defineStore("user", {
   state: () => ({
     userInfo: {
-      username: "",
-      role: "",
-      avatarUrl: "",
-      token: "",
+      userName: null,
+      userRole: null,
+      userAvatar: null,
+      token: null,
     },
   }),
   actions:() => {
+    return {
+      getToken() {
+        return this.userInfo.token;
+      },
+      resetToken() {
+        this.userInfo = null;
+      }
+    }
     },
 
   persist: {

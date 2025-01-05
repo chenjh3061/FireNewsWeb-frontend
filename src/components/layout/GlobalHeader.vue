@@ -10,11 +10,20 @@
                 <router-link :to="item.path" active-class="active">{{ item.meta.title }}</router-link>
             </li>
         </ul>
-        <div id="login" v-if="!userStore.userInfo.token">
+        <div id="login" v-if="!userStore?.userInfo?.token">
             <button @click="openLoginModal"><span>登录</span></button>
         </div>
         <div id="userInfo" v-else>
-            <span>{{ userStore.userInfo.username }}</span>
+            <div class="user-avatar" @click="toggleDropdown">
+                <img :src="userStore?.userInfo?.userAvatar" alt="1"/>
+                <span>{{ userStore?.userInfo?.userName }}</span>
+            </div>
+            <div v-if="isDropdownVisible" class="dropdown-menu">
+                <ul>
+                    <li @click="goToProfile">个人中心</li>
+                    <li @click="handleLogout">退出登录</li>
+                </ul>
+            </div>
         </div>
 
         <!-- 登录/注册模态框 -->
@@ -44,7 +53,7 @@ const menuRoutes = router.options.routes.filter(route => route.meta && route.met
 
 // 登录表单
 const loginForm = ref({
-    username: "",
+    userName: "",
     password: ""
 });
 
@@ -68,7 +77,37 @@ const handleLogin = async () => {
         alert("登录失败，请检查网络连接");
     }
 };
+const isDropdownVisible = ref(false);
+// 切换下拉菜单的显示状态
+const toggleDropdown = () => {
+    isDropdownVisible.value = !isDropdownVisible.value;
+};
 
+// 跳转到个人中心
+const goToProfile = () => {
+    router.push("/user"); // 假设个人中心的路由是 "/profile"
+    isDropdownVisible.value = false;
+};
+
+// 退出登录
+const handleLogout = async () => {
+    try {
+        const response = await myAxios.post('/user/logout',null,
+            {headers: {'token': userStore.userInfo?.token}});
+        if (response.data.code === 0) {
+            userStore.$state.userInfo = null; // 清空用户信息
+            userStore.$reset(); // 重置用户信息，例如清除token等
+            await router.push('/'); // 跳转到登录页
+            alert('已退出登录');
+        } else {
+            alert('退出登录失败');
+        }
+    } catch (error) {
+        alert('网络错误，退出失败');
+    } finally {
+        isDropdownVisible.value = false;
+    }
+};
 </script>
 
 <style scoped>
@@ -215,6 +254,69 @@ const handleLogin = async () => {
     background: linear-gradient(90deg, #ff7b54, #ffc154); /* 按下时恢复原样 */
     box-shadow: 0 2px 5px rgba(255, 123, 84, 0.4); /* 阴影变小，模拟按压感 */
     transform: translateY(2px); /* 按下时轻微下移 */
+}
+
+#userInfo {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* 用户信息和按钮之间的间距 */
+    margin-right: 10px; /* 右侧外边距，与按钮保持一定距离 */
+    position: relative;
+}
+.user-avatar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.user-avatar img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.user-avatar span {
+    color: #fff;
+    font-size: 16px;
+}
+
+/* 下拉菜单 */
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    width: 150px;
+    margin-top: 10px;
+    z-index: 10;
+    display: none;
+    /* 默认不显示，点击头像时才会显示 */
+}
+
+.dropdown-menu ul {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.dropdown-menu li {
+    padding: 10px;
+    color: #333;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.dropdown-menu li:hover {
+    background-color: #f5f5f5;
+}
+
+/* 显示下拉菜单 */
+#userInfo .dropdown-menu {
+    display: block;
 }
 
 #navMenu {

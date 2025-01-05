@@ -72,7 +72,7 @@
                         </a-input-group>
                     </a-form-item>
                     <a-form-item label="用户名">
-                        <a-input v-model:value="formData.userName"/>
+                        <a-input v-model:value="formData.userAccount"/>
                     </a-form-item>
                     <a-form-item label="邮箱">
                         <a-input v-model:value="formData.email"/>
@@ -131,7 +131,7 @@ const getAllUsers = () => {
                 page: pagination.value.current,
                 size: pagination.value.pageSize,
             },
-        })
+        },)
         .then((res) => {
             if (res.data) {
                 const data = res.data;
@@ -210,7 +210,7 @@ const formData = ref({
     id: 0,
     userAccount: "",
     userPassword: "",
-    userName: "",
+    userAccount: "",
     userAvatar: "",
     email: "",
     userRole: "",
@@ -224,7 +224,7 @@ const openAddModal = () => {
         id: 0,
         userAccount: "",
         userPassword: "",
-        userName: "",
+        userAccount: "",
         userAvatar: "",
         email: "",
         userRole: "",

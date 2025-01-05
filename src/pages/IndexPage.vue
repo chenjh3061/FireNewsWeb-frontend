@@ -6,7 +6,7 @@
             <div class="carousel-container">
                 <a-carousel arrows autoplay class="custom-carousel">
                     <div v-for="(item, index) in carouselNews" :key="index" class="carousel-item">
-                        <img :src="item.articleAvatar" alt="Fire" class="carousel-image"/>
+                        <img v-lazy="item.articleAvatar" alt="Fire" class="carousel-image"/>
                         <div class="carousel-overlay">
                             <div class="carousel-content">
                                 <h3 class="carousel-title">{{ item.articleTitle }}</h3>
@@ -20,14 +20,30 @@
             <a-button v-allow="'admin'" type="primary" @click="addNews">添加新闻</a-button>
             <!-- 搜索栏部分 -->
             <div class="search-container">
-                <a-input-search
-                    v-model:value="searchParams.text"
-                    class="search-bar"
-                    enter-button="搜索"
-                    placeholder="请输入搜索内容"
-                    size="large"
-                    @search="onSearch"
-                />
+                <a-dropdown >
+                    <a-input-search
+                        v-model:value="searchParams.text"
+                        class="search-bar"
+                        enter-button="搜索"
+                        placeholder="请输入搜索内容"
+                        size="large"
+                        @search="onSearch"
+                        @focus="showHistory = true"
+                        @blur="hideHistory"
+                    ></a-input-search>
+                    <template #overlay>
+                        <a-menu v-if="showHistory && historyStore.history.length"
+                                class="history-dropdown">
+                            <span class="history-title">历史搜索</span>
+                            <a-menu-item v-for="(history, index) in historyStore.history"
+                                         :key="index" @click="selectSearchHistory(history)">
+                                {{ history }}
+                            </a-menu-item>
+                        </a-menu>
+                    </template>
+                </a-dropdown>
+
+
                 <!-- 热点新闻榜 -->
                 <div class="hot-news-container">
                     <h2>热点新闻榜</h2>
@@ -46,7 +62,7 @@
         <div class="main-news-container">
             <div class="main-news">
                 <div class="main-news-image">
-                    <img :src="mainNews.articleAvatar || 'https://via.placeholder.com/400x200'" alt="Breaking News"/>
+                    <img v-lazy="mainNews.articleAvatar || 'https://via.placeholder.com/400x200'" alt="Breaking News"/>
                 </div>
                 <div class="main-news-text">
                     <h2>{{ mainNews.articleTitle }}</h2>
@@ -61,7 +77,7 @@
         <!-- 次要新闻展示区 -->
         <div class="secondary-news-container">
             <div v-for="(article, index) in secondaryArticles" :key="index" class="news-item">
-                <img :src="article.articleAvatar || 'https://via.placeholder.com/400x200'" alt="新闻封面"
+                <img v-lazy="article.articleAvatar || 'https://via.placeholder.com/400x200'" alt="新闻封面"
                      class="news-image"/>
                 <div class="news-info">
                     <h3>{{ article.articleTitle }}</h3>
@@ -78,6 +94,7 @@ import { onMounted, ref } from 'vue';
 import { useArticleStore, useHistoryStore } from "../store/index";
 import { useRouter } from 'vue-router';
 import myAxios from "../plugins/myAxios";
+import {message} from "ant-design-vue";
 
 const router = useRouter();
 
@@ -94,14 +111,30 @@ const mainNews = ref({});
 
 const secondaryArticles = ref([]);
 
+const showHistory = ref(false);
+const historyStore = useHistoryStore();
+
 const onSearch = () => {
-    console.log(searchParams.value.text);
+    if (!searchParams.value.text){
+        message.error('请输入搜索内容');
+        return;
+    }
     useHistoryStore().addSearchHistory(searchParams.value.text);
     router.push({
         path: '/search',
         query: { text: searchParams.value.text },
     });
     searchParams.value.text = '';
+};
+
+const selectSearchHistory = (term) => {
+    searchParams.value.text = term;
+};
+
+const hideHistory = () => {
+    setTimeout(() => {
+        showHistory.value = false;
+    }, 300);
 };
 
 const viewNewsDetail = (newsId, newsData) => {
@@ -165,10 +198,29 @@ onMounted(() => {
     flex-grow: 1;
     max-width: 400px;
     margin-left: 20px;
+    position: relative;
 }
 
 .search-bar {
     width: 100%;
+}
+
+.history-dropdown {
+    position: absolute;
+    top: 100%; /* 确保它从输入框下方显示 */
+    left: 0;
+    z-index: 9999; /* 确保它显示在其他元素上面 */
+    width: 100%; /* 使下拉菜单宽度与输入框一致 */
+    max-height: 300px; /* 限制下拉菜单最大高度 */
+    overflow-y: auto; /* 当内容过多时出现滚动条 */
+}
+
+.history-title {
+    font-size: 16px;
+    color: #333;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #ccc;
 }
 
 .carousel-container {

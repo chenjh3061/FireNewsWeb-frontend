@@ -63,7 +63,7 @@ const allComments = ref([
         content: "这篇文章写得真棒！",
         articleTitle: "如何优化 Vue 性能",
         userAvatar: "https://via.placeholder.com/40",
-        username: "张三",
+        userName: "张三",
         status: "approved",
     },
     {
@@ -71,7 +71,7 @@ const allComments = ref([
         content: "我有不同的看法",
         articleTitle: "如何优化 Vue 性能",
         userAvatar: "https://via.placeholder.com/40",
-        username: "李四",
+        userName: "李四",
         status: "pending",
     },
     {
@@ -79,7 +79,7 @@ const allComments = ref([
         content: "受教了！",
         articleTitle: "Vue 3 新特性详解",
         userAvatar: "https://via.placeholder.com/40",
-        username: "王五",
+        userName: "王五",
         status: "approved",
     },
     {
@@ -87,7 +87,7 @@ const allComments = ref([
         content: "写得很好，值得收藏",
         articleTitle: "使用 Vuex 管理状态",
         userAvatar: "https://via.placeholder.com/40",
-        username: "赵六",
+        userName: "赵六",
         status: "approved",
     },
     {
@@ -95,7 +95,7 @@ const allComments = ref([
         content: "讲解清晰易懂",
         articleTitle: "Vue Router 实战教程",
         userAvatar: "https://via.placeholder.com/40",
-        username: "孙七",
+        userName: "孙七",
         status: "pending",
     },
 ]);

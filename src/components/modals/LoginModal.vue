@@ -6,17 +6,17 @@
 
             <a-form @submit.prevent="submitForm">
                 <a-form-item class="input-container">
-                    <span :class="{ label: true, active: userForm.userName || isFocused.userName }">
+                    <span :class="{ label: true, active: userForm.userAccount || isFocused.userAccount }">
                         请输入用户名
                     </span>
                     <input
                         class="input"
                         @focus="onFocus('userName')"
                         @blur="onBlur('userName')"
-                        v-model="userForm.userName"
+                        v-model="userForm.userAccount"
                         type="text"
                     />
-                    <div :class="{ line: true, active: isFocused.userName }"></div>
+                    <div :class="{ line: true, active: isFocused.userAccount }"></div>
                 </a-form-item>
 
                 <a-form-item class="input-container">
@@ -39,17 +39,17 @@
                 </a-form-item>
 
                 <label v-if="isRegister" class="input-container">
-                    <span :class="{ label: true, active: userForm.confirmPassword || isFocused.confirmPassword }">
+                    <span :class="{ label: true, active: userForm.checkPassword || isFocused.checkPassword }">
                         请确认密码
                     </span>
                     <input
                         class="input"
                         @focus="onFocus('confirmPassword')"
                         @blur="onBlur('confirmPassword')"
-                        v-model="userForm.confirmPassword"
+                        v-model="userForm.checkPassword"
                         type="password"
                     />
-                    <div :class="{ line: true, active: isFocused.confirmPassword }"></div>
+                    <div :class="{ line: true, active: isFocused.checkPassword }"></div>
                 </label>
 
                 <button class="login-button" type="submit">
@@ -70,6 +70,7 @@ import { ref } from "vue";
 import { defineProps, defineEmits } from "vue";
 import { useUserStore } from "../../store";
 import myAxios from "../../plugins/myAxios";
+import {message} from "ant-design-vue";
 
 const userStore = useUserStore();
 
@@ -80,14 +81,14 @@ const props = defineProps({
 const emit = defineEmits(["close", "login"]);
 
 const userForm = ref({
-    userName: "",
+    userAccount: "",
     password: "",
-    confirmPassword: "",
+    checkPassword: "",
 });
 const isFocused = ref({
-    userName: false,
+    userAccount: false,
     password: false,
-    confirmPassword: false,
+    checkPassword: false,
 });
 const errorMessage = ref("");
 const showPassword = ref(false);
@@ -108,22 +109,32 @@ const togglePasswordVisibility = () => {
 };
 
 const submitForm = () => {
-    if (!userForm.value.userName || !userForm.value.password || (isRegister.value && !userForm.value.confirmPassword)) {
+    if (!userForm.value.userAccount || !userForm.value.password || (isRegister.value && !userForm.value.checkPassword)) {
         errorMessage.value = "请填写所有字段！";
         return;
     }
-    if (isRegister.value && userForm.value.password !== userForm.value.confirmPassword) {
+    if (isRegister.value && userForm.value.password !== userForm.value.checkPassword) {
         errorMessage.value = "密码不一致！";
         return;
     }
     const apiUrl = isRegister.value ? "/user/register" : "/user/login";
     try {
-        myAxios.post(apiUrl, userForm.value).then((res) => {
-            if (res.data.code === 200) {
+        myAxios.post(apiUrl, userForm.value,
+            {
+                headers: {'Content-Type': 'application/json'}
+            }).then((res) => {
+            if (res.data.code === 0) {
                 userStore.userInfo = res.data.data;
-                console.log(isRegister.value ? "注册成功" : "登录成功");
+                userForm.value = {
+                    userAccount: "",
+                    password: "",
+                    checkPassword: ""
+                };
+                emit("login");
+                message.info("登录成功！")
+                console.log(isRegister.value ? "注册成功" : "登录成功" , userStore.userInfo);
             } else {
-                errorMessage.value = res.data.message;
+                message.error(res.data.message);
             }
         });
     } catch (err) {

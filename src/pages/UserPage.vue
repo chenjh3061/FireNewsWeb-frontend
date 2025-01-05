@@ -1,23 +1,28 @@
 <template>
     <div class="personal-page">
         <h1 class="page-title">个人页面</h1>
-        <div class="user-profile">
+
+        <div v-if="isLoggedIn">
+
             <!-- 用户资料部分 -->
-            <div class="profile-header">
-                <img :src="user.userAvatar" alt="Avatar" class="avatar"/>
-                <div class="user-info">
-                    <h1><span>用户名：</span> {{ user.userName }}</h1>
-                    <h2><span>账号：</span>{{ user.userAccount }}</h2>
-                    <div class="user-role"><span>身份：</span>{{ user.userRole }}</div>
-                    <div class="user-email"><span>邮箱：</span>{{ user.userEmail }}</div>
-                    <p class="user-profile-text"><span>用户简介：</span>{{ user.userProfile }}</p>
+            <div class="user-profile">
+
+                <div class="profile-header">
+                    <img :src="user.userAvatar" alt="Avatar" class="avatar"/>
+                    <div class="user-info">
+                        <h1><span>用户名：</span> {{ user.userAccount }}</h1>
+                        <h2><span>账号：</span>{{ user.userAccount }}</h2>
+                        <div class="user-role"><span>身份：</span>{{ user.userRole }}</div>
+                        <div class="user-email"><span>邮箱：</span>{{ user.userEmail }}</div>
+                        <p class="user-profile-text"><span>用户简介：</span>{{ user.userProfile }}</p>
+                    </div>
                 </div>
             </div>
 
             <!-- 用户资料编辑按钮 -->
             <div class="profile-settings">
-                <button @click="openEditProfileModal" class="primary-button">编辑资料</button>
-                <button @click="openChangePasswordModal" class="secondary-button">修改密码</button>
+                <button class="primary-button" @click="openEditProfileModal">编辑资料</button>
+                <button class="secondary-button" @click="openChangePasswordModal">修改密码</button>
             </div>
 
             <!-- 用户动态 -->
@@ -32,70 +37,80 @@
         </div>
 
         <!-- 编辑资料弹窗 -->
-        <a-modal v-model:visible="editModalVisible" title="编辑资料" @cancel="closeModal" :footer="null">
+        <a-modal v-model:visible="editModalVisible" :footer="null" title="编辑资料" @cancel="closeModal">
             <div class="modal-content">
                 <div class="modal-input">
                     <label for="userName">用户名：</label>
-                    <input id="userName" v-model="editUserName" type="text" placeholder="请输入新用户名" />
+                    <input id="userName" v-model="editUserName" placeholder="请输入新用户名" type="text"/>
                 </div>
                 <div class="modal-input">
                     <label for="userProfile">简介：</label>
                     <textarea id="userProfile" v-model="editUserProfile" placeholder="请输入个人简介"></textarea>
                 </div>
                 <div class="modal-footer">
-                    <button @click="saveProfileChanges" class="primary-button">保存</button>
+                    <button class="primary-button" @click="saveProfileChanges">保存</button>
                 </div>
             </div>
         </a-modal>
 
         <!-- 修改密码弹窗 -->
-        <a-modal v-model:visible="passwordModalVisible" title="修改密码" @cancel="closeModal" :footer="null">
+        <a-modal v-model:visible="passwordModalVisible" :footer="null" title="修改密码" @cancel="closeModal">
             <div class="modal-content">
                 <div class="modal-input">
                     <label for="currentPassword">当前密码：</label>
-                    <input id="currentPassword" v-model="currentPassword" type="password" placeholder="请输入当前密码" />
+                    <input id="currentPassword" v-model="currentPassword" placeholder="请输入当前密码" type="password"/>
                 </div>
                 <div class="modal-input">
                     <label for="newPassword">新密码：</label>
-                    <input id="newPassword" v-model="newPassword" type="password" placeholder="请输入新密码" />
+                    <input id="newPassword" v-model="newPassword" placeholder="请输入新密码" type="password"/>
                 </div>
                 <div class="modal-input">
                     <label for="confirmPassword">确认密码：</label>
-                    <input id="confirmPassword" v-model="confirmPassword" type="password" placeholder="请确认新密码" />
+                    <input id="confirmPassword" v-model="confirmPassword" placeholder="请确认新密码" type="password"/>
                 </div>
                 <div class="modal-footer">
-                    <button @click="savePasswordChanges" class="primary-button">保存</button>
+                    <button class="primary-button" @click="savePasswordChanges">保存</button>
                 </div>
             </div>
         </a-modal>
+
+        <!-- 未登录提示 -->
+        <div v-if="!isLoggedIn" class="not-login-tip">
+            <p>请登录后查看个人页面</p>
+            <a-button class="primary-button">登录</a-button>
+        </div>
     </div>
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
-import { Modal } from 'ant-design-vue';
+import {onMounted, ref} from 'vue';
+import {useUserStore} from "@/store";
 
 const user = ref({
     userAccount: "john_doe",
     userAvatar: 'https://example.com/avatar.jpg',
-    userName: 'JohnDoe',
     userProfile: 'Software Developer at Example Inc.',
     userRole: "user",
     userEmail: 'john.doe@example.com',
 });
 
+const userStore = useUserStore();
+user.value = userStore.userInfo;
+
 const actions = ref([
-    { time: '2024-12-30 10:00', text: '修改了个人资料' },
-    { time: '2024-12-29 18:30', text: '更新了密码' },
-    { time: '2024-12-28 15:00', text: '登录了系统' },
+    {time: '2024-12-30 10:00', text: '修改了个人资料'},
+    {time: '2024-12-29 18:30', text: '更新了密码'},
+    {time: '2024-12-28 15:00', text: '登录了系统'},
 ]);
+
+const isLoggedIn = ref(false);
 
 // 弹窗控制
 const editModalVisible = ref(false);
 const passwordModalVisible = ref(false);
 
 // 编辑资料表单
-const editUserName = ref(user.value.userName);
+const editUserName = ref(user.value.userAccount);
 const editUserProfile = ref(user.value.userProfile);
 
 // 修改密码表单
@@ -121,7 +136,7 @@ const closeModal = () => {
 
 // 保存编辑资料
 const saveProfileChanges = () => {
-    user.value.userName = editUserName.value;
+    user.value.userAccount = editUserName.value;
     user.value.userProfile = editUserProfile.value;
     editModalVisible.value = false;
 };
@@ -135,6 +150,12 @@ const savePasswordChanges = () => {
         console.error('Passwords do not match');
     }
 };
+
+onMounted(() => {
+    if (userStore?.userInfo?.token){
+        isLoggedIn.value = true;
+    }
+});
 </script>
 
 <style scoped>
@@ -144,7 +165,7 @@ const savePasswordChanges = () => {
     min-height: 80vh;
     margin: 0 auto;
     padding: 30px;
-    background-color: #f0f2f5;  /* 浅灰色背景 */
+    background-color: #f0f2f5; /* 浅灰色背景 */
     border-radius: 15px;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
 }
@@ -199,7 +220,7 @@ const savePasswordChanges = () => {
 .user-role {
     font-size: 14px;
     font-weight: 600;
-    color: #4CAF50;  /* 绿色角色 */
+    color: #4CAF50; /* 绿色角色 */
     margin-right: 10px;
 }
 
