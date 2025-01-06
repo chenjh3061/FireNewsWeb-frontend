@@ -65,9 +65,6 @@ const routes: Array<RouteRecordRaw> = [
         path: "/user",
         name: "user",
         component: UserPage,
-        meta: {
-            title: "个人中心",
-        }
     },
     {
         path: "/about",

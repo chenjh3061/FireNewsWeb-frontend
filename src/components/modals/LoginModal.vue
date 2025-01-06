@@ -130,7 +130,6 @@ const submitForm = () => {
                     password: "",
                     checkPassword: ""
                 };
-                emit("login");
                 message.info("登录成功！")
                 console.log(isRegister.value ? "注册成功" : "登录成功" , userStore.userInfo);
             } else {
