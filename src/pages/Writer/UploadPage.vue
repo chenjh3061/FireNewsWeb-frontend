@@ -8,11 +8,16 @@
                 <span>支持从word文档粘贴，图片插入推荐使用url导入</span>
                 <div class="editor-container">
                     <a-input
-                        v-model:value="title"
+                        v-model:value="article.articleTitle"
                         placeholder="请输入文章标题"
                         class="title-input"
                     />
-                    <jodit-editor v-model="content" :config="config" />
+                    <a-textarea class="article-desc" v-model:value="article.articleDesc"></a-textarea>
+                    <div class="article-avatar">
+                        <a-input v-model:value="article.articleAvatar" placeholder="请输入文章封面图片URL"></a-input>
+                        <img class="avatar-preview" :src="article.articleAvatar" alt="图"/>
+                    </div>
+                    <jodit-editor v-model="article.articleContent" :config="config" />
                     <div class="editor-actions">
                         <a-button type="primary" @click="submitArticle">提交文章</a-button>
                     </div>
@@ -77,6 +82,12 @@ function handleDrop(e: DragEvent) {
 }
 
 // 在线编辑相关状态
+const article = ref({
+    articleTitle: "",
+    articleContent: "",
+    articleDesc: "",
+    articleAvatar: "",
+});
 const title = ref("");
 const content = ref("");
 
@@ -93,7 +104,7 @@ const submitArticle = () => {
     }
     console.log("文章：", { title: title.value, content: content.value });
     // 发送到后端
-    axios.post("/api/articles", { title, content })
+    axios.post("/addArticle", { title, content })
         .then((response) => {
             message.success("文章提交成功！");
         })

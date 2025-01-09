@@ -39,7 +39,7 @@
 import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { LeftOutlined } from '@ant-design/icons-vue';
-import myAxios from "../plugins/myAxios";
+import myAxios from "../../plugins/myAxios";
 
 const router = useRouter();
 const route = useRoute();

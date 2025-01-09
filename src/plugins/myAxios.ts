@@ -2,9 +2,6 @@ import axios from "axios";
 import { ref } from "vue";
 import { useUserStore } from "../store";
 
-
-
-
 const instance = axios.create({
     baseURL: "http://localhost:8089",
     timeout: 10000,

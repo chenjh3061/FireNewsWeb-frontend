@@ -91,9 +91,9 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
-import { useArticleStore, useHistoryStore } from "../store/index";
+import { useArticleStore, useHistoryStore } from "../../store/index";
 import { useRouter } from 'vue-router';
-import myAxios from "../plugins/myAxios";
+import myAxios from "../../plugins/myAxios";
 import {message} from "ant-design-vue";
 
 const router = useRouter();

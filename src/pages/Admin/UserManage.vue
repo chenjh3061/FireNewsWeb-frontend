@@ -59,6 +59,9 @@
                     <a-form-item label="账号">
                         <a-input v-model:value="formData.userAccount"/>
                     </a-form-item>
+                    <a-form-item label="用户简介">
+                        <a-textarea v-model:value="formData.userProfile"/>
+                    </a-form-item>
                     <a-form-item label="密码">
                         <a-input-group compact>
                             <a-input-password
@@ -70,6 +73,14 @@
                                 {{ isEditePassword ? '隐藏' : '显示' }}
                             </a-button>
                         </a-input-group>
+                    </a-form-item>
+                    <a-form-item label="用户头像">
+                        <a-avatar :src="formData.userAvatar" style="margin-right: 8px;"/>
+                        <a-upload v-model:file-list="fileList" @change="handleUploadChange"
+                                  action="http://localhost:8089/upload" accept=".png">
+                            <a-button @click="ref">上传头像</a-button>
+                        </a-upload>
+                        <a-input v-model:value="formData.userAvatar"/>
                     </a-form-item>
                     <a-form-item label="用户名">
                         <a-input v-model:value="formData.userAccount"/>
@@ -111,7 +122,7 @@ const pagination = computed(() => {
         current: 1,
         pageSize: 10,
         total: userData.value.length,
-        showTotal: (total) => total,
+        showTotal: (total) => "共 " + total + " 条数据",
         showSizeChanger: true,
         onChange: (page: number, pageSize: number) => {
             pagination.value.current = page;
@@ -198,7 +209,6 @@ const onSearch = () => {
     }
 }
 
-
 const clearSearchBar = () => {
     userSearch.value = "";
     getAllUsers(); // 清空搜索后重新获取数据
@@ -210,7 +220,7 @@ const formData = ref({
     id: 0,
     userAccount: "",
     userPassword: "",
-    userAccount: "",
+    userProfile: "",
     userAvatar: "",
     email: "",
     userRole: "",
@@ -224,10 +234,10 @@ const openAddModal = () => {
         id: 0,
         userAccount: "",
         userPassword: "",
-        userAccount: "",
+        userProfile: undefined,
         userAvatar: "",
         email: "",
-        userRole: "",
+        userRole: ""
     };
     isAdd.value = true;
     isModalVisible.value = true;
@@ -237,6 +247,14 @@ const openAddModal = () => {
 const handleCancel = () => {
     isAdd.value = false;
     isModalVisible.value = false;
+};
+ const fileList = ref([]);
+const handleUploadChange = (info) => {
+    if (info.file.status === 'done') {
+        formData.value.userAvatar = "http://localhost:8089" + info.file.response.data; // 更新头像路径
+    } else if (info.file.status === 'error') {
+        message.error('上传失败');
+    }
 };
 
 // 保存或更新用户

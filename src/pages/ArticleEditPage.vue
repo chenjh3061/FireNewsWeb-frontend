@@ -16,6 +16,11 @@
                     <a-form-item label="文章摘要" name="articleDesc">
                         <a-textarea v-model:value="articleForm.articleDesc"  placeholder="请输入摘要" />
                     </a-form-item>
+                    <a-form-item label="文章分类" name="articleCategory">
+                        <a-select v-model:value="articleForm.articleCategory" placeholder="请选择分类">
+                            <a-select-option v-for="item in categoryList" :key="item.id" :value="item.name" />
+                        </a-select>
+                    </a-form-item>
                 </a-col>
 
                 <!-- 文章封面 -->
@@ -37,10 +42,14 @@
                             <a-col :span="12">
                                 <!-- 图片链接 -->
                                 <a-input
-                                    v-model:value="articleForm.articleCover"
+                                    v-model:value="articleForm.articleAvatar"
                                     placeholder="或填写图片链接"
                                     type="url"
                                 />
+                                <span>预览</span>
+                                <div v-if="articleForm.articleAvatar">
+                                    <img :src="articleForm.articleAvatar" alt="" style="width: 100px; height: auto;">
+                                </div>
                             </a-col>
                         </a-row>
                     </a-form-item>
@@ -58,27 +67,31 @@
 </template>
 
 <script lang="ts" setup>
-import {onBeforeUnmount, onMounted, ref, toRaw, watchEffect} from "vue";
+import {computed, onBeforeUnmount, onMounted, ref, toRaw, watch, watchEffect} from "vue";
 import { useRouter } from "vue-router";
 import JoditEditor from "../plugins/JoditEditor.vue";
 import { useArticleStore } from "../store/index";
-import { Modal } from "ant-design-vue";
+import {message, Modal} from "ant-design-vue";
 import myAxios from "../plugins/myAxios";
 
 const router = useRouter();
 const jodit = ref();
 
 // 当前文章数据
-const articleForm = ref<Object>();
+const articleForm = ref({
+    articleTitle: '',
+    articleDesc: '',
+    articleAvatar: '',
+    articleContent: '',
+    articleId: ''
+});
 const articleStore = useArticleStore();
 
-articleForm.value = articleStore.selectedArticle;
-watchEffect(() => {
+const isEdit = computed(() => !!articleStore.selectedArticle);
 
-    console.table(articleForm.value);
-});
-
-const isEdit = ref(false);
+if (articleStore.selectedArticle) {
+    articleForm.value = articleStore.selectedArticle;
+}
 
 // 文章表单验证规则
 const rules = {
@@ -86,7 +99,7 @@ const rules = {
     articleContent: [{ required: true, message: "内容不能为空", trigger: "blur" }],
 };
 
-const uploadUrl = 'https://your-upload-api-url';  // 修改为实际的上传接口
+const uploadUrl = 'http://localhost:8089/upload';  // 修改为实际的上传接口
 
 // 文件上传列表
 const fileList = ref([]);
@@ -95,37 +108,52 @@ const fileList = ref([]);
 const handleImageChange = (info) => {
     if (info.file.status === 'done') {
         // 上传成功，更新封面图片链接
-        articleForm.value.articleCover = info.file.response.url;
-    }
+        articleForm.value.articleAvatar = "http://localhost:8089" + info.file.response.data;
+    } else if (info.file.status === 'error') {
+    message.error('上传失败');
+}
 };
-
+watchEffect(() => {
+    console.log(articleForm.value.articleAvatar);
+});
 // 提交表单
 const handleSubmit = () => {
-    try {
-        myAxios.post('/article/updateArticle', toRaw(articleForm.value), {
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        }).then(res => {
+    Modal.confirm({
+        title: '确认提交保存?',
+        okText: '确定',
+        cancelText: '取消',
+        onOk() {
+            try {
+                myAxios.post('article/updateArticle', articleForm.value, {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }).then(res => {
 
-            console.log(res);
-            if (res.data.code === 0) {
-                Modal.success({
-                    title: '保存成功',
-                    content: res.message,
+                    console.log(res);
+                    if (res.data.code === 0) {
+                        Modal.success({
+                            title: '保存成功',
+                            content: res.message,
+                        });
+                        useArticleStore().setSelectedArticle(null);
+                        router.back();
+                    } else {
+                        Modal.error({
+                            title: '保存失败',
+                            content: res.message,
+                        });
+                    }
                 });
-                useArticleStore().setSelectedArticle(null);
-                router.back();
-            } else {
-                Modal.error({
-                    title: '保存失败',
-                    content: res.message,
-                });
+            } catch (error) {
+                console.error('提交表单时出错:', error);
             }
-        });
-    } catch (error) {
-        console.error('提交表单时出错:', error);
-    }
+        },
+        onCancel() {
+            console.log('取消返回');
+        }
+    });
+
     return;
 };
 

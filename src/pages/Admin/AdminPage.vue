@@ -26,6 +26,7 @@
                         <upload-outlined />
                         <span>文本管理</span>
                     </template>
+                    <a-menu-item key="review">审核管理</a-menu-item>
                     <a-menu-item key="carousel">轮播新闻</a-menu-item>
                     <a-menu-item key="categories">分类管理</a-menu-item>
                     <a-menu-item key="newsManage">文章管理</a-menu-item>

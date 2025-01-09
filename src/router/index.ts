@@ -1,8 +1,8 @@
 import {createRouter, createWebHashHistory, RouteRecordRaw} from "vue-router";
-import IndexPage from "../pages/IndexPage.vue";
+import IndexPage from "../pages/Front/IndexPage.vue";
 import AdminPage from "../pages/Admin/AdminPage.vue";
-import hotTopics from "../pages/HotTopics.vue";
-import Science from "../pages/SciencePage.vue";
+import hotTopics from "../pages/Front/HotTopics.vue";
+import Science from "../pages/Front/SciencePage.vue";
 import WriterPage from "../pages/Writer/WriterPage.vue";
 import ArticlesPage from "../pages/Writer/ArticlesPage.vue";
 import UploadPage from "../pages/Writer/UploadPage.vue";
@@ -12,13 +12,14 @@ import UserManage from "../pages/Admin/UserManage.vue";
 import NotionManage from "../pages/Admin/NotionManage.vue";
 import CategoriesPage from "../pages/Admin/CategoriesPage.vue";
 import CarouselPage from "../pages/Admin/CarouselPage.vue";
-import AboutPage from "../pages/AboutPage.vue";
+import AboutPage from "../pages/Front/AboutPage.vue";
 import CommentManage from "../pages/Admin/CommentManage.vue";
 import ErrorPage from "../pages/ErrorPage.vue";
 import UserPage from "../pages/UserPage.vue";
 import ArticleDetails from "../pages/ArticleDetails.vue";
-import SearchPage from "../pages/SearchPage.vue";
+import SearchPage from "../pages/Front/SearchPage.vue";
 import ArticleEditPage from "../pages/ArticleEditPage.vue";
+import ReviewPage from "../pages/Admin/ReviewPage.vue";
 
 const routes: Array<RouteRecordRaw> = [
     {
@@ -106,6 +107,11 @@ const routes: Array<RouteRecordRaw> = [
                 path: "dashboard",
                 name: "dashboard",
                 component: DashBoard,
+            },
+            {
+                path: "review",
+                name: "review",
+                component: ReviewPage,
             },
             {
                 path: "categories",

@@ -3,7 +3,7 @@
         <h2 class="title">文章管理</h2>
 
         <!-- 操作按钮，点击弹出新闻管理的Modal -->
-        <a-button type="primary" @click="openAddModal">新增文章</a-button>
+        <a-button type="primary" @click="addArticle">新增文章</a-button>
 
         <!-- 新闻列表 -->
         <a-skeleton :loading="loading" active :style="{margin: '20px',}">
@@ -32,37 +32,18 @@
                         </a-tag>
                     </template>
                     <template v-if="column.dataIndex === 'action'">
-                        <a-button id="action" @click="viewDetails(record)">查看/修改</a-button>
+                        <a-button id="action" @click="viewDetails(record)">查看详情</a-button>
+                        <a-button id="action" @click="editeArticle(record)">修改文章</a-button>
                         <a-button @click="deleteNews(record.id)">删除文章</a-button>
                     </template>
                 </template>
             </a-table>
         </a-skeleton>
-        <!-- 弹窗 - 用于新增新闻 -->
-        <a-modal v-model:visible="addModalVisible" :footer="null" title="新增新闻" @cancel="handleCancel">
-            <div class="modal-content">
-                <a-form :form="form">
-                    <a-form-item label="新闻标题">
-                        <a-input v-model:value="formData.title"/>
-                    </a-form-item>
-                    <a-form-item label="新闻内容">
-                        <jodit-editor v-model="formData.content" :config="{readonly: false}"/>
-                    </a-form-item>
-                </a-form>
-                <div class="modal-footer">
-                    <a-button @click="handleCancel">取消</a-button>
-                    <a-button type="primary" @click="handleOk">保存</a-button>
-                </div>
-            </div>
-        </a-modal>
 
         <!-- 弹窗 - 用于修改新闻 -->
-        <ArticleEditModal
-                :article="selectedArticle"
-                :visible="isModalVisible"
-                @cancel="handleCancel"
-                @close="isModalVisible = false"
-                @save="handleOk"
+        <ArticleModal
+            v-model:visible="isModalVisible"
+            :article="selectedArticle"
         />
     </div>
 </template>
@@ -73,8 +54,10 @@ import {message, TableColumnsType} from "ant-design-vue";
 import myAxios from "../../plugins/myAxios";
 import JoditEditor from "../../plugins/JoditEditor.vue";
 import dayjs from "dayjs";
-import ArticleEditModal from "../../components/modals/ArticleEditModal.vue";
+import ArticleModal from "../../components/modals/ArticleDetailModal.vue";
 import {fieldMappings} from "../../utils/mapping.js";
+import {useArticleStore} from "../../store";
+import {useRouter} from "vue-router";
 
 const mappings = fieldMappings;
 
@@ -90,7 +73,6 @@ const loading = ref(false);
 // 表格列配置
 const columns = ref<TableColumnsType>([
     {title: "文章标题", dataIndex: "articleTitle", key: "title", resizable: true, minWidth: 100},
-    {title: "文章简介", dataIndex: "articleDesc", key: "content", resizable: true, minWidth: 100},
     {title: "文章封面", dataIndex: "articleAvatar", key: "avatar", resizable: true, minWidth: 100},
     {title: "文章类型", dataIndex: "articleCategory", key: "Category", resizable: true, minWidth: 100},
     {title: "作者", dataIndex: "authorName", key: "author", resizable: true, minWidth: 100},
@@ -142,20 +124,15 @@ const getArticles = () => {
 };
 
 // Modal 控制
-const addModalVisible = ref(false);
 const isModalVisible = ref(false);
 const selectedArticle = ref(null);
-const formData = ref({
-    id: undefined,
-    title: "",
-    content: "",
-});
-const form = ref(null);
 
-// 打开 Modal 用于新增新闻
-const openAddModal = () => {
-    formData.value = {id: undefined, title: "", content: ""};
-    addModalVisible.value = true;
+// 添加新闻
+const addArticle = () => {
+    articleStore.selectedArticle = null;
+    router.push({
+        path: "/articleEditor",
+    });
 };
 
 // 浏览详情
@@ -164,46 +141,14 @@ const viewDetails = (record: any) => {
     isModalVisible.value = true;
 };
 
-const isEdit = ref(false);
-const editorKey = ref(0); // 用于强制刷新组件
-
-// 开始编辑
-const startEdit = () => {
-    isEdit.value = !isEdit.value;
-    editorKey.value++;
-};
-
-// 取消 Modal
-const handleCancel = () => {
-    isModalVisible.value = false;
-    addModalVisible.value = false;
-};
-
-// 保存或更新新闻
-const handleOk = () => {
-    formData.value = selectedArticle.value;
-    console.table(formData.value);
-    if (!formData.value.articleTitle || !formData.value.articleContent) {
-        message.error("标题和内容不能为空");
-        return;
-    }
-
-    if (formData.value.id) {
-        // 更新新闻
-        const index = newsData.value.findIndex(news => news.id === formData.value.id);
-        if (index !== -1) {
-            newsData.value[index] = {id: 1, ...formData.value};
-        }
-        message.success("新闻更新成功");
-    } else {
-        // 新增新闻
-        const newId = newsData.value.length + 1;
-        newsData.value.push({id: newId, ...formData.value});
-        message.success("新闻新增成功");
-    }
-
-    isModalVisible.value = false;
-    addModalVisible.value = false;
+const articleStore = useArticleStore();
+const router = useRouter();
+// 修改文章
+const editeArticle = (record: any) => {
+    articleStore.selectedArticle = record;
+    router.push({
+        path: "/articleEditor",
+    });
 };
 
 // 删除新闻
@@ -236,8 +181,13 @@ onMounted(() => {
 }
 
 .article-avatar {
-    width: 200px;
+    width: 250px;
     height: 150px;
+    img {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+    }
 }
 
 .modal-content {

@@ -29,7 +29,7 @@
                                 <a @click.prevent="viewNewsDetail(item)" class="news-title">{{ item.articleTitle }}</a>
                             </template>
                             <template #avatar>
-                                <a-avatar :src="item.avatar" />
+                                <a-avatar :src="item.authorAvatar" />
                                 <span class="author-name">{{ item.authorName }}</span>
                             </template>
                         </a-list-item-meta>
@@ -44,9 +44,9 @@
 <script lang="ts" setup>
 import { LikeOutlined, MessageOutlined, StarOutlined } from '@ant-design/icons-vue';
 import { ref, onMounted } from 'vue';
-import myAxios from "../plugins/myAxios";
-import { useArticleStore } from "../store/index";
-import router from "../router/index";
+import myAxios from "../../plugins/myAxios";
+import { useArticleStore } from "../../store";
+import router from "../../router";
 
 // 使用 ref 包装 listData
 const listData = ref<any[]>([]);

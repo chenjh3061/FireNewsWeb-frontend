@@ -56,9 +56,9 @@
 <script lang="ts" setup>
 // 模拟从后端获取的数据，实际开发中可以通过API请求来获取数据
 import {onMounted, ref} from 'vue';
-import myAxios from "../plugins/myAxios";
-import {useArticleStore} from "../store";
-import router from "../router";
+import myAxios from "../../plugins/myAxios";
+import {useArticleStore} from "../../store";
+import router from "../../router";
 
 // 假设这些是从后端接口返回的数据
 const articles = ref([

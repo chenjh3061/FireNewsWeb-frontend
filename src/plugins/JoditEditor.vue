@@ -7,6 +7,7 @@ import { ref, onMounted, onBeforeUnmount, watch } from "vue";
 
 import 'jodit/es2021/jodit.min.css';
 import { Jodit } from "jodit";
+import axios from "axios";
 
 let editorRef = ref(null);
 const props = defineProps({
@@ -96,16 +97,25 @@ let config = {
         },
     },
     uploader: {
-        url: "/api/uploads", //上传地址
-        insertImageAsBase64URI: true, // 本地预览
+        url: "http://localhost:8089/upload", //上传地址
+        insertImageAsBase64URI: false, // 本地预览
+        method: "POST",
+        headers: {
+            // 根据后端需求设置 Content-Type
+            "Content-Type": "multipart/form-data",
+        },
         isSuccess(res) {
-            return res && res.code === 200;
+            return res;
         },
         defaultHandlerSuccess(data) {
+            console.log("defaultHandlerSuccess", data);
             if (Array.isArray(data)) {
                 data.forEach((item) => {
-                    const url = item.url || item.base64 || ""; // 支持后端返回或本地 Base64
-                    this.s.insertImage(url);
+                    if (item.url) {
+                        editorInstance.insertImage(item.url);
+                    } else {
+                        console.warn("Item does not have a url property:", item);
+                    }
                 });
             } else {
                 console.warn("Unexpected upload response:", data);
@@ -121,6 +131,21 @@ let config = {
             this.jodit.events.fire("errorMessage", "文件上传失败");
         },
     },
+};
+// 使用 axios 发送文件上传请求的示例函数
+const uploadFile = async (file) => {
+    try {
+        const formData = new FormData();
+        formData.append('file', file);
+        const response = await axios.post('http://localhost:8089/upload', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            }
+        });
+        console.log(response.data);
+    } catch (error) {
+        console.error(error);
+    }
 };
 onMounted(() => {
     editorInstance = Jodit.make("#editorRef", { ...config, ...props.config }); //合并组件传入的配置项并创建实例

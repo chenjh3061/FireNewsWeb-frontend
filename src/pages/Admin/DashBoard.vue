@@ -7,40 +7,40 @@
                 <p>今天是个好日子，祝您工作顺利！</p>
             </div>
             <img
-                src="https://source.unsplash.com/160x160/?business"
+                :src="userStore.userInfo.userAvatar"
                 alt="welcome-image"
                 class="welcome-image"
             />
         </div>
 
         <!-- 数据统计卡片 -->
-        <div class="stats-section">
+        <div class="stats-section" :key="123">
             <div class="stat-card">
                 <div class="card-icon">📈</div>
                 <div class="card-info">
                     <p class="card-title">今日访问量</p>
-                    <h2>12,345</h2>
+                    <h2>{{ DashboardData?.todayViewCount || '加载中...' }}</h2>
                 </div>
             </div>
             <div class="stat-card">
                 <div class="card-icon">📊</div>
                 <div class="card-info">
                     <p class="card-title">活跃用户</p>
-                    <h2>2,560</h2>
+                    <h2>{{ DashboardData.userNum || '加载中...' }}</h2>
                 </div>
             </div>
             <div class="stat-card">
                 <div class="card-icon">📰</div>
                 <div class="card-info">
-                    <p class="card-title">发布新闻</p>
-                    <h2>321</h2>
+                    <p class="card-title">发布文章</p>
+                    <h2>{{ DashboardData.articleNum || '加载中...' }}</h2>
                 </div>
             </div>
             <div class="stat-card">
                 <div class="card-icon">⚙️</div>
                 <div class="card-info">
                     <p class="card-title">系统运行时间</p>
-                    <h2>102 天</h2>
+                    <h2>{{ DashboardData?.runningDays || '加载中...' }}天</h2>
                 </div>
             </div>
         </div>
@@ -50,7 +50,7 @@
             <!-- 折线图 -->
             <div class="chart-section">
                 <h3>近7天访问量趋势</h3>
-                <div ref="lineChart"></div>
+                <div ref="lineChart" id="lineChart"></div>
             </div>
             <!-- 动态信息 -->
             <div class="activity-section">
@@ -79,26 +79,52 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue';
+import {nextTick, onMounted, ref} from 'vue';
 import * as echarts from 'echarts';
+import myAxios from "../../plugins/myAxios";
+import {useUserStore} from "../../store/index";
+
+const userStore = useUserStore();
+
+const DashboardData = ref<any>({
+    todayViewCount: 0,
+    userNum: 0,
+    articleNum: 0,
+    runningDays: 0
+});
+const getData = async () => {
+    try {
+        const response = await myAxios.get('admin/getDashboardData');
+        DashboardData.value = response.data.data;
+        await nextTick();
+        initChart();
+        console.log(DashboardData.value);
+    } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+    }
+};
+
+
 
 // ECharts图表初始化
 const lineChart = ref<HTMLDivElement | null>(null);
 
-onMounted(() => {
+const initChart = () => {
     if (lineChart.value) {
         const lineChartInstance = echarts.init(lineChart.value);
         lineChartInstance.setOption({
             title: {
                 text: '访问量与新闻发布趋势',
                 left: 'center',
-                top: '10px',
+                top: '0px',
             },
             tooltip: {
                 trigger: 'axis',
             },
             legend: {
                 data: ['日访问量', '新闻发布量'],
+                top: '20px',
+                left: 'center',
             },
             xAxis: {
                 type: 'category',
@@ -124,6 +150,9 @@ onMounted(() => {
             ],
         });
     }
+}
+onMounted(() => {
+    getData();
 });
 </script>
 
@@ -225,6 +254,9 @@ onMounted(() => {
     max-width: 100%;
     height: auto;
     min-height: 300px; /* 确保图表有足够的显示空间 */
+    #lineChart {
+        height: 80%;
+    }
 }
 
 .chart-section h3 {
