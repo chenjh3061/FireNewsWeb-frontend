@@ -7,7 +7,7 @@ import ACCESS_ENUM from "../access/ACCESS_ENUM"
  * @return boolean 有无权限
  */
 const checkAccess = (loginUser: any, needAccess = ACCESS_ENUM.NOT_LOGIN) => {
-    const userAccess = loginUser?.userInfo?.userRole;
+    const userAccess = loginUser?.userRole;
 
     if (needAccess === ACCESS_ENUM.NOT_LOGIN) {
         return true

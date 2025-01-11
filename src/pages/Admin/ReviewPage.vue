@@ -27,10 +27,10 @@
 
         <!-- 弹窗显示文章详情 -->
         <a-modal
-                v-model:visible="isModalVisible"
-                footer=""
-                title="文章详情"
-                @cancel="closeModal"
+            v-model:visible="isModalVisible"
+            footer=""
+            title="文章详情"
+            @cancel="closeModal"
         >
             <div v-if="selectedArticle">
                 <h3>{{ selectedArticle.articleTitle }}</h3>
@@ -40,16 +40,28 @@
                      style="max-width: 100%; height: auto;"/>
             </div>
         </a-modal>
+
+        <!-- 批注输入弹窗 -->
+        <a-modal
+            v-model:visible="isCommentModalVisible"
+            title="填写批注"
+            @cancel="closeCommentModal"
+            @ok="submitComment"
+        >
+            <a-textarea v-model:value="comment" placeholder="请输入批注..." rows="4"></a-textarea>
+        </a-modal>
     </div>
 </template>
 
+
 <script lang="ts" setup>
-import {computed, ref} from "vue";
-import {message, TableColumnsType} from "ant-design-vue";
+import { computed, ref } from "vue";
+import { message, TableColumnsType } from "ant-design-vue";
 import myAxios from "../../plugins/myAxios";
 import { fieldMappings } from "../../utils/mapping.js";
 import dayjs from "dayjs";
 const mappings = fieldMappings;
+
 // 模拟文章数据
 const articles = ref([
     {
@@ -72,12 +84,12 @@ const articles = ref([
 
 // 表格列配置
 const columns = ref<TableColumnsType>([
-    {title: "文章标题", dataIndex: "articleTitle", key: "articleTitle", resizable: true, minWidth: 200},
-    {title: "文章摘要", dataIndex: "articleDesc", key: "articleDesc",resizable: true, minWidth: 200 },
-    {title: "文章作者", dataIndex: "authorName", key: "authorName",resizable: true, minWidth: 200},
-    {title: "作者id", dataIndex: "authorId", key: "authorId",resizable: true, minWidth: 200},
-    {title: "发布时间", dataIndex: "createTime", key: "createTime",resizable: true, minWidth: 200},
-    {title: "审核状态", dataIndex: "reviewStatus", key: "reviewStatus",resizable: true, minWidth: 200},
+    { title: "文章标题", dataIndex: "articleTitle", key: "articleTitle", resizable: true, minWidth: 200 },
+    { title: "文章摘要", dataIndex: "articleDesc", key: "articleDesc", resizable: true, minWidth: 200 },
+    { title: "文章作者", dataIndex: "authorName", key: "authorName", resizable: true, minWidth: 200 },
+    { title: "作者id", dataIndex: "authorId", key: "authorId", resizable: true, minWidth: 200 },
+    { title: "发布时间", dataIndex: "createTime", key: "createTime", resizable: true, minWidth: 200 },
+    { title: "审核状态", dataIndex: "reviewStatus", key: "reviewStatus", resizable: true, minWidth: 200 },
     {
         title: "操作",
         dataIndex: "action",
@@ -107,6 +119,11 @@ const pagination = computed(() => {
 const isModalVisible = ref(false);
 const selectedArticle = ref(null);
 
+// 批注输入弹窗相关状态
+const isCommentModalVisible = ref(false);
+const comment = ref(""); // 用来存储批注的内容
+const currentArticle = ref(null); // 用来存储当前操作的文章
+
 const getArticles = () => {
     try {
         myAxios.get("/article/getUnreviewedArticles").then(res => {
@@ -129,30 +146,74 @@ const viewArticle = (article) => {
     isModalVisible.value = true;
 };
 
-// 关闭模态框
+// 关闭文章详情模态框
 const closeModal = () => {
     isModalVisible.value = false;
 };
 
-// 审核通过
+const reviewStatus = ref(null);
+
+// 打开批注模态框
 const approveArticle = (article) => {
-    try {
-
-    } catch (e) {
-        message.error("提交失败");
-    }
-    message.success(`文章《${article.articleTitle}》已通过审核`);
+    currentArticle.value = article;
+    reviewStatus.value = 1;
+    isCommentModalVisible.value = true;
 };
 
-// 拒绝审核
+// 拒绝审核并填写批注
 const rejectArticle = (article) => {
-    article.status = "已拒绝";
-    message.error(`文章《${article.articleTitle}》审核被拒绝`);
+    currentArticle.value = article;
+    reviewStatus.value = 2;
+    isCommentModalVisible.value = true;
 };
 
+// 关闭批注输入弹窗
+const closeCommentModal = () => {
+    isCommentModalVisible.value = false;
+    reviewStatus.value = null;
+    comment.value = ""; // 清空批注内容
+    currentArticle.value = null;
+};
 
+// 提交批注
+const submitComment = () => {
+    if (!comment.value.trim()) {
+        message.error("批注不能为空");
+        return;
+    }
 
+    // 发送请求将批注和审核结果一并提交
+    myAxios.post("/article/reviewArticle", {
+        id: currentArticle.value.articleId,
+        reviewMessage: comment.value,
+        reviewStatus: reviewStatus.value,
+    },{headers:{
+        'Content-Type': 'application/json',
+
+    }}).then(res => {
+        if (res.data.code === 0) {
+            message.success("提交成功");
+        } else {
+            message.error(res.data.message);
+        }
+    }).catch(err => {
+        message.error(err+"提交批注失败");
+    });
+
+    // 更新文章状态
+    if (currentArticle.value.status === "待审核") {
+        currentArticle.value.status = "已通过";
+        message.success(`文章《${currentArticle.value.articleTitle}》已通过审核，批注：${comment.value}`);
+    } else {
+        currentArticle.value.status = "已拒绝";
+        message.error(`文章《${currentArticle.value.articleTitle}》审核被拒绝，批注：${comment.value}`);
+    }
+
+    // 关闭弹窗
+    closeCommentModal();
+};
 </script>
+
 
 <style scoped>
 .audit-page {

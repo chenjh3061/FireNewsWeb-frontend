@@ -11,12 +11,6 @@ export const useUserStore = defineStore("user", {
   }),
   actions:() => {
     return {
-      getToken() {
-        return this.userInfo.token;
-      },
-      resetToken() {
-        this.userInfo = null;
-      }
     }
     },
 
@@ -61,5 +55,22 @@ export const useHistoryStore = defineStore("history", {
   persist: {
     storage: localStorage,
     key: "history",
+  },
+});
+
+export const useErrorStore = defineStore('error', {
+  state: () => ({
+    errorType: null, // 错误类型
+    errorMessage: '', // 错误消息
+  }),
+  actions: {
+    setError(type, message) {
+      this.errorType = type;
+      this.errorMessage = message;
+    },
+    clearError() {
+      this.errorType = null;
+      this.errorMessage = '';
+    },
   },
 });

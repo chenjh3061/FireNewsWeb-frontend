@@ -17,7 +17,7 @@
                     </div>
                 </a-carousel>
             </div>
-            <a-button v-allow="'admin'" type="primary" @click="addNews">添加新闻</a-button>
+<!--            <a-button v-allow="'admin'" type="primary" @click="addNews">添加新闻</a-button>-->
             <!-- 搜索栏部分 -->
             <div class="search-container">
                 <a-dropdown >

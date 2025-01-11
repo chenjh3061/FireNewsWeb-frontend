@@ -1,4 +1,5 @@
 import {createRouter, createWebHashHistory, RouteRecordRaw} from "vue-router";
+import ACCESS_ENUM from "../access/ACCESS_ENUM.js";
 import IndexPage from "../pages/Front/IndexPage.vue";
 import AdminPage from "../pages/Admin/AdminPage.vue";
 import hotTopics from "../pages/Front/HotTopics.vue";
@@ -20,6 +21,10 @@ import ArticleDetails from "../pages/ArticleDetails.vue";
 import SearchPage from "../pages/Front/SearchPage.vue";
 import ArticleEditPage from "../pages/ArticleEditPage.vue";
 import ReviewPage from "../pages/Admin/ReviewPage.vue";
+import {useErrorStore, useUserStore} from "../store";
+import myAxios from "../plugins/myAxios";
+import checkAccess from "../access/checkAccess";
+import {message} from "ant-design-vue";
 
 const routes: Array<RouteRecordRaw> = [
     {
@@ -61,6 +66,9 @@ const routes: Array<RouteRecordRaw> = [
         name: 'ArticleEditor',
         component: ArticleEditPage,
         props: true, // 将路由参数作为组件的 props 传递
+        meta: {
+            access: ACCESS_ENUM.ADMIN || ACCESS_ENUM.WRITER,
+        }
     },
     {
         path: "/user",
@@ -81,6 +89,7 @@ const routes: Array<RouteRecordRaw> = [
         name: "writer",
         meta: {
             title: "作者页面",
+            access: ACCESS_ENUM.WRITER,
         },
         children: [
             {
@@ -101,6 +110,8 @@ const routes: Array<RouteRecordRaw> = [
         component: AdminPage,
         meta: {
             title: "管理员页面",
+            access: ACCESS_ENUM.ADMIN,
+            access_redirect: "/error",
         },
         children: [
             {
@@ -147,11 +158,35 @@ const routes: Array<RouteRecordRaw> = [
     },
     {
         path: "/error",
+        name: "errorPage",
+        component: ErrorPage,
+    },
+    {
+        path: "/:catchAll(.*)",
         name: "error",
         component: ErrorPage,
+        beforeEnter: (to, from, next) => {
+            const errorStore = useErrorStore();
+            if (to.name === 'admin' || to.name === 'writer') {
+                errorStore.setError('403', '用户权限不足');
+            } else {
+                errorStore.setError('404', '页面不存在');
+            }
+            next();
+        }
     },
 
 ];
+
+export const getLoginUser = () => {
+    myAxios.get("/user/getLoginUser").then(res => {
+        if (res.data === null) {
+            console.log(res.data)
+            useUserStore().userInfo = null;
+        }
+
+    });
+}
 
 const router = createRouter({
     history: createWebHashHistory(),
@@ -160,7 +195,24 @@ const router = createRouter({
 
 //全局路由守卫
 router.beforeEach((to, from, next) => {
+    const userStore = useUserStore();
+    const errorStore = useErrorStore();
+    const loginUser = userStore.userInfo; // 获取当前登录用户
+    const needAccess: string = <string> to.meta.access || ACCESS_ENUM.NOT_LOGIN; // 获取路由中设置的需要的权限，默认为 NOT_LOGIN
 
-    next();
+    // 使用 checkAccess 来判断权限
+    const hasAccess = checkAccess(loginUser, needAccess);
+
+    if (hasAccess) {
+        next(); // 如果有权限，继续路由
+    } else {
+        if (needAccess === ACCESS_ENUM.NOT_LOGIN) {
+            next(); // 未登录的用户可以访问的页面继续跳转
+        } else {
+            message.error('用户权限不足'); // 提示权限不足
+            errorStore.setError('403', '用户权限不足');
+            next('/error'); // 跳转到登录页面或其他指定页面
+        }
+    }
 });
 export default router;

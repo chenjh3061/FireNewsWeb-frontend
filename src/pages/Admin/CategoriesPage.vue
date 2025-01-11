@@ -55,6 +55,7 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 import { message, TableColumnsType } from "ant-design-vue";
+import axios from "axios";
 
 // 分类数据
 const categories = ref<{ category: string }[]>([
@@ -63,6 +64,12 @@ const categories = ref<{ category: string }[]>([
     { category: "体育新闻" },
     { category: "娱乐新闻" },
 ]);
+
+const getAllCategories = () => {
+    return categories.value;
+};
+
+getAllCategories();
 
 // 新分类名称
 const newCategory = ref<string>("");
@@ -127,6 +134,24 @@ const onButtonLeave = (e: MouseEvent) => {
     const button = e.target as HTMLButtonElement;
     button.style.transform = "scale(1)";
 };
+
+const downloadFile = async (filePath) => {
+    const response = await axios({
+        url: `/api/download?filePath=${encodeURIComponent(filePath)}`,  // 注意 URL 编码
+        method: 'GET',
+        responseType: 'blob'  // 让返回值作为二进制数据处理
+    });
+
+    // 生成下载链接
+    const blob = response.data;
+    const link = document.createElement('a');
+    const url = window.URL.createObjectURL(blob);
+    link.href = url;
+    link.download = filePath.split('/').pop();  // 获取文件名
+    link.click();
+    window.URL.revokeObjectURL(url);  // 清除 URL 对象
+};
+
 </script>
 
 <style scoped>

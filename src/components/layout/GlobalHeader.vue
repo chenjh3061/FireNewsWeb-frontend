@@ -4,7 +4,7 @@
         <div id="logo">
             <img src="../../assets/Logo.png" alt="logo">
         </div>
-        <span id="title">火灾新闻网</span>
+        <span id="title">消防新闻网</span>
         <ul id="navMenu" >
             <li v-for="item in menuRoutes">
                 <router-link :to="item.path" active-class="active">{{ item.meta.title }}</router-link>

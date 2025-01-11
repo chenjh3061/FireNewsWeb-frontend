@@ -67,7 +67,7 @@ import {
     PieChartOutlined,
     VideoCameraOutlined,
 } from '@ant-design/icons-vue';
-import router from "../../router";
+import router, {getLoginUser} from "../../router";
 import {useRoute} from "vue-router";
 
 const route = useRoute();
@@ -83,8 +83,11 @@ const handleSelect = (info: { key: string }) => {
     selectedKeys.value = [info.key];
     router.push('/admin/' + info.key);
 };
+
+
 onMounted(() => {
     // handleSelect({key: 'dashboard'});
+    getLoginUser();
     if (router.currentRoute.value.path === '/admin') {
         selectedKeys.value = ['dashboard']; // 默认选中菜单项
         router.push('/admin/dashboard'); // 默认跳转到作品管理页面

@@ -38,19 +38,32 @@
 
         <!-- 编辑资料弹窗 -->
         <a-modal v-model:visible="editModalVisible" :footer="null" title="编辑资料" @cancel="closeModal">
-            <div class="modal-content">
-                <div class="modal-input">
+            <a-form class="modal-content" v-model:value="user">
+                <a-form-item class="modal-input">
                     <label for="userName">用户名：</label>
-                    <input id="userName" v-model="editUserName" placeholder="请输入新用户名" type="text"/>
-                </div>
-                <div class="modal-input">
+                    <a-input id="userName" v-model:value="user.userName" placeholder="请输入新用户名" type="text"/>
+                </a-form-item>
+                <a-form-item class="modal-input">
+                    <label for="userAvatar">头像:</label>
+                    <a-input id="userAvatar" v-model:value="user.userAvatar" placeholder="请输入新头像链接或上传头像" type="text"/>
+                    <a-upload v-model:file-list="fileList" @change="handleUploadChange"
+                              action="http://localhost:8089/upload" accept=".png">
+                        <a-button @click="ref">上传头像</a-button>
+                        <img :src="user.userAvatar"  alt="预览"/>
+                    </a-upload>
+                </a-form-item>
+                <a-form-item class="modal-input">
+                    <label for="userEmail">邮箱：</label>
+                    <a-input id="userEmail" v-model:value="user.userEmail" placeholder="请输入新邮箱" type="email"/>
+                </a-form-item>
+                <a-form-item class="modal-input">
                     <label for="userProfile">简介：</label>
-                    <textarea id="userProfile" v-model="editUserProfile" placeholder="请输入个人简介"></textarea>
-                </div>
-                <div class="modal-footer">
+                    <a-textarea id="userProfile" v-model="user.userProfile" placeholder="请输入个人简介"></a-textarea>
+                </a-form-item>
+                <a-form-item class="modal-footer">
                     <button class="primary-button" @click="saveProfileChanges">保存</button>
-                </div>
-            </div>
+                </a-form-item>
+            </a-form>
         </a-modal>
 
         <!-- 修改密码弹窗 -->
@@ -84,7 +97,9 @@
 
 <script lang="ts" setup>
 import {onMounted, ref} from 'vue';
-import {useUserStore} from "@/store";
+import {useUserStore} from "../store/index";
+import {message} from "ant-design-vue";
+import myAxios from "../plugins/myAxios";
 
 const user = ref({
     userAccount: "john_doe",
@@ -97,6 +112,16 @@ const user = ref({
 const userStore = useUserStore();
 user.value = userStore.userInfo;
 
+const fileList = ref([]);
+
+const handleUploadChange = (info) => {
+    if (info.file.status === 'done') {
+        user.value.userAvatar = "http://localhost:8089" + info.file.response.data; // 更新头像路径
+    } else if (info.file.status === 'error') {
+        message.error('上传失败');
+    }
+};
+
 const actions = ref([
     {time: '2024-12-30 10:00', text: '修改了个人资料'},
     {time: '2024-12-29 18:30', text: '更新了密码'},
@@ -106,12 +131,8 @@ const actions = ref([
 const isLoggedIn = ref(false);
 
 // 弹窗控制
-const editModalVisible = ref(false);
+const editModalVisible = ref(true);
 const passwordModalVisible = ref(false);
-
-// 编辑资料表单
-const editUserName = ref(user.value.userAccount);
-const editUserProfile = ref(user.value.userProfile);
 
 // 修改密码表单
 const currentPassword = ref('');
@@ -136,8 +157,18 @@ const closeModal = () => {
 
 // 保存编辑资料
 const saveProfileChanges = () => {
-    user.value.userAccount = editUserName.value;
-    user.value.userProfile = editUserProfile.value;
+    try {
+     myAxios.post('/user/updateUser', user.value).then(res => {
+         userStore.userInfo = (res.data);
+         message.success('更新成功');
+     }).catch(err => {
+         console.log(err);
+         message.error('更新失败');
+     });
+
+    } catch (error) {
+        console.error('Error updating profile');
+    }
     editModalVisible.value = false;
 };
 
@@ -288,18 +319,23 @@ onMounted(() => {
 
 .user-action-item {
     background-color: #fff;
-    padding: 12px;
     margin-bottom: 10px;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
 .modal-content {
-    padding: 20px;
 }
 
 .modal-input {
     margin-bottom: 20px;
+    img{
+        max-width: 50%;
+        max-height: 15rem;
+        height: auto;
+        margin: auto auto auto 3rem;
+        border-radius: 50%;
+    }
 }
 
 .modal-input label {
@@ -310,7 +346,6 @@ onMounted(() => {
 
 .modal-input input, .modal-input textarea {
     width: 100%;
-    padding: 10px;
     font-size: 16px;
     border-radius: 8px;
     border: 1px solid #ccc;
