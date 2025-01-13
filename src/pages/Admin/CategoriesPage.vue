@@ -55,25 +55,18 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 import { message, TableColumnsType } from "ant-design-vue";
-import axios from "axios";
-import myAxios from "@/plugins/myAxios";
+import myAxios from "../../plugins/myAxios";
 
 // 分类数据
-const categories = ref<{ category: string }[]>([
-    { category: "时事新闻" },
-    { category: "科技新闻" },
-    { category: "体育新闻" },
-    { category: "娱乐新闻" },
-]);
+const categories = ref();
 
 const getCategory = () => {
     try {
         myAxios.get("/categories/getAllCategories").then(res => {
             if (res.data.code === 0){
                 categories.value = res.data.data;
-
             } else {
-
+                message.error(res.data.message)
             }
         })
     } catch (e) {
@@ -81,8 +74,6 @@ const getCategory = () => {
     }
 };
 getCategory();
-
-getAllCategories();
 
 // 新分类名称
 const newCategory = ref<string>("");
@@ -105,21 +96,19 @@ const addCategory = () => {
 
 // 编辑分类
 const editCategory = (category: string) => {
-    message.success("编辑分类：" + category);
 };
 
 // 删除分类
 const deleteCategory = (category: string) => {
-    categories.value = categories.value.filter((cat) => cat.category !== category);
-    message.success("分类删除成功！");
+
 };
 
 // 表格列配置
 const columns = ref<TableColumnsType>([
     {
         title: "分类名称",
-        dataIndex: "category",
-        key: "category",
+        dataIndex: "name",
+        key: "name",
         resizable: true,
         minWidth: 100,
     },
@@ -131,7 +120,6 @@ const columns = ref<TableColumnsType>([
         minWidth: 150,
     },
 ]);
-
 // 表格列宽拖动
 function handleResizeColumn(w, column) {
     column.width = w;
