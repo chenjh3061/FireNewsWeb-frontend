@@ -71,6 +71,7 @@ import { defineProps, defineEmits } from "vue";
 import { useUserStore } from "../../store";
 import myAxios from "../../plugins/myAxios";
 import {message} from "ant-design-vue";
+import router from "@/router";
 
 const userStore = useUserStore();
 
@@ -131,6 +132,7 @@ const submitForm = () => {
                     checkPassword: ""
                 };
                 message.info("登录成功！")
+                router.go(0);
                 console.log(isRegister.value ? "注册成功" : "登录成功" , userStore.userInfo);
             } else {
                 message.error(res.data.message);

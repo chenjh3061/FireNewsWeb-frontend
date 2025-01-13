@@ -56,6 +56,7 @@
 import { ref } from "vue";
 import { message, TableColumnsType } from "ant-design-vue";
 import axios from "axios";
+import myAxios from "@/plugins/myAxios";
 
 // 分类数据
 const categories = ref<{ category: string }[]>([
@@ -65,9 +66,21 @@ const categories = ref<{ category: string }[]>([
     { category: "娱乐新闻" },
 ]);
 
-const getAllCategories = () => {
-    return categories.value;
+const getCategory = () => {
+    try {
+        myAxios.get("/categories/getAllCategories").then(res => {
+            if (res.data.code === 0){
+                categories.value = res.data.data;
+
+            } else {
+
+            }
+        })
+    } catch (e) {
+        message.error(e)
+    }
 };
+getCategory();
 
 getAllCategories();
 
@@ -135,22 +148,22 @@ const onButtonLeave = (e: MouseEvent) => {
     button.style.transform = "scale(1)";
 };
 
-const downloadFile = async (filePath) => {
-    const response = await axios({
-        url: `/api/download?filePath=${encodeURIComponent(filePath)}`,  // 注意 URL 编码
-        method: 'GET',
-        responseType: 'blob'  // 让返回值作为二进制数据处理
-    });
-
-    // 生成下载链接
-    const blob = response.data;
-    const link = document.createElement('a');
-    const url = window.URL.createObjectURL(blob);
-    link.href = url;
-    link.download = filePath.split('/').pop();  // 获取文件名
-    link.click();
-    window.URL.revokeObjectURL(url);  // 清除 URL 对象
-};
+// const downloadFile = async (filePath) => {
+//     const response = await axios({
+//         url: `/api/download?filePath=${encodeURIComponent(filePath)}`,  // 注意 URL 编码
+//         method: 'GET',
+//         responseType: 'blob'  // 让返回值作为二进制数据处理
+//     });
+//
+//     // 生成下载链接
+//     const blob = response.data;
+//     const link = document.createElement('a');
+//     const url = window.URL.createObjectURL(blob);
+//     link.href = url;
+//     link.download = filePath.split('/').pop();  // 获取文件名
+//     link.click();
+//     window.URL.revokeObjectURL(url);  // 清除 URL 对象
+// };
 
 </script>
 

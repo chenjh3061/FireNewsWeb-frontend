@@ -54,14 +54,14 @@
                 </a-form-item>
                 <a-form-item class="modal-input">
                     <label for="userEmail">邮箱：</label>
-                    <a-input id="userEmail" v-model:value="user.userEmail" placeholder="请输入新邮箱" type="email"/>
+                    <a-input id="userEmail" v-model:value="user.email" placeholder="请输入新邮箱" type="email"/>
                 </a-form-item>
                 <a-form-item class="modal-input">
                     <label for="userProfile">简介：</label>
-                    <a-textarea id="userProfile" v-model="user.userProfile" placeholder="请输入个人简介"></a-textarea>
+                    <a-textarea id="userProfile" v-model:value="user.userProfile" placeholder="请输入个人简介"></a-textarea>
                 </a-form-item>
                 <a-form-item class="modal-footer">
-                    <button class="primary-button" @click="saveProfileChanges">保存</button>
+                    <button class="primary-button" @click="saveChanges">保存</button>
                 </a-form-item>
             </a-form>
         </a-modal>
@@ -103,10 +103,11 @@ import myAxios from "../plugins/myAxios";
 
 const user = ref({
     userAccount: "john_doe",
+    userName: "joho",
     userAvatar: 'https://example.com/avatar.jpg',
     userProfile: 'Software Developer at Example Inc.',
     userRole: "user",
-    userEmail: 'john.doe@example.com',
+    email: 'john.doe@example.com',
 });
 
 const userStore = useUserStore();
@@ -156,9 +157,9 @@ const closeModal = () => {
 };
 
 // 保存编辑资料
-const saveProfileChanges = () => {
+const saveChanges = () => {
     try {
-     myAxios.post('/user/updateUser', user.value).then(res => {
+     myAxios.post('/user/updateUserByUser', user.value).then(res => {
          userStore.userInfo = (res.data);
          message.success('更新成功');
      }).catch(err => {
@@ -174,7 +175,20 @@ const saveProfileChanges = () => {
 
 // 保存修改密码
 const savePasswordChanges = () => {
-    if (newPassword.value === confirmPassword.value) {
+    if (!currentPassword.value || !newPassword.value || !confirmPassword.value){
+        message.error("请完善表单");
+    } else if (newPassword.value === confirmPassword.value) {
+        try {
+            myAxios.post("/user/updatePassword").then(res => {
+                if (res.data.code === 0){
+                    message.info("修改成功")
+                } else {
+                    message.error("修改失败")
+                }
+            });
+        } catch (e){
+            console.log(e);
+        }
         console.log('Password updated');
         passwordModalVisible.value = false;
     } else {

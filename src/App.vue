@@ -20,6 +20,9 @@ const appClass = computed(() => {
     // 判断当前路由是否是后台页面
     return route.path.startsWith('/admin') | route.path.startsWith('/writer') ? 'back-layout' : 'frontend-layout';
 });
+const isLogin = computed(() => {
+    route.path;
+})
 </script>
 
 <style scoped>

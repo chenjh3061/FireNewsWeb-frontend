@@ -327,13 +327,14 @@ onMounted(() => {
 
 .main-news-image img {
     width: 50%;
+    margin: 5px 10rem;
     height: auto;
     border-radius: 8px;
 }
 
 .main-news-text {
     padding: 20px;
-    width: 45%;
+    width: 100%;
 }
 
 .main-news-text h2 {

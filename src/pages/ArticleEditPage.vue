@@ -77,6 +77,24 @@ import myAxios from "../plugins/myAxios";
 const router = useRouter();
 const jodit = ref();
 
+const categoryList = ref();
+
+const getCategory = () => {
+    try {
+         myAxios.get("/categories/getAllCategories").then(res => {
+             if (res.data.code === 0){
+                 categoryList.value = res.data.data;
+
+             } else {
+
+             }
+         })
+    } catch (e) {
+        message.error(e)
+    }
+};
+getCategory();
+
 // 当前文章数据
 const articleForm = ref({
     articleTitle: '',
