@@ -3,7 +3,7 @@
         <template #icon>
             <CustomerServiceOutlined />
         </template>
-        <a-float-button @click="handleCommentClick">
+        <a-float-button tooltip="意见反馈" @click="handleCommentClick">
             <template #icon>
                 <CommentOutlined />
             </template>

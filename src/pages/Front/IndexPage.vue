@@ -237,7 +237,7 @@ onMounted(() => {
 .carousel-image {
     width: 100%;
     height: 500px;
-    object-fit: contain;
+    object-fit: fill;
     border-radius: 8px;
 }
 
@@ -246,7 +246,7 @@ onMounted(() => {
     bottom: 0;
     left: 0;
     right: 0;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0));
+    background: linear-gradient(to top, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0));
     padding: 20px;
     color: #fff;
     border-radius: 0 0 8px 8px;
@@ -320,33 +320,75 @@ onMounted(() => {
     width: 100%;
     max-width: 1200px;
     justify-content: space-between;
-    background-color: #fff;
+    align-items: center;
+    background: linear-gradient(135deg, #f5f7fa, #c3cfe2); /* 添加渐变背景色 */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
+    border-radius: 16px; /* 圆角增加视觉柔和感 */
+    overflow: hidden; /* 确保内容不会超出边界 */
+    margin: 20px 0;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.main-news:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    transform: translateY(-5px);
+
+}
+
+.main-news-image {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
 }
 
 .main-news-image img {
-    width: 50%;
-    margin: 5px 10rem;
+    width: 70%;
     height: auto;
-    border-radius: 8px;
+    margin-left: 15%;
+    object-fit: fill;
+    transition: transform 0.5s ease;
+}
+
+.main-news-image img:hover {
+    transform: scale(1.05);
 }
 
 .main-news-text {
-    padding: 20px;
-    width: 100%;
+    flex: 1;
+    padding: 30px;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .main-news-text h2 {
-    font-size: 24px;
+    font-size: 28px; /* 更大字号突出标题 */
     font-weight: bold;
-    color: #333;
+    color: #002b5b; /* 深蓝色标题 */
+    margin-bottom: 16px;
 }
 
 .main-news-text p {
     font-size: 16px;
-    color: #666;
-    margin-top: 10px;
+    color: #555555;
+    line-height: 1.6;
+    margin-bottom: 24px;
+}
+
+.main-news-text a {
+    align-self: flex-start;
+    padding: 10px 20px;
+    font-size: 14px;
+    color: #ffffff;
+    background-color: #007bff;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.main-news-text a:hover {
+    background-color: #0056b3;
 }
 
 .read-more {

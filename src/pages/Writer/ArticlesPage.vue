@@ -1,6 +1,6 @@
 <template>
     <div class="article-management">
-        <h2>文章详情页</h2>
+        <h2 class="page-title">文章详情页</h2>
         <a-table
             :columns="columns"
             :data-source="dataSource"
@@ -154,3 +154,13 @@ onMounted(() => {
     getArticles(); // 获取文章数据
 })
 </script>
+
+<style scoped>
+.article-management {
+    padding: 20px;
+}
+
+.page-title {
+
+}
+</style>

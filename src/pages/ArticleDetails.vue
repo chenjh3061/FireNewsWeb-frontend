@@ -12,8 +12,8 @@
 
         <!-- 标题栏 -->
         <div class="title-bar">
-            <h1 class="article-title">{{ articleData.articleTitle }}</h1>
-            <p class="publish-date">{{ formatDate(articleData.createTime) }}</p>
+            <h1 class="article-title">{{ articleData?.articleTitle }}</h1><br/>
+            <p class="publish-date">{{ formatDate(articleData?.createTime) }}</p>
             <!-- 字号调整 -->
             <div class="font-size-control">
                 <a-button type="text" @click="adjustFontSize('small')">A-小字体</a-button>
@@ -130,9 +130,8 @@ import {useArticleStore, useUserStore} from "../store/index";
 import {useRouter} from "vue-router";
 import {StepBackwardOutlined} from "@ant-design/icons-vue";
 import myAxios from "../plugins/myAxios";
-import MyAxios from "../plugins/myAxios";
 import DOMPurify from "dompurify";
-import {adjustFontSize, formatDate} from '.././utils/utils.js';
+import {adjustFontSize, formatDate} from '../utils/utils.js';
 import {_} from "lodash";
 
 
@@ -184,7 +183,7 @@ const submitComment = () => {
         return; // 评论为空不提交
     } else {
         try {
-            MyAxios.post("/comments/addComment", {
+            myAxios.post("/comments/addComment", {
                 articleId: articleData.value.articleId,
                 userId: userStore.userInfo.userName,
                 content: newComment.value,
@@ -208,12 +207,6 @@ const fontSize = ref(16);
 const adjustFontSize = (size: "small" | "large" | "reset") => {
     const sizes = {small: 14, large: 20, reset: 16};
     fontSize.value = sizes[size];
-};
-
-// 格式化日期
-const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString() + " " + date.toLocaleTimeString();
 };
 
 // 返回上一个页面
@@ -428,6 +421,7 @@ onMounted(() => {
 
 .font-size-control {
     display: inline;
+    margin-left: 30px;
 }
 
 .font-size-control a-button {

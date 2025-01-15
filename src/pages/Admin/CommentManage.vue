@@ -18,6 +18,7 @@
             :data-source="allComments"
             :pagination="pagination"
             :rowKey="record => record.id"
+            sticky
         >
             <template #bodyCell="{ column, record }">
                 <template v-if="column.dataIndex === 'content'">
@@ -111,17 +112,35 @@ const getComments = () => {
     }
 }
 getComments();
+
 // 表格列配置
 const columns = ref([
-    { title: "评论内容", dataIndex: "content", key: "content", width: 300 },
-    { title: "文章", dataIndex: "article", key: "article", width: 200 },
-    { title: "用户", dataIndex: "user", key: "user", width: 200 },
+    { title: "评论内容", dataIndex: "content", key: "content", width: 300,
+        sorter: (a: any, b: any) => a.content.length - b.content.length,
+        sortDirections: ["ascend", "descend"],
+    },
+    { title: "文章", dataIndex: "article", key: "article", width: 200,
+        sorter: (a: any, b: any) =>
+            a.articleTitle.localeCompare(b.articleTitle),
+        sortDirections: ["ascend", "descend"],
+    },
+    { title: "用户", dataIndex: "user", key: "user", width: 200,
+        sorter: (a: any, b: any) => a.userName.localeCompare(b.userName),
+        sortDirections: ["ascend", "descend"],
+    },
     {
         title: "状态",
         dataIndex: "status",
         key: "status",
         width: 100,
         align: "center",
+        sorter : (a: any, b: any) => a.status === 'approved' ? -1 : 1,
+        sortDirections: ["ascend", "descend"],
+        // filters: [
+        //     { text: "已显示", value: "approved" },
+        //     { text: "未显示", value: "pending" },
+        // ],
+        // onFilter: (value: string, record: any) => record.status === value,
     },
     {
         title: "操作",

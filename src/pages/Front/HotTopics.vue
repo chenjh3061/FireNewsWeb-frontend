@@ -178,6 +178,7 @@ onMounted(() => {});
 .action {
     font-size: 14px;
     color: #333;
+    margin-top: 40px;
     margin-right: 16px;
 }
 

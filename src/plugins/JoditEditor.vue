@@ -102,7 +102,7 @@ let config = {
         method: "POST",
         headers: {
             // 根据后端需求设置 Content-Type
-            "Content-Type": "multipart/form-data",
+            //"Content-Type": "multipart/form-data",
         },
         isSuccess(res) {
             return res;

@@ -26,20 +26,10 @@
         </a-table>
 
         <!-- 弹窗显示文章详情 -->
-        <a-modal
+        <ArticleModal
             v-model:visible="isModalVisible"
-            footer=""
-            title="文章详情"
-            @cancel="closeModal"
-        >
-            <div v-if="selectedArticle">
-                <h3>{{ selectedArticle.articleTitle }}</h3>
-                <p><strong>摘要：</strong>{{ selectedArticle.articleDesc }}</p>
-                <p><strong>内容：</strong>{{ selectedArticle.articleContent }}</p>
-                <img v-if="selectedArticle.articleAvatar" :src="selectedArticle.articleAvatar" alt="封面图"
-                     style="max-width: 100%; height: auto;"/>
-            </div>
-        </a-modal>
+            :article="selectedArticle"
+        />
 
         <!-- 批注输入弹窗 -->
         <a-modal
@@ -60,6 +50,7 @@ import { message, TableColumnsType } from "ant-design-vue";
 import myAxios from "../../plugins/myAxios";
 import { fieldMappings } from "../../utils/mapping.js";
 import dayjs from "dayjs";
+import ArticleModal from "../../components/modals/ArticleDetailModal.vue";
 const mappings = fieldMappings;
 
 // 模拟文章数据
