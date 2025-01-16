@@ -111,7 +111,7 @@ import myAxios from "../../plugins/myAxios";
 import type {TableColumnsType} from "ant-design-vue";
 import {message, Modal} from "ant-design-vue";
 import { fieldMappings } from "../../utils/mapping.js";
-import { Pagination } from "../../utils/pagination.js";
+import { Pagination } from "../../utils/Pagination.js";
 
 const mappings = fieldMappings;
 

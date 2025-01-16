@@ -1,8 +1,8 @@
 // utils/pagination.ts
 export class Pagination {
-    current: 2;
-    pageSize: 10;
-    total: 0;
+    current: number;
+    pageSize: number;
+    total: number;
     onPageChange: (page: number, pageSize: number) => void;
 
     constructor(total: number, onPageChange: (page: number, pageSize: number) => void) {

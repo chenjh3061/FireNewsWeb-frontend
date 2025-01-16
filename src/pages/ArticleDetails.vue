@@ -38,15 +38,19 @@
                 :style="{ top: aiWindowPosition.top + 'px', left: aiWindowPosition.left + 'px',
                       width: aiWindowSize.width + 'px', height: aiWindowSize.height + 'px' }"
                 class="ai-window"
+                :class="{ 'ai-window-collapsed': isAiWindowCollapsed }"
                 @mousedown="startDrag"
                 @mouseup="stopDrag"
         >
             <div class="ai-header">
                 <span>AI总结与提问</span>
                 <a-icon type="minus" @click="toggleAiWindow"/>
+                <button @click="toggleCollapse">
+                    {{ isAiWindowCollapsed ? '展开' : '折叠' }}
+                </button>
             </div>
 
-            <div class="ai-content">
+            <div class="ai-content" >
                 <h2>AI总结</h2>
                 <p>{{ aiSummary }}</p>
 
@@ -153,6 +157,12 @@ const sanitizedArticleContent = computed(() => {
 const comments = ref([]);
 const newComment = ref([]);
 
+// AI功能
+const isAiWindowCollapsed = ref(false);
+const toggleCollapse = () => {
+    isAiWindowCollapsed.value = !isAiWindowCollapsed.value;
+};
+
 // 获取评论
 const getComments = () => {
     const commentData = ref();
@@ -230,8 +240,10 @@ const userQuestion = ref("");
 const isAiWindowVisible = ref(true); // 控制窗口显示与否
 const aiWindowPosition = reactive({top: 200, left: 50}); // 控制窗口的初始位置
 const aiWindowSize = reactive({width: 350, height: 350}); // 控制窗口的初始大小
-const AIUrl = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
-const apiKey = "cd3e9fa7f67988e4c4a87e6adaad7d4f.tXpGrIlHvyIoqIlL"
+// const AIUrl = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
+// const apiKey = "cd3e9fa7f67988e4c4a87e6adaad7d4f.tXpGrIlHvyIoqIlL"
+
+const isQuestionLoading = ref(false); // 控制提问按钮的加载状态
 
 // 获取文章内容的AI总结
 const getAiSummary =  _.debounce(async () => {
@@ -265,7 +277,6 @@ const getAiSummary =  _.debounce(async () => {
     }
 }, 500);
 
-const isQuestionLoading = ref(false); // 控制提问按钮的加载状态
 
 // 提问功能
 const askQuestion = _.debounce(async () => {
@@ -278,9 +289,8 @@ const askQuestion = _.debounce(async () => {
     try {
         isQuestionLoading.value = true; // 开始加载
         const res = await myAxios.post(
-            AIUrl, // 这里的 URL 需要根据你的 API 地址进行调整
+            "/ai/askQuestion", // 这里的 URL 需要根据你的 API 地址进行调整
             {
-                model: "glm-4-flash", // 使用相同的模型
                 messages: [
                     {
                         userRole: "user",
@@ -290,13 +300,12 @@ const askQuestion = _.debounce(async () => {
             },
             {
                 headers: {
-                    "Authorization": "Bearer " + apiKey, // 需要添加授权头
                     "Content-Type": "application/json"
                 }
             }
         );
 
-        aiAnswer.value = res.data.choices[0].message.content; // 假设返回的结构类似
+        aiAnswer.value = res.data.answer.message.content; // 假设返回的结构类似
         isQuestionLoading.value = false; // 结束加载
     } catch (err) {
         console.error("AI回答失败", err);
@@ -388,7 +397,7 @@ const toggleAiWindow = () => {
 
 // 在组件加载时获取AI总结
 onMounted(() => {
-    getAiSummary();
+    // getAiSummary();
 });
 </script>
 
@@ -527,6 +536,11 @@ onMounted(() => {
     border-radius: 8px;
     z-index: 999;
     cursor: move;
+}
+
+.ai-window-collapsed {
+    height: 50px;
+    overflow: hidden;
 }
 
 .ai-header {
