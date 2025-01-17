@@ -32,12 +32,12 @@
                 <template v-if="column.dataIndex === 'user'">
                     <div class="user-info">
                         <a-avatar :src="record.userAvatar" style="margin-right: 8px" />
-                        <span>{{ record.username }}</span>
+                            <div>{{ record.userName }}</div>
                     </div>
                 </template>
                 <template v-if="column.dataIndex === 'status'">
                     <a-switch
-                        :checked="record.status === 'approved'"
+                        :checked="record.isShow === 1"
                         @change="toggleStatus(record)"
                     />
                 </template>
@@ -175,8 +175,26 @@ const pagination = computed(() => {
 
 // 切换评论状态
 const toggleStatus = (record: any) => {
-    record.status = record.status === "approved" ? "pending" : "approved";
-    message.success("评论状态已更新！");
+    console.table(record)
+    try {
+        myAxios.post("/comments/changeCommentStatus", {
+            id: record.id,
+            status: record.isShow === 1 ? 0 : 1,
+        }).then((res) => {
+            if (res.data.code !== 0) {
+                message.error("更新评论状态失败！");
+                return;
+            } else {
+                message.success("评论状态已更新！");
+                record.isShow = res.data.data;
+            }
+        });
+    } catch (error) {
+        message.error("更新评论状态失败！");
+    } finally {
+
+    }
+    // message.success("评论状态已更新！");
 };
 
 // 删除评论

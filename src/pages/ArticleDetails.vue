@@ -32,9 +32,11 @@
         <div :style="{ fontSize: fontSize + 'px' }" class="news-content" v-html="sanitizedArticleContent"></div>
 
         <!-- 可拖动、可折叠的AI总结与提问窗口 -->
+        <transition name="ai-window-collapse">
         <div
                 v-show="isAiWindowVisible"
                 ref="aiWindow"
+                id="aiWindow"
                 :style="{ top: aiWindowPosition.top + 'px', left: aiWindowPosition.left + 'px',
                       width: aiWindowSize.width + 'px', height: aiWindowSize.height + 'px' }"
                 class="ai-window"
@@ -50,9 +52,10 @@
                 </button>
             </div>
 
-            <div class="ai-content" >
+            <div class="ai-content" v-if="!isAiWindowCollapsed">
                 <h2>AI总结</h2>
-                <p>{{ aiSummary }}</p>
+                <div v-if="isAILoading" class="loading">加载中...</div>
+                <p v-else>{{ aiSummary }}</p>
 
                 <div class="question-section">
                     <h3>提问AI</h3>
@@ -62,7 +65,7 @@
                             placeholder="请输入您的问题"
                             @pressEnter="askQuestion"
                     />
-                    <a-button type="primary" @click="askQuestion">提问</a-button>
+                    <a-button :loading="isAILoading" type="primary" @click="askQuestion">提问</a-button>
                 </div>
 
                 <div v-if="aiAnswer" class="ai-answer">
@@ -71,7 +74,7 @@
                 </div>
 
                 <div class="ai-footer">
-                    <a-button type="primary" @click="getAiSummary">获取AI总结</a-button>
+                    <a-button :loading="isAILoading" type="primary" @click="getAiSummary">获取AI总结</a-button>
                 </div>
             </div>
             <!-- 可调节大小的手柄 -->
@@ -84,7 +87,7 @@
             <div class="resize-handle bottom" @mousedown="startResize('bottom')"></div>
             <div class="resize-handle left" @mousedown="startResize('left')"></div>
         </div>
-
+        </transition>
     </div>
 
   <!-- 评论区 -->
@@ -161,6 +164,15 @@ const newComment = ref([]);
 const isAiWindowCollapsed = ref(false);
 const toggleCollapse = () => {
     isAiWindowCollapsed.value = !isAiWindowCollapsed.value;
+    if (isAiWindowCollapsed.value === true){
+        aiWindowSize.width =  100;
+        aiWindowSize.height = 100;
+    } else {
+        aiWindowSize.width =  350;
+        aiWindowSize.height = 350;
+    }
+
+
 };
 
 // 获取评论
@@ -243,11 +255,12 @@ const aiWindowSize = reactive({width: 350, height: 350}); // 控制窗口的初�
 // const AIUrl = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
 // const apiKey = "cd3e9fa7f67988e4c4a87e6adaad7d4f.tXpGrIlHvyIoqIlL"
 
-const isQuestionLoading = ref(false); // 控制提问按钮的加载状态
+const isAILoading = ref(false); // 控制提问按钮的加载状态
 
 // 获取文章内容的AI总结
 const getAiSummary =  _.debounce(async () => {
     try {
+        isAILoading.value = true; // 开始加载
         const res = await myAxios.post(
             "/ai/generateSummary",
             {
@@ -274,6 +287,8 @@ const getAiSummary =  _.debounce(async () => {
         }
     } catch (err) {
         console.error("AI总结生成失败", err);
+    } finally {
+        isAILoading.value = false; // 结束加载
     }
 }, 500);
 
@@ -287,7 +302,7 @@ const askQuestion = _.debounce(async () => {
     console.log("题目：", userQuestion.value); // 输出返回的响应
 
     try {
-        isQuestionLoading.value = true; // 开始加载
+        isAILoading.value = true; // 开始加载
         const res = await myAxios.post(
             "/ai/askQuestion", // 这里的 URL 需要根据你的 API 地址进行调整
             {
@@ -306,9 +321,11 @@ const askQuestion = _.debounce(async () => {
         );
 
         aiAnswer.value = res.data.answer.message.content; // 假设返回的结构类似
-        isQuestionLoading.value = false; // 结束加载
+        isAILoading.value = false; // 结束加载
     } catch (err) {
         console.error("AI回答失败", err);
+    } finally {
+        isAILoading.value = false; // 结束加载
     }
 }, 500);
 
@@ -542,7 +559,10 @@ onMounted(() => {
     height: 50px;
     overflow: hidden;
 }
-
+.loading {
+    color: #999;
+    font-style: italic;
+}
 .ai-header {
     display: flex;
     justify-content: space-between;

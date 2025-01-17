@@ -180,8 +180,8 @@ const routes: Array<RouteRecordRaw> = [
 
 export const getLoginUser = () => {
     myAxios.get("/user/getLoginUser").then(res => {
-        if (res.data === null) {
-            console.log(res.data)
+        if (res.data.data === null) {
+            console.log(res.data.data)
             useUserStore().userInfo = null;
         }
 

@@ -100,6 +100,7 @@ import {onMounted, ref} from 'vue';
 import {useUserStore} from "../store/index";
 import {message} from "ant-design-vue";
 import myAxios from "../plugins/myAxios";
+import {getLoginUser} from "../router/index";
 
 const user = ref({
     userAccount: "john_doe",
@@ -197,9 +198,9 @@ const savePasswordChanges = () => {
 };
 
 onMounted(() => {
-    if (userStore?.userInfo?.token){
-        isLoggedIn.value = true;
-    }
+    getLoginUser();
+    console.log(isLoggedIn.value)
+    isLoggedIn.value = !!userStore?.userInfo?.token;
 });
 </script>
 
