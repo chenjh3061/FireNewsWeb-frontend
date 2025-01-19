@@ -1,5 +1,6 @@
 <template>
-    <a-float-button-group trigger="hover" type="primary" :style="{ right: '11vw' }" tooltip="功能按键">
+    <a-float-button-group trigger="hover" type="primary" :style="{ right: '11vw' }" tooltip="功能按键"
+                            ref="floatButtonGroup">
         <template #icon>
             <CustomerServiceOutlined />
         </template>
@@ -18,6 +19,10 @@
 
 <script lang="ts" setup>
 import { CustomerServiceOutlined, CommentOutlined, VerticalAlignTopOutlined } from "@ant-design/icons-vue";
+import {ref} from "vue";
+import {message} from "ant-design-vue";
+
+const floatButtonGroup = ref(null);
 
 // 返回顶部方法
 const scrollToTop = () => {
@@ -26,12 +31,16 @@ const scrollToTop = () => {
         behavior: "smooth", // 平滑滚动
     });
 };
-
-// 评论按钮点击方法（根据需求自行实现）
+// 评论按钮点击方法
 const handleCommentClick = () => {
-    console.log("评论按钮点击");
-    // 在这里实现具体功能，比如跳转评论区
+    // 使用 message 弹出联系方式，并自动在3秒后关闭
+    message.info({
+        content: "联系方式：电话：123-456-7890，邮箱：contact@website.com",
+        duration: 3, // 3秒后自动关闭
+    });
 };
+
+
 </script>
 <style scoped>
 /* 调整 FloatButton 的间距或位置 */

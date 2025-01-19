@@ -32,6 +32,7 @@
                     accept=".doc,.docx,.md,.txt"
                     action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
                     name="file"
+                    :style="{ width: '100%',marginBottom: '16px' }"
                     @change="handleChange"
                     @drop="handleDrop"
                 >
@@ -126,23 +127,111 @@ const clearEditor = () => {
 <style scoped>
 .upload-article-page {
     padding: 0 40px;
-    height: 62rem;
+    height: auto;
     background-color: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     margin: 20px auto;
+    max-width: 1200px;
 }
 
 h2 {
-    margin-bottom: 16px;
-    font-size: 22px;
+    margin-bottom: 24px;
+    font-size: 24px;
     font-weight: bold;
     text-align: center;
+    color: #333;
 }
 
 .upload-tabs {
-    margin-top: 16px;
+    margin-top: 20px;
 }
+
+.editor-container {
+    padding: 24px;
+    min-height: 550px;
+    background-color: #fafafa;
+    border: 1px solid #d9d9d9;
+    border-radius: 8px;
+    margin-bottom: 24px;
+}
+
+.title-input, .article-desc, .article-avatar input {
+    margin-bottom: 16px;
+    width: 100%;
+    border-radius: 6px;
+    padding: 12px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+}
+
+.article-desc {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.article-avatar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.avatar-preview {
+    max-width: 100px;
+    max-height: 100px;
+    border-radius: 6px;
+    object-fit: cover;
+    border: 1px solid #ddd;
+}
+
+.editor-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+.editor-actions a-button {
+    padding: 10px 20px;
+    font-size: 16px;
+}
+
+.a-tabs {
+    background-color: #fff;
+    border-radius: 8px;
+}
+
+.a-tab-pane {
+    padding: 16px;
+    background-color: #fff;
+    border-radius: 8px;
+}
+
+.a-upload-dragger {
+    background-color: #f7f7f7;
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    padding: 24px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.ant-upload-drag-icon {
+    font-size: 30px;
+    color: #4CAF50;
+}
+
+.ant-upload-text {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #666;
+}
+
+.ant-upload-hint {
+    margin-top: 12px;
+    font-size: 12px;
+    color: #999;
+}
+
 
 .editor-container {
     padding: 16px;

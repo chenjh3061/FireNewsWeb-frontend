@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import myAxios from "../plugins/myAxios";
 
 export const useUserStore = defineStore("user", {
   state: () => ({
@@ -9,8 +10,12 @@ export const useUserStore = defineStore("user", {
       token: null,
     },
   }),
-  actions:() => {
-    return {
+  actions:{
+    isLoggedIn() {
+      myAxios.get("/user/getLoginUser").then(r => {
+        this.userInfo = r.data.data;
+      })
+      return this.userInfo.token !== null;
     }
     },
 
@@ -44,12 +49,13 @@ export const useHistoryStore = defineStore("history", {
   }),
   actions: {
     addSearchHistory(item: any) {
-      this.history = [item, ...this.history];
       if (this.history.length > 5) {
         this.history = this.history.slice(0, 5);
-      } else if (this.history.includes(item)) {
+      }
+      if (this.history.includes(item)) {
         return;
       }
+      this.history = [item, ...this.history];
     },
   },
   persist: {

@@ -40,6 +40,7 @@ import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { LeftOutlined } from '@ant-design/icons-vue';
 import myAxios from "../../plugins/myAxios";
+import {useArticleStore, useHistoryStore} from "../../store/index";
 
 const router = useRouter();
 const route = useRoute();
@@ -50,14 +51,17 @@ const searchParams = ref({
 });
 console.log(searchParams);
 const searchResults = ref([]);
+const history = useHistoryStore();
 
 // 根据查询参数进行搜索
 const onSearch = async () => {
     if (searchParams.value.text.trim()) {
+        const query = searchParams.value.text.trim();
         try {
-            const res = await myAxios.get(`/article/searchArticles?query=${searchParams.value.text}`);
+            const res = await myAxios.get(`/article/searchArticle?searchParams=${encodeURIComponent(query)}`);
             if (res.data.code === 0) {
                 searchResults.value = res.data.data;
+                useHistoryStore().addSearchHistory(searchParams.value.text)
             } else {
                 searchResults.value = [];
             }
@@ -79,6 +83,7 @@ const goHome = () => {
 };
 
 const viewNewsDetail = (newsId, newsData) => {
+    useArticleStore().setSelectedArticle(newsData);
     router.push({
         path: '/article',
         params: { id: newsId },

@@ -13,15 +13,19 @@ import { useRoute } from 'vue-router';
 import GlobalHeader from './components/layout/GlobalHeader.vue';
 import GlobalFooter from './components/layout/GlobalFooter.vue';
 import FloatButtons from './plugins/FloatButtons.vue';
+import {useUserStore} from "./store/index.js";
 
 const route = useRoute();
+const store = useUserStore();
 
 const appClass = computed(() => {
     // 判断当前路由是否是后台页面
-    return route.path.startsWith('/admin') | route.path.startsWith('/writer') ? 'back-layout' : 'frontend-layout';
+    return route.path.startsWith('/admin') || route.path.startsWith('/writer') ? 'back-layout' : 'frontend-layout';
 });
+
 const isLogin = computed(() => {
-    route.path;
+    const path = route.path;
+    return (path.startsWith('/admin') || path.startsWith('/writer') || path === '/user') && !store.isLoggedIn();
 })
 </script>
 

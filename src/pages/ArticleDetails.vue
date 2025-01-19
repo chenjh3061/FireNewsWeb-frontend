@@ -54,6 +54,7 @@
 
             <div class="ai-content" v-if="!isAiWindowCollapsed">
                 <h2>AI总结</h2>
+                <h3>请登录后使用</h3>
                 <div v-if="isAILoading" class="loading">加载中...</div>
                 <p v-else>{{ aiSummary }}</p>
 
@@ -161,7 +162,7 @@ const comments = ref([]);
 const newComment = ref([]);
 
 // AI功能
-const isAiWindowCollapsed = ref(false);
+const isAiWindowCollapsed = ref(true);
 const toggleCollapse = () => {
     isAiWindowCollapsed.value = !isAiWindowCollapsed.value;
     if (isAiWindowCollapsed.value === true){
@@ -251,7 +252,7 @@ const aiAnswer = ref("");
 const userQuestion = ref("");
 const isAiWindowVisible = ref(true); // 控制窗口显示与否
 const aiWindowPosition = reactive({top: 200, left: 50}); // 控制窗口的初始位置
-const aiWindowSize = reactive({width: 350, height: 350}); // 控制窗口的初始大小
+const aiWindowSize = reactive({width: 100, height: 100}); // 控制窗口的初始大小
 // const AIUrl = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
 // const apiKey = "cd3e9fa7f67988e4c4a87e6adaad7d4f.tXpGrIlHvyIoqIlL"
 
