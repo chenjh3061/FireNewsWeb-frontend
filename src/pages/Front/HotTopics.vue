@@ -9,7 +9,7 @@
                         <b>组件支持来自 ant design vue</b>
                     </div>
                 </template>
-                <template #renderItem="{ item }">
+                <template #renderItem="{ item, index }">
                     <a-list-item :key="item.articleId" class="news-item">
                         <template #actions>
                             <span v-for="(action, index) in actions" :key="index" class="action">
@@ -88,17 +88,17 @@ const actions = [
     { icon: MessageOutlined, text: '2' },
 ];
 
-getHotTopics();
-
 // 页面加载时获取热点新闻
-onMounted(() => {});
+onMounted(() => {
+    getHotTopics();
+});
 </script>
 
 <style scoped>
 .hotTopicLayout {
     min-height: 60%;
     width: 85%;
-    background: #fff;
+    background: #edf0f6;
     padding: 22px;
     margin: 0 auto;
     align-items: center;
@@ -116,7 +116,7 @@ onMounted(() => {});
 
 .hotTopicContent {
     width: 100%;
-    background: #f5f5f5;
+    background: #eecfc9;
     display: flex;
     margin: 0 auto;
     padding: 16px;
@@ -124,17 +124,40 @@ onMounted(() => {});
 }
 
 .news-item {
-    background-color: #fff;
+    background-color: rgba(255, 255, 255, 0.5);  /* 半透明效果 */
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
     margin-bottom: 20px;
     padding: 16px;
+    position: relative;
+    overflow: hidden;
     transition: all 0.3s ease;
 }
 
 .news-item:hover {
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
     transform: translateY(-5px);
+}
+
+.news-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.4); /* 半透明灰白色蒙板 */
+    transition: all 0.3s ease;
+    z-index: -1;
+}
+
+/* 使用伪类选择器为奇偶数项设置不同的背景渐变色 */
+.news-item:nth-child(even) {
+    background: linear-gradient(45deg, rgba(255, 78, 80, 0.7), rgba(249, 212, 35, 0.7)); /* 渐变色透明度调整 */
+}
+
+.news-item:nth-child(odd) {
+    background: linear-gradient(45deg, rgba(255, 106, 0, 0.7), rgba(238, 9, 121, 0.7)); /* 渐变色透明度调整 */
 }
 
 .news-image {
@@ -152,10 +175,11 @@ onMounted(() => {});
 
 .news-title {
     font-size: 20px;
-    color: #333;
+    color: #fff; /* 白色字体 */
     font-weight: 600;
     text-decoration: none;
     transition: color 0.3s ease;
+    z-index: 2;
 }
 
 .news-title:hover {
@@ -164,22 +188,24 @@ onMounted(() => {});
 
 .content-preview {
     font-size: 16px;
-    color: #555;
+    color: #fff; /* 白色字体 */
     line-height: 1.6;
     margin-top: 12px;
+    z-index: 2;
 }
 
 .author-name {
     font-size: 14px;
-    color: #777;
+    color: #fff; /* 白色字体 */
     margin-top: 5px;
 }
 
 .action {
     font-size: 14px;
-    color: #333;
+    color: #fff; /* 白色字体 */
     margin-top: 40px;
     margin-right: 16px;
+    z-index: 2;
 }
 
 .action:hover {
@@ -189,9 +215,10 @@ onMounted(() => {});
 .footer-text {
     text-align: center;
     padding: 20px;
+    border-radius: 8px;
     font-size: 14px;
     color: #777;
-    background-color: #f5f5f5;
-    border-top: 1px solid #ddd;
+    background-color: #e1baba;
 }
+
 </style>

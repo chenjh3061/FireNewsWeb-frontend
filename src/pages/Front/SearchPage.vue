@@ -25,7 +25,7 @@
                         <h3>{{ article.articleTitle }}</h3>
                         <a class="read-more" @click.prevent="viewNewsDetail(article.id, article)">阅读全文</a>
                     </div>
-                    <p>{{ article.articleDesc }}</p>
+                    <span>{{ article.articleDesc }}</span>
                 </div>
             </div>
             <div v-else class="no-results">
@@ -153,15 +153,22 @@ const viewNewsDetail = (newsId, newsData) => {
 
 .no-results {
     padding: 20px;
+    min-height: 600px;
     background-color: #fff;
     margin-top: 20px;
     text-align: center;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;  /* 设置为 Flexbox 布局 */
+    flex-direction: column;  /* 垂直排列子元素 */
+    justify-content: center;  /* 垂直居中 */
+    align-items: center;  /* 水平居中 */
 }
 
 .no-results p {
     font-size: 16px;
     color: #888;
+    justify-content: center;
+    align-items: center;
 }
 </style>
