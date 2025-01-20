@@ -447,6 +447,22 @@ onMounted(() => {
 }
 
 @media screen and (max-width: 768px) {
+    .hot-news-container {
+        display: none;
+    }
+    .custom-carousel {
+        height: 40vh;
+    }
+    .carousel-container {
+        width: 100vw;
+
+        .carousel-image {
+            height: 100%;
+        }
+    }
+    .search-container {
+        display: none;
+    }
     .main-news {
         flex-direction: column;
     }

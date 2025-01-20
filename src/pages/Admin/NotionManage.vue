@@ -13,7 +13,16 @@
             class="notification-table"
             :pagination="pagination"
             @resizeColumn="handleResizeColumn"
-        />
+        >
+            <template #bodyCell="{ column, record }">
+                <template v-if="column.dataIndex === 'type'">
+
+                </template>
+                <template v-if="column.dataIndex === 'action'">
+                    <a-button type="primary" @click="editNotification(record)">编辑</a-button>
+                </template>
+            </template>
+        </a-table>
 
         <!-- 弹窗 - 用于新增或修改通知 -->
         <a-modal
@@ -50,7 +59,7 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import { Modal, Button, Table, Input, Form, message, Select, SelectOption, } from "ant-design-vue";
+import {Modal, Button, Table, Input, Form, message, Select, SelectOption, TableColumnsType,} from "ant-design-vue";
 import { computed } from "vue";
 
 // 通知数据
@@ -60,7 +69,7 @@ const notificationData = ref([
 ]);
 
 // 表格列配置
-const columns = ref([
+const columns = ref<TableColumnsType>([
     {title: "通知标题", dataIndex: "title", key: "title", resizable: true , minWidth: 100 },
     {
         title: "通知内容",
@@ -74,6 +83,7 @@ const columns = ref([
     },
     {
         title: "操作",
+        dataIndex: "action",
         key: "action", resizable: true
     },
 ]);

@@ -413,9 +413,21 @@ const toggleAiWindow = () => {
     isAiWindowVisible.value = !isAiWindowVisible.value;
 };
 
+// 记录浏览
+const recordVisit = () => {
+    // 这里可以调用API来记录访问信息，例如：
+    myAxios.post("/article/recordArticleView", null, {
+        params: {
+            articleId: articleData.value.articleId,
+            userId: userStore?.userInfo?.id !== null ? userStore?.userInfo?.id : 1
+        }
+    });
+
+}
+
 // 在组件加载时获取AI总结
 onMounted(() => {
-    // getAiSummary();
+    recordVisit();
 });
 </script>
 
@@ -605,6 +617,15 @@ onMounted(() => {
 .ai-answer h3 {
     font-size: 16px;
     font-weight: bold;
+}
+
+@media (max-width: 768px) {
+    .ai-window {
+        display: none;
+    }
+    .news-detail {
+        padding: 20px;
+    }
 }
 </style>
 

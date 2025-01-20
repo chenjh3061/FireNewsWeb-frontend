@@ -79,4 +79,10 @@ const isLogin = computed(() => {
 body {
     -webkit-overflow-scrolling: touch; /* 启用平滑滚动 */
 }
+
+@media (max-width: 768px) {
+    .frontend-layout {
+        max-width: 100vw; /* 小屏设备下宽度为100% */
+    }
+}
 </style>

@@ -4,6 +4,7 @@ import myAxios from "../plugins/myAxios";
 export const useUserStore = defineStore("user", {
   state: () => ({
     userInfo: {
+      id: null,
       userName: null,
       userRole: null,
       userAvatar: null,
