@@ -12,9 +12,20 @@
                         placeholder="请输入文章标题"
                         class="title-input"
                     />
-                    <a-textarea class="article-desc" v-model:value="article.articleDesc"></a-textarea>
+                    <a-textarea class="article-desc" v-model:value="article.articleDesc"
+                                placeholder="填写文章简介">
+                    </a-textarea>
                     <div class="article-avatar">
                         <a-input v-model:value="article.articleAvatar" placeholder="请输入文章封面图片URL"></a-input>
+                        <a-upload
+                            :action="uploadUrl"
+                            list-type="picture-card"
+                            :file-list="fileList"
+                            :show-upload-list="false"
+                            :on-change="handleImageChange"
+                        >
+                            <a-button icon="upload">点击上传</a-button>
+                        </a-upload>
                         <img class="avatar-preview" :src="article.articleAvatar" alt="图"/>
                     </div>
                     <jodit-editor v-model="article.articleContent" :config="config" />
@@ -54,7 +65,7 @@ import { InboxOutlined } from "@ant-design/icons-vue";
 import {onBeforeUnmount, onMounted, ref, watch} from "vue";
 import { message, UploadChangeParam } from "ant-design-vue";
 import JoditEditor  from "../../plugins/JoditEditor.vue";
-import axios from "axios";
+import myAxios from "../../plugins/myAxios";
 
 // 编辑器配置
 const config = {
@@ -63,7 +74,16 @@ const config = {
 };
 // 文件上传状态
 const fileList = ref([]);
-
+const uploadUrl = 'http://localhost:8089/upload';
+// 处理图片上传
+const handleImageChange = (info) => {
+    if (info.file.status === 'done') {
+        // 上传成功，更新封面图片链接
+        articleForm.value.articleAvatar = "http://localhost:8089" + info.file.response.data;
+    } else if (info.file.status === 'error') {
+        message.error('上传失败');
+    }
+};
 // 文件上传事件
 const handleChange = (info: UploadChangeParam) => {
     const status = info.file.status;
@@ -105,7 +125,7 @@ const submitArticle = () => {
     }
     console.log("文章：", { title: title.value, content: content.value });
     // 发送到后端
-    axios.post("/addArticle", { title, content })
+    myAxios.post("/addArticle", { title, content })
         .then((response) => {
             message.success("文章提交成功！");
         })
@@ -166,7 +186,6 @@ h2 {
 }
 
 .article-desc {
-    min-height: 120px;
     resize: vertical;
 }
 

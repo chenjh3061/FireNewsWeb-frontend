@@ -18,7 +18,8 @@
                     </a-form-item>
                     <a-form-item label="文章分类" name="articleCategory">
                         <a-select v-model:value="articleForm.articleCategory" placeholder="请选择分类">
-                            <a-select-option v-for="item in categoryList" :key="item.id" :value="item.name" />
+                            <a-select-option v-for="item in categoryList" :key="item.name" :value="item.id"
+                                                @select="() => articleForm.articleCategory = item.id"/>
                         </a-select>
                     </a-form-item>
                 </a-col>
@@ -93,6 +94,18 @@ if (articleStore.selectedArticle) {
     articleForm.value = articleStore.selectedArticle;
 }
 
+const categoryList = ref([{
+    id: 0,
+    name: '新闻报道'
+}, {
+    id: 1,
+    name: '科普文章'
+}, {
+    id: 2,
+    name: '通知'
+}
+]);
+
 // 文章表单验证规则
 const rules = {
     articleTitle: [{ required: true, message: "标题不能为空", trigger: "blur" }],
@@ -111,7 +124,7 @@ const handleImageChange = (info) => {
         articleForm.value.articleAvatar = "http://localhost:8089" + info.file.response.data;
     } else if (info.file.status === 'error') {
     message.error('上传失败');
-}
+    }
 };
 watchEffect(() => {
     console.log(articleForm.value.articleAvatar);

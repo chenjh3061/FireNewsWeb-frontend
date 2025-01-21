@@ -17,16 +17,6 @@ export const userRoleMapping = (record) => {
     return roleMap[record.userRole] || {color: 'gray', text: '未知角色'};
 };
 
-export const categoryMapping = (record) => {
-    const categoryMap = {
-        0: {color: 'blue', text: '新闻文章'},
-        1: {text: '科普文章'},
-        2: {text: '通知'},
-        3: {text: '娱乐'}
-    };
-    return categoryMap[record.articleCategory] || '未知类别';
-}
-
 export const isCarouselMapping = (record) => {
     const isCarouselMap = {
         0: {color: 'volcano', text: '未轮播'},
@@ -34,6 +24,16 @@ export const isCarouselMapping = (record) => {
     };
     return isCarouselMap[record.isCarousel] || '未知状态';
 }
+
+export const categoryMapping = (articleCategory) => {
+    const categoryMap = {
+        0: '新闻文章',
+        1: '科普文章',
+        2: '通知',
+    };
+    return categoryMap[articleCategory] || '未知类别';
+};
+
 
 // 如果有其他字段的映射，可以继续添加：
 export const otherFieldMapping = (record) => {

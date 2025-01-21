@@ -14,6 +14,8 @@
             </div>
             <div class="article-info">
                 <div class="article-title">{{ article?.articleTitle }}</div>
+                <div class="article-category">分类：{{
+                        mapping["articleCategory"](article.articleCategory) }}</div>
                 <div class="article-author">作者：{{ article?.authorName }}</div>
                 <div class="article-time">发布时间：{{ dayjs(article?.createTime).format("YYYY-MM-DD HH:mm") }}</div>
             </div>
@@ -28,6 +30,9 @@
 import {computed, defineEmits, defineProps} from "vue";
 import dayjs from "dayjs";
 import DOMPurify from "dompurify";
+import {fieldMappings} from "../../utils/mapping.js"
+
+const mapping = fieldMappings;
 
 // 定义 props 和 emits
 const props = defineProps({
