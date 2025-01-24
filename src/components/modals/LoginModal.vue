@@ -131,8 +131,13 @@ const submitForm = () => {
                     password: "",
                     checkPassword: ""
                 };
-                message.info("登录成功！")
-                router.go(0);
+                if (isRegister.value) {
+                    message.info("注册成功！登录后请到个人页面完善个人信息！")
+                    router.go(0);
+                } else {
+                    message.info("登录成功！")
+                    router.go(0);
+                }
                 console.log(isRegister.value ? "注册成功" : "登录成功" , userStore.userInfo);
             } else {
                 message.error(res.data.message);

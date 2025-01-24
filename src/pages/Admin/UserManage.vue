@@ -77,7 +77,7 @@
                     <a-form-item label="用户头像">
                         <a-avatar :src="formData.userAvatar" style="margin-right: 8px;"/>
                         <a-upload v-model:file-list="fileList" @change="handleUploadChange"
-                                  action="http://localhost:8089/upload" accept=".png">
+                                  action="http://localhost:8089/upload/img" accept=".png">
                             <a-button @click="ref">上传头像</a-button>
                         </a-upload>
                         <a-input v-model:value="formData.userAvatar"/>

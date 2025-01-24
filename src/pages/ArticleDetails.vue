@@ -98,13 +98,15 @@
         <!-- 评论输入框 -->
         <div v-if="isLoggedIn" class="comment-input">
             <a-textarea
-                    v-model="newComment"
+                    v-model:value="newComment"
                     class="comment-textarea"
                     placeholder="发表你的评论..."
                     rows="4"
             />
             <div class="comment-actions">
-                <a-button type="primary" @click="submitComment">发表评论</a-button>
+                <a-button type="primary" @click="submitComment" :loading="isCommentSubmitting">
+                    发表评论
+                </a-button>
             </div>
         </div>
 
@@ -116,15 +118,31 @@
         <!-- 评论列表 -->
         <div v-if="comments.length" class="comment-list">
             <div
-                    v-for="(comment, index) in comments"
+                    v-for="(comment, index) in paginatedComments"
                     :key="index"
                     class="comment-item"
             >
                 <div class="comment-author">
-                    <span class="author-name">{{ comment.user }}</span>
+                    <span class="author-name">
+                        <a-avatar :src="comment.userAvatar" icon="user"/>
+                        {{ comment.userName }}
+                    </span>
                     <span class="comment-date">{{ formatDate(comment.createTime) }}</span>
                 </div>
                 <p class="comment-text">{{ comment.content }}</p>
+                <!--点赞功能-->
+                <div class="comment-actions">
+                    <button
+                        class="like-btn"
+                        :class="{ liked: comment.liked }"
+                        @click="toggleLike(comment)"
+                    >
+                        ❤️ {{ comment.likes }}
+                    </button>
+                </div>
+            </div>
+            <div class="load-more" v-if="hasMoreComments">
+                <a-button type="link" @click="loadMoreComments">加载更多评论</a-button>
             </div>
         </div>
         <div v-else class="no-comments">暂无评论，快来抢沙发吧！</div>
@@ -133,7 +151,7 @@
 
 
 <script lang="ts" setup>
-import {computed, onMounted, reactive, ref} from "vue";
+import {computed, nextTick, onMounted, reactive, ref, watchEffect} from "vue";
 import {useArticleStore, useUserStore} from "../store/index";
 import {useRouter} from "vue-router";
 import {StepBackwardOutlined} from "@ant-design/icons-vue";
@@ -141,6 +159,7 @@ import myAxios from "../plugins/myAxios";
 import DOMPurify from "dompurify";
 import {adjustFontSize, formatDate} from '../utils/utils.js';
 import {_} from "lodash";
+import {message} from "ant-design-vue";
 
 
 // 获取路由和文章数据
@@ -149,7 +168,7 @@ const articleStore = useArticleStore();
 const userStore = useUserStore();
 
 const articleData = ref(articleStore.getSelectedArticle());
-const isLoggedIn = computed(() => userStore); // 检查用户是否已登录
+const isLoggedIn = computed(() => userStore.userInfo.token); // 检查用户是否已登录
 
 // 处理文章内容
 const sanitizedArticleContent = computed(() => {
@@ -159,7 +178,22 @@ const sanitizedArticleContent = computed(() => {
 
 // 评论功能
 const comments = ref([]);
-const newComment = ref([]);
+const newComment = ref();
+const isCommentSubmitting = ref(false);
+const hasMoreComments = ref(true);
+const currentPage = ref(1);
+const commentsPerPage = 10;
+
+const paginatedComments = computed(() =>
+    comments.value.slice(0, currentPage.value * commentsPerPage)
+);
+
+const commentData = ref({
+    articleId: articleData.value.articleId,
+    userId: userStore.userInfo.id,
+    content: newComment.value,
+    parentCommentId: null,
+});
 
 // AI功能
 const isAiWindowCollapsed = ref(true);
@@ -176,16 +210,20 @@ const toggleCollapse = () => {
 
 };
 
+
+
 // 获取评论
 const getComments = () => {
     const commentData = ref();
+    // if (!articleData.value.id) {
+    //     console.warn("Article ID is missing");
+    //     return;
+    // }
+    articleData.value = articleStore.getSelectedArticle();
     try {
-        myAxios.get("/comments/getCommentsByArticleId",
-            {
-                params: {
-                    id: articleData.value.id,
-                },
-            }).then((res) => {
+        myAxios.get("/comments/getCommentsByArticleId", {
+            params: { id: articleData.value.articleId },
+        }).then((res) => {
             console.log(res);
             if (res.data.code === 0) {
                 commentData.value = res.data.data;
@@ -198,31 +236,69 @@ const getComments = () => {
         console.error(err);
     }
 };
-getComments();
 
 // 提交评论
-const submitComment = () => {
-    if (newComment.value === "") {
+const submitComment = async () => {
+    if (!newComment.value.trim()) {
+        message.warn("评论内容不能为空！");
         return; // 评论为空不提交
-    } else {
-        try {
-            myAxios.post("/comments/addComment", {
-                articleId: articleData.value.articleId,
-                userId: userStore.userInfo.userName,
-                content: newComment.value,
-            }).then((res) => {
-                if (res.data) {
-                    getComments();
-                } else {
-                    console.log("提交评论失败！");
-                }
-            });
-        } catch (err) {
-            console.error(err);
-        }
     }
+    isCommentSubmitting.value = true; // 显示加载状态
+    try {
+        const res = await myAxios.post("/comments/addComment", {
+            articleId: articleData.value.articleId,
+            userId: userStore?.userInfo.id,
+            content: newComment.value.trim(),
+        });
 
-    newComment.value = null; // 清空输入框
+        if (res.data.code === 0) {
+            message.success("评论提交成功！");
+            comments.value.unshift(res.data.data); // 将新评论添加到列表顶部
+            newComment.value = ""; // 清空输入框
+        } else {
+            message.error(`提交评论失败：${res.data.message || "未知错误"}`);
+        }
+    } catch (err) {
+        console.error("提交评论时发生错误：", err);
+        message.error("提交评论失败，请稍后重试！");
+    } finally {
+        isCommentSubmitting.value = false; // 隐藏加载状态
+    }
+};
+// 加载更多评论
+const loadMoreComments = async () => {
+    try {
+        const res = await myAxios.get("/comments/getCommentsByArticleId", {
+            params: {
+                id: articleData.value.articleId,
+                page: currentPage.value + 1,
+                size: commentsPerPage,
+            },
+        });
+        if (res.data.code === 0) {
+            comments.value.push(...res.data.data);
+            currentPage.value++;
+            if (res.data.data.length < commentsPerPage) {
+                hasMoreComments.value = false; // 没有更多评论
+            }
+        } else {
+            message.error("加载更多评论失败！");
+        }
+    } catch (err) {
+        console.error(err);
+        message.error("加载评论时发生错误！");
+    }
+};
+
+// 点赞功能
+// 点赞切换
+const toggleLike = (comment) => {
+    if (comment.liked) {
+        comment.likes--; // 已点赞 -> 取消点赞
+    } else {
+        comment.likes++; // 未点赞 -> 点赞
+    }
+    comment.liked = !comment.liked; // 切换状态
 };
 
 // 字号调整功能
@@ -428,6 +504,8 @@ const recordVisit = () => {
 // 在组件加载时获取AI总结
 onMounted(() => {
     recordVisit();
+
+    getComments();
 });
 </script>
 
@@ -435,7 +513,7 @@ onMounted(() => {
 <style scoped>
 .news-detail {
     padding: 20px 40px;
-    max-width: 800px;
+    max-width: 900px;
     margin: 0 auto;
     background: #fff;
     border-radius: 8px;
@@ -534,9 +612,14 @@ onMounted(() => {
     font-size: 14px;
     color: #666;
     margin-bottom: 5px;
+
+    a-avatar {
+        margin-right: 10px;
+    }
 }
 
 .author-name {
+
     font-weight: bold;
     color: #007bff;
 }
@@ -618,7 +701,25 @@ onMounted(() => {
     font-size: 16px;
     font-weight: bold;
 }
-
+.comment-actions {
+    display: flex;
+    align-items: center;
+    justify-content: right;
+}
+.like-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+}
+.like-btn.liked {
+    color: #ff4d4f; /* 点赞后的高亮颜色 */
+}
+.like-btn:not(.liked) {
+    color: #aaa; /* 未点赞的默认颜色 */
+}
 @media (max-width: 768px) {
     .ai-window {
         display: none;

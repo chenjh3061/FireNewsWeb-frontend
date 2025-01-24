@@ -21,6 +21,7 @@
                         <img :src="record.articleAvatar" alt="文章封面" class="article-avatar"/>
                     </template>
                     <template v-if="column.dataIndex === 'articleCategory'">
+
                         {{ mappings[column.dataIndex](record).text }}
                     </template>
                     <template v-if="column.dataIndex === 'createTime'">

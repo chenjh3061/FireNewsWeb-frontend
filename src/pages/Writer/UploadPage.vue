@@ -15,19 +15,20 @@
                     <a-textarea class="article-desc" v-model:value="article.articleDesc"
                                 placeholder="填写文章简介">
                     </a-textarea>
+                    <a-input v-model:value="article.articleAvatar" placeholder="请输入文章封面图片URL" type="url"></a-input>
                     <div class="article-avatar">
-                        <a-input v-model:value="article.articleAvatar" placeholder="请输入文章封面图片URL"></a-input>
+
                         <a-upload
                             :action="uploadUrl"
                             list-type="picture-card"
                             :file-list="fileList"
                             :show-upload-list="false"
-                            :on-change="handleImageChange"
+                            @change="handleImageChange"
                         >
                             <a-button icon="upload">点击上传</a-button>
                         </a-upload>
-                        <img class="avatar-preview" :src="article.articleAvatar" alt="图"/>
-                    </div>
+
+                    </div><img class="avatar-preview" :src="article.articleAvatar" alt="图"/>
                     <jodit-editor v-model="article.articleContent" :config="config" />
                     <div class="editor-actions">
                         <a-button type="primary" @click="submitArticle">提交文章</a-button>
@@ -41,7 +42,7 @@
                     v-model:fileList="fileList"
                     :multiple="false"
                     accept=".doc,.docx,.md,.txt"
-                    action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
+                    action="http://localhost:8089/upload/document"
                     name="file"
                     :style="{ width: '100%',marginBottom: '16px' }"
                     @change="handleChange"
@@ -66,6 +67,20 @@ import {onBeforeUnmount, onMounted, ref, watch} from "vue";
 import { message, UploadChangeParam } from "ant-design-vue";
 import JoditEditor  from "../../plugins/JoditEditor.vue";
 import myAxios from "../../plugins/myAxios";
+import {watchEffect} from "vue";
+
+// 在线编辑相关状态
+const article = ref({
+    articleTitle: "",
+    articleContent: "",
+    articleCategory: "",
+    articleDesc: "",
+    articleAvatar: "",
+});
+
+watch(article, (newVal) => {
+    console.log("文章内容变化：", newVal);
+},{ deep: true })
 
 // 编辑器配置
 const config = {
@@ -74,16 +89,21 @@ const config = {
 };
 // 文件上传状态
 const fileList = ref([]);
-const uploadUrl = 'http://localhost:8089/upload';
+const uploadUrl = 'http://localhost:8089/upload/img';
 // 处理图片上传
 const handleImageChange = (info) => {
-    if (info.file.status === 'done') {
+    console.log("图片上传信息：", info);
+    if (info.file.status === 'done' || info.file.response ) {
         // 上传成功，更新封面图片链接
-        articleForm.value.articleAvatar = "http://localhost:8089" + info.file.response.data;
+        article.value.articleAvatar = "http://localhost:8089" + info.file.response.data;
+        console.log("上传成功，更新封面图片链接：", article.value.articleAvatar);
     } else if (info.file.status === 'error') {
         message.error('上传失败');
     }
 };
+watchEffect(() => {
+    console.log(article.value.articleAvatar);
+});
 // 文件上传事件
 const handleChange = (info: UploadChangeParam) => {
     const status = info.file.status;
@@ -102,13 +122,7 @@ function handleDrop(e: DragEvent) {
     console.log(e);
 }
 
-// 在线编辑相关状态
-const article = ref({
-    articleTitle: "",
-    articleContent: "",
-    articleDesc: "",
-    articleAvatar: "",
-});
+
 const title = ref("");
 const content = ref("");
 
@@ -127,7 +141,7 @@ const submitArticle = () => {
     // 发送到后端
     myAxios.post("/addArticle", { title, content })
         .then((response) => {
-            message.success("文章提交成功！");
+            message.success(response + "文章提交成功！");
         })
         .catch((error) => {
             console.error("提交失败：", error);
@@ -196,7 +210,7 @@ h2 {
 }
 
 .avatar-preview {
-    max-width: 100px;
+    max-width: 150px;
     max-height: 100px;
     border-radius: 6px;
     object-fit: cover;

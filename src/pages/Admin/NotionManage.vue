@@ -15,8 +15,11 @@
             @resizeColumn="handleResizeColumn"
         >
             <template #bodyCell="{ column, record }">
-                <template v-if="column.dataIndex === 'type'">
-
+                <template v-if="column.dataIndex === 'startTime'">
+                    {{ dayjs(record.startTime).format('YYYY-MM-DD HH:mm') }}
+                </template>
+                <template v-if="column.dataIndex === 'endTime'">
+                    {{ dayjs(record.endTime).format('YYYY-MM-DD HH:mm') }}
                 </template>
                 <template v-if="column.dataIndex === 'action'">
                     <a-button type="primary" @click="editNotification(record)">编辑</a-button>
@@ -58,9 +61,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import {onMounted, ref} from "vue";
 import {Modal, Button, Table, Input, Form, message, Select, SelectOption, TableColumnsType,} from "ant-design-vue";
 import { computed } from "vue";
+import myAxios from "@/plugins/myAxios";
+import dayjs from "dayjs";
 
 // 通知数据
 const notificationData = ref([
@@ -77,9 +82,14 @@ const columns = ref<TableColumnsType>([
         key: "content", resizable: true
     },
     {
-        title: "通知类型",
-        dataIndex: "type",
-        key: "type", resizable: true
+        title: "开始时间",
+        dataIndex: "startTime",
+        key: "createTime", resizable: true,
+    },
+    {
+        title: "结束时间",
+        dataIndex: "endTime",
+        key: "updateTime", resizable: true,
     },
     {
         title: "操作",
@@ -106,6 +116,19 @@ const pagination = computed(() => {
         },
     }
 });
+
+// 初始化表单
+const getAllNotion = () => {
+    try {
+        myAxios.get("/notion/getAllNotion").then(res => {
+            notificationData.value = res.data.data;
+        });
+    } catch (error) {
+        message.error("获取通知失败");
+    } finally {
+
+    }
+}
 
 // Modal 控制
 const isModalVisible = ref(false);
@@ -169,6 +192,10 @@ const deleteNotification = (id: number) => {
         },
     });
 };
+
+onMounted(() => {
+    getAllNotion();
+});
 </script>
 
 <style scoped>

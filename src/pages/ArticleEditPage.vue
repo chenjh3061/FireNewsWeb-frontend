@@ -112,7 +112,7 @@ const rules = {
     articleContent: [{ required: true, message: "内容不能为空", trigger: "blur" }],
 };
 
-const uploadUrl = 'http://localhost:8089/upload';  // 修改为实际的上传接口
+const uploadUrl = 'http://localhost:8089/upload/img';  // 修改为实际的上传接口
 
 // 文件上传列表
 const fileList = ref([]);

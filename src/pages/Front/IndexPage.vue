@@ -11,7 +11,7 @@
                             <div class="carousel-content">
                                 <h3 class="carousel-title">{{ item.articleTitle }}</h3>
                                 <p class="carousel-description">{{ item.articleDesc }}</p>
-                                <a class="carousel-link" @click.prevent="viewNewsDetail(index, item)">查看详情</a>
+                                <a class="carousel-link" @click.prevent="viewNewsDetail(item.id, item)">查看详情</a>
                             </div>
                         </div>
                     </div>
@@ -50,7 +50,7 @@
                     <div class="hot-news-list">
                         <div v-for="(article, index) in hotArticles" :key="index" class="hot-news-item">
                             <h3>{{ article.articleTitle }}</h3>
-                            <a class="read-more" @click.prevent="viewNewsDetail(article.id, article)">阅读全文</a>
+                            <a class="read-more" @click.prevent="viewNewsDetail(article.articleId, article)">阅读全文</a>
                         </div>
                     </div>
                 </div>
@@ -69,7 +69,7 @@
                     <p>
                         {{ mainNews.articleDesc }}
                     </p>
-                    <a class="read-more" @click.prevent="viewNewsDetail(mainNews.id, mainNews)">阅读全文</a>
+                    <a class="read-more" @click.prevent="viewNewsDetail(mainNews.articleId, mainNews)">阅读全文</a>
                 </div>
             </div>
         </div>
@@ -82,7 +82,7 @@
                 <div class="news-info">
                     <h3>{{ article.articleTitle }}</h3>
                     <p>{{ article.articleDesc }}</p>
-                    <a class="read-more" @click.prevent="viewNewsDetail(article.id, article)">阅读全文</a>
+                    <a class="read-more" @click.prevent="viewNewsDetail(article.articleId, article)">阅读全文</a>
                 </div>
             </div>
         </div>
@@ -138,7 +138,9 @@ const hideHistory = () => {
 };
 
 const viewNewsDetail = (newsId, newsData) => {
+    newsData.articleId = newsId;
     useArticleStore().setSelectedArticle(newsData);
+    console.log(newsData);
     router.push({
         path: '/article',
         params: { id: newsId },

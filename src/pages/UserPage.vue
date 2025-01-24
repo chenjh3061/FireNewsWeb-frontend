@@ -47,7 +47,7 @@
                     <label for="userAvatar">头像:</label>
                     <a-input id="userAvatar" v-model:value="user.userAvatar" placeholder="请输入新头像链接或上传头像" type="text"/>
                     <a-upload v-model:file-list="fileList" @change="handleUploadChange"
-                              action="http://localhost:8089/upload" accept=".png">
+                              action="http://localhost:8089/upload/img" accept=".png">
                         <a-button @click="ref">上传头像</a-button>
                         <img :src="user.userAvatar"  alt="预览"/>
                     </a-upload>
@@ -133,7 +133,7 @@ const actions = ref([
 const isLoggedIn = ref(false);
 
 // 弹窗控制
-const editModalVisible = ref(true);
+const editModalVisible = ref(false);
 const passwordModalVisible = ref(false);
 
 // 修改密码表单

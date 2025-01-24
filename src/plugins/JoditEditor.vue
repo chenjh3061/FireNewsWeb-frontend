@@ -97,7 +97,7 @@ let config = {
         },
     },
     uploader: {
-        url: "http://localhost:8089/upload", //上传地址
+        url: "http://localhost:8089/upload/img", //上传地址
         insertImageAsBase64URI: false, // 本地预览
         method: "POST",
         headers: {
@@ -137,7 +137,7 @@ const uploadFile = async (file) => {
     try {
         const formData = new FormData();
         formData.append('file', file);
-        const response = await axios.post('http://localhost:8089/upload', formData, {
+        const response = await axios.post('http://localhost:8089/upload/img', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             }

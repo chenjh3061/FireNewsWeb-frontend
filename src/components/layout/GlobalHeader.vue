@@ -100,6 +100,11 @@ const handleLogout = async () => {
             await router.push('/'); // 跳转到登录页
             alert('已退出登录');
         } else {
+            if (response.data.message === "未登录"){
+                userStore.$state.userInfo = null; // 清空用户信息
+                userStore.$reset(); // 重置用户信息，例如清除token等
+                await router.push('/'); // 跳转到登录页
+            }
             alert('退出登录失败');
         }
     } catch (error) {

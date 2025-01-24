@@ -25,13 +25,13 @@ export const isCarouselMapping = (record) => {
     return isCarouselMap[record.isCarousel] || '未知状态';
 }
 
-export const categoryMapping = (articleCategory) => {
+export const categoryMapping = (record) => {
     const categoryMap = {
-        0: '新闻文章',
-        1: '科普文章',
-        2: '通知',
+        0: {color: 'blue', text:'新闻文章',},
+        1: {color: 'green',text:'科普文章',},
+        2: {color: 'geekblue',text:'通知',},
     };
-    return categoryMap[articleCategory] || '未知类别';
+    return categoryMap[record.articleCategory] || '未知类别';
 };
 
 
