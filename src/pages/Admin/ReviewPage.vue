@@ -192,14 +192,15 @@ const submitComment = () => {
     });
 
     // 更新文章状态
-    if (currentArticle.value.status === "待审核") {
-        currentArticle.value.status = "已通过";
+    if (currentArticle.value.status === 0) {
+        currentArticle.value.status = 1;
         message.success(`文章《${currentArticle.value.articleTitle}》已通过审核，批注：${comment.value}`);
     } else {
-        currentArticle.value.status = "已拒绝";
+        currentArticle.value.status = 2;
         message.error(`文章《${currentArticle.value.articleTitle}》审核被拒绝，批注：${comment.value}`);
     }
-
+    // 更新文章列表
+    getArticles();
     // 关闭弹窗
     closeCommentModal();
 };

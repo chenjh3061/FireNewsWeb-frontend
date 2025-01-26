@@ -29,7 +29,7 @@
         </div>
 
         <!-- 文章详情 -->
-        <div :style="{ fontSize: fontSize + 'px' }" class="news-content" v-html="sanitizedArticleContent"></div>
+        <div :style="{ fontSize: fontSize + 'px', zoom: scale }" class="news-content" v-html="sanitizedArticleContent"></div>
 
         <!-- 可拖动、可折叠的AI总结与提问窗口 -->
         <transition name="ai-window-collapse">
@@ -303,9 +303,23 @@ const toggleLike = (comment) => {
 
 // 字号调整功能
 const fontSize = ref(16);
+const scale = ref(1);
 const adjustFontSize = (size: "small" | "large" | "reset") => {
     const sizes = {small: 14, large: 20, reset: 16};
     fontSize.value = sizes[size];
+
+    switch (size) {
+        case "small":
+            scale.value -= 0.1;
+            break;
+        case "large":
+            scale.value += 0.1;
+            break;
+        case "reset":
+            scale.value = 1;
+            break;
+    }
+
 };
 
 // 返回上一个页面
@@ -566,6 +580,7 @@ onMounted(() => {
     line-height: 1.8;
     color: #333;
     margin-bottom: 40px;
+    word-break: break-all;
 }
 
 .comment-section {
