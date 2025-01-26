@@ -59,7 +59,7 @@
 
             <!-- 文章内容 -->
             <a-form-item label="文章内容" name="articleContent">
-                <JoditEditor :key="jodit" v-model:value="articleForm.articleContent"/>
+                <JoditEditor :key="jodit" v-model="articleForm.articleContent"/>
             </a-form-item>
 
         </a-form>
@@ -71,7 +71,7 @@
 import {computed, onBeforeUnmount, onMounted, ref, toRaw, watch, watchEffect} from "vue";
 import { useRouter } from "vue-router";
 import JoditEditor from "../plugins/JoditEditor.vue";
-import { useArticleStore } from "../store/index";
+import { useArticleStore, useUserStore } from "../store/index";
 import {message, Modal} from "ant-design-vue";
 import myAxios from "../plugins/myAxios";
 
@@ -84,7 +84,9 @@ const articleForm = ref({
     articleDesc: '',
     articleAvatar: '',
     articleContent: '',
-    articleId: ''
+    articleId: '',
+    authorId: useUserStore().userInfo.id,
+    articleCategory: 0
 });
 const articleStore = useArticleStore();
 
@@ -137,28 +139,49 @@ const handleSubmit = () => {
         cancelText: '取消',
         onOk() {
             try {
-                myAxios.post('article/updateArticle', articleForm.value, {
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                }).then(res => {
-
-                    console.log(res);
-                    if (res.data.code === 0) {
-                        Modal.success({
-                            title: '保存成功',
-                            content: res.message,
-                        });
-                        useArticleStore().setSelectedArticle(null);
-                        router.back();
-                    } else {
-                        Modal.error({
-                            title: '保存失败',
-                            content: res.message,
-                        });
-                    }
+                if (isEdit.value) {
+                    myAxios.post('article/updateArticle', articleForm.value, {
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    }).then(res => {
+                        console.log(res);
+                        if (res.data.code === 0) {
+                            Modal.success({
+                                title: '保存成功',
+                                content: res.data.message,
+                            });
+                            useArticleStore().setSelectedArticle(null);
+                            router.back();
+                        } else {
+                            Modal.error({
+                                title: '保存失败',
+                                content: res.data.message,
+                            });
+                        }
+                    });
+                } else {
+                    myAxios.post('article/addArticle', articleForm.value, {
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    }).then(res => {
+                        console.log(res);
+                        if (res.data.code === 0) {
+                            Modal.success({
+                                title: '保存成功',
+                                content: res.data.message,
+                            });
+                            useArticleStore().setSelectedArticle(null);
+                            router.back();
+                        } else {
+                            Modal.error({
+                                title: '保存失败',
+                                content: res.data.message,
+                            });
+                        }
                 });
-            } catch (error) {
+            }} catch (error) {
                 console.error('提交表单时出错:', error);
             }
         },
