@@ -527,7 +527,7 @@ onMounted(() => {
 <style scoped>
 .news-detail {
     padding: 20px 40px;
-    max-width: 900px;
+    max-width: 1100px;
     margin: 0 auto;
     background: #fff;
     border-radius: 8px;

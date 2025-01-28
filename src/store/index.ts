@@ -17,6 +17,9 @@ export const useUserStore = defineStore("user", {
         this.userInfo = r.data.data;
       })
       return this.userInfo.token !== null;
+    },
+    getToken() {
+      return this.userInfo.token;
     }
     },
 

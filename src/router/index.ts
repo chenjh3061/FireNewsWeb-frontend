@@ -89,7 +89,7 @@ const routes: Array<RouteRecordRaw> = [
         name: "writer",
         meta: {
             title: "作者页面",
-            access: ACCESS_ENUM.WRITER,
+            access: ACCESS_ENUM.WRITER || ACCESS_ENUM.ADMIN,
         },
         children: [
             {

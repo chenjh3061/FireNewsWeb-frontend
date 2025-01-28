@@ -40,7 +40,7 @@ import myAxios from "../../plugins/myAxios";
 import dayjs from "dayjs";
 import { fieldMappings } from "../../utils/mapping.js";
 import {message} from "ant-design-vue";
-import { useArticleStore } from "../../store";
+import { useArticleStore, useUserStore } from "../../store";
 import { useRouter } from "vue-router";
 
 const mappings = fieldMappings;
@@ -57,6 +57,8 @@ const pagination = computed(() => {
         },
     }
 });
+
+const userStore = useUserStore();
 
 // 示例文章数据
 const dataSource = ref([
@@ -84,7 +86,9 @@ const columns = ref([
 // 请求文章数据
 const getArticles = () => {
     // 请求数据
-    myAxios.get("/article/getAllArticles").then((res) => {
+    myAxios.get("/article/getArticlesByAuthorId", {
+                        params: { id: userStore.userInfo.id,}}
+    ).then((res) => {
 
         if (res.data.code === 0) {
             dataSource.value = res.data.data; // 设置表格数据源

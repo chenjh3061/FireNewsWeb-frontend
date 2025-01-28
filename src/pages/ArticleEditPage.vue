@@ -36,6 +36,7 @@
                                     :file-list="fileList"
                                     :show-upload-list="false"
                                     :on-change="handleImageChange"
+                                    :headers="{'token': useUserStore().getToken()}"
                                 >
                                     <a-button icon="upload">点击上传</a-button>
                                 </a-upload>
@@ -121,11 +122,25 @@ const fileList = ref([]);
 
 // 处理图片上传
 const handleImageChange = (info) => {
-    if (info.file.status === 'done') {
-        // 上传成功，更新封面图片链接
-        articleForm.value.articleAvatar = "http://localhost:8089" + info.file.response.data;
-    } else if (info.file.status === 'error') {
-    message.error('上传失败');
+    if (info.file.status === 'uploading') {
+        // 手动上传文件
+        const formData = new FormData();
+        formData.append('file', info.file.originFileObj);
+        myAxios.post(uploadUrl, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                'token': useUserStore().getToken()
+            }
+        }).then(response => {
+            if (response.data.code === 0) {
+                articleForm.value.articleAvatar = "http://localhost:8089" + response.data.data;
+            } else {
+                message.error('上传失败');
+            }
+        }).catch(error => {
+            console.error(error);
+            message.error('上传失败');
+        });
     }
 };
 watchEffect(() => {

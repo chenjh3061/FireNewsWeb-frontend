@@ -8,6 +8,9 @@ import { ref, onMounted, onBeforeUnmount, watch } from "vue";
 import 'jodit/es2021/jodit.min.css';
 import { Jodit } from "jodit";
 import axios from "axios";
+import {useUserStore} from "../store/index";
+import {message} from "ant-design-vue";
+import myAxios from "../plugins/myAxios";
 
 let editorRef = ref(null);
 const props = defineProps({
@@ -26,7 +29,7 @@ let config = {
     width: "100%",
     height: "100%",
     minHeight: 400,
-    saveModeInCookie: false,
+    saveModeInCookie: true,
     toolbarSticky: false, //工具栏设置sticky
     statusbar: false, //底部状态栏(左：html元素；右：单词数，字符数统计)
     image: {
@@ -99,10 +102,15 @@ let config = {
     uploader: {
         url: "http://localhost:8089/upload/img", //上传地址
         insertImageAsBase64URI: false, // 本地预览
+        withCredentials: true,
         method: "POST",
         headers: {
             // 根据后端需求设置 Content-Type
             //"Content-Type": "multipart/form-data",
+            'token': useUserStore().getToken() || ''
+        },
+        prepareData(Uploader, formData) {
+            return formData;
         },
         isSuccess(res) {
             return res;
@@ -136,10 +144,15 @@ let config = {
 const uploadFile = async (file) => {
     try {
         const formData = new FormData();
+        console.log("文件：",file);
         formData.append('file', file);
-        const response = await axios.post('http://localhost:8089/upload/img', formData, {
+        if (file === null) {
+            message.error('请选择文件');
+        }
+        const response = await myAxios.post('http://localhost:8089/upload/img', formData, {
             headers: {
-                'Content-Type': 'multipart/form-data',
+                //'Content-Type': 'multipart/form-data',
+                'token': useUserStore().getToken() || '',
             }
         });
         console.log(response.data);

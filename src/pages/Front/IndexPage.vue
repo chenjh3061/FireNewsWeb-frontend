@@ -1,100 +1,105 @@
 <template>
     <div id="home">
-        <!-- 顶部搜索框和轮播图部分 -->
-        <div class="upper-container">
-            <!-- 轮播图部分 -->
-            <div class="carousel-container">
-                <a-carousel arrows autoplay class="custom-carousel">
-                    <div v-for="(item, index) in carouselNews" :key="index" class="carousel-item">
-                        <img v-lazy="item.articleAvatar" alt="Fire" class="carousel-image"/>
-                        <div class="carousel-overlay">
-                            <div class="carousel-content">
-                                <h3 class="carousel-title">{{ item.articleTitle }}</h3>
-                                <p class="carousel-description">{{ item.articleDesc }}</p>
-                                <a class="carousel-link" @click.prevent="viewNewsDetail(item.id, item)">查看详情</a>
+        <a-spin v-if="loadingInstance"  size="large" class="full-screen-loading"/>
+            <!-- 顶部搜索框和轮播图部分 -->
+            <div class="upper-container">
+                <!-- 轮播图部分 -->
+                <div class="carousel-container">
+                    <a-carousel arrows autoplay class="custom-carousel">
+                        <div v-for="(item, index) in carouselNews" :key="index" class="carousel-item">
+                            <img v-lazy="item.articleAvatar" alt="Fire" class="carousel-image"/>
+                            <div class="carousel-overlay">
+                                <div class="carousel-content">
+                                    <h3 class="carousel-title">{{ item.articleTitle }}</h3>
+                                    <p class="carousel-description">{{ item.articleDesc }}</p>
+                                    <a class="carousel-link" @click.prevent="viewNewsDetail(item.id, item)">查看详情</a>
+                                </div>
+                            </div>
+                        </div>
+                    </a-carousel>
+                </div>
+    <!--            <a-button v-allow="'admin'" type="primary" @click="addNews">添加新闻</a-button>-->
+                <!-- 搜索栏部分 -->
+                <div class="search-container">
+                    <a-dropdown >
+                        <a-input-search
+                            v-model:value="searchParams.text"
+                            class="search-bar"
+                            enter-button="搜索"
+                            placeholder="请输入搜索内容"
+                            size="large"
+                            @search="onSearch"
+                            @focus="showHistory = true"
+                            @blur="hideHistory"
+                        ></a-input-search>
+                        <template #overlay>
+                            <a-menu v-if="showHistory && historyStore.history.length"
+                                    class="history-dropdown">
+                                <span class="history-title">历史搜索</span>
+                                <a-menu-item v-for="(history, index) in historyStore.history"
+                                             :key="index" @click="selectSearchHistory(history)">
+                                    {{ history }}
+                                </a-menu-item>
+                            </a-menu>
+                        </template>
+                    </a-dropdown>
+
+
+                    <!-- 热点新闻榜 -->
+                    <div class="hot-news-container">
+                        <h2>热点新闻榜</h2>
+                        <div class="hot-news-list">
+                            <div v-for="(article, index) in hotArticles" :key="index" class="hot-news-item">
+                                <h3>{{ article.articleTitle }}</h3>
+                                <a class="read-more" @click.prevent="viewNewsDetail(article.articleId, article)">阅读全文</a>
                             </div>
                         </div>
                     </div>
-                </a-carousel>
+                </div>
             </div>
-<!--            <a-button v-allow="'admin'" type="primary" @click="addNews">添加新闻</a-button>-->
-            <!-- 搜索栏部分 -->
-            <div class="search-container">
-                <a-dropdown >
-                    <a-input-search
-                        v-model:value="searchParams.text"
-                        class="search-bar"
-                        enter-button="搜索"
-                        placeholder="请输入搜索内容"
-                        size="large"
-                        @search="onSearch"
-                        @focus="showHistory = true"
-                        @blur="hideHistory"
-                    ></a-input-search>
-                    <template #overlay>
-                        <a-menu v-if="showHistory && historyStore.history.length"
-                                class="history-dropdown">
-                            <span class="history-title">历史搜索</span>
-                            <a-menu-item v-for="(history, index) in historyStore.history"
-                                         :key="index" @click="selectSearchHistory(history)">
-                                {{ history }}
-                            </a-menu-item>
-                        </a-menu>
-                    </template>
-                </a-dropdown>
 
-
-                <!-- 热点新闻榜 -->
-                <div class="hot-news-container">
-                    <h2>热点新闻榜</h2>
-                    <div class="hot-news-list">
-                        <div v-for="(article, index) in hotArticles" :key="index" class="hot-news-item">
-                            <h3>{{ article.articleTitle }}</h3>
-                            <a class="read-more" @click.prevent="viewNewsDetail(article.articleId, article)">阅读全文</a>
-                        </div>
+            <!-- 主要新闻展示区 -->
+            <div class="main-news-container">
+                <div class="main-news">
+                    <div class="main-news-image">
+                        <img v-lazy="mainNews.articleAvatar || 'https://via.placeholder.com/400x200'" alt="Breaking News"/>
+                    </div>
+                    <div class="main-news-text">
+                        <h2>{{ mainNews.articleTitle }}</h2>
+                        <p>
+                            {{ mainNews.articleDesc }}
+                        </p>
+                        <a class="read-more" @click.prevent="viewNewsDetail(mainNews.articleId, mainNews)">阅读全文</a>
                     </div>
                 </div>
             </div>
-        </div>
 
-
-        <!-- 主要新闻展示区 -->
-        <div class="main-news-container">
-            <div class="main-news">
-                <div class="main-news-image">
-                    <img v-lazy="mainNews.articleAvatar || 'https://via.placeholder.com/400x200'" alt="Breaking News"/>
-                </div>
-                <div class="main-news-text">
-                    <h2>{{ mainNews.articleTitle }}</h2>
-                    <p>
-                        {{ mainNews.articleDesc }}
-                    </p>
-                    <a class="read-more" @click.prevent="viewNewsDetail(mainNews.articleId, mainNews)">阅读全文</a>
+            <!-- 次要新闻展示区 -->
+            <div class="secondary-news-container">
+                <div v-for="(article, index) in secondaryArticles" :key="index" class="news-item">
+                    <img v-lazy="article.articleAvatar || 'https://via.placeholder.com/400x200'" alt="新闻封面"
+                         class="news-image"/>
+                    <div class="news-info">
+                        <h3>{{ article.articleTitle }}</h3>
+                        <p>{{ article.articleDesc }}</p>
+                        <a class="read-more" @click.prevent="viewNewsDetail(article.articleId, article)">阅读全文</a>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <!-- 次要新闻展示区 -->
-        <div class="secondary-news-container">
-            <div v-for="(article, index) in secondaryArticles" :key="index" class="news-item">
-                <img v-lazy="article.articleAvatar || 'https://via.placeholder.com/400x200'" alt="新闻封面"
-                     class="news-image"/>
-                <div class="news-info">
-                    <h3>{{ article.articleTitle }}</h3>
-                    <p>{{ article.articleDesc }}</p>
-                    <a class="read-more" @click.prevent="viewNewsDetail(article.articleId, article)">阅读全文</a>
-                </div>
-            </div>
-        </div>
     </div>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import {onMounted, ref, watch} from 'vue';
 import { useArticleStore, useHistoryStore } from "../../store/index";
 import { useRouter } from 'vue-router';
 import myAxios from "../../plugins/myAxios";
+import { loadingInstance } from "../../plugins/myAxios";
 import {message} from "ant-design-vue";
+
+watch(loadingInstance, (newVal) => {
+    console.log(newVal);
+})
 
 const router = useRouter();
 
@@ -154,23 +159,29 @@ const getNews = async () => {
                 const sortedArticles = res.data.data.sort((a, b) => new Date(b.createTime) - new Date(a.createTime));
                 mainNews.value = sortedArticles[0];
                 secondaryArticles.value = sortedArticles.slice(1);
+                loadingInstance.value = false;
             } else {
                 console.log('获取新闻失败');
+                loadingInstance.value = false;
             }
         });
         myAxios.get("/article/getCarouselArticles").then((res) => {
             if (res.data.code === 0) {
                 carouselNews.value = res.data.data;
+                loadingInstance.value = false;
             } else {
                 console.log('获取轮播图新闻失败');
+                loadingInstance.value = false;
             }
         });
         myAxios.get("/article/getHotNews").then((res) => {
             if (res.data.code === 0) {
                 hotArticles.value = res.data.data.slice(0, 5);
                 console.log(hotArticles.value);
+                loadingInstance.value = false;
             } else {
                 console.log('获取热点新闻失败');
+                loadingInstance.value = false;
             }
         });
     } catch (error) {
@@ -188,7 +199,18 @@ onMounted(() => {
     width: 100%;
     background-color: #f8f9fa;
 }
-
+.full-screen-loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.5); /* 半透明背景 */
+    z-index: 9999; /* 确保 loading 层在最上层 */
+}
 .upper-container {
     display: flex;
     justify-content: space-between;

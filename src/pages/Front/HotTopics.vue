@@ -198,6 +198,7 @@ onMounted(() => {
     font-size: 14px;
     color: #fff; /* 白色字体 */
     margin-top: 5px;
+    margin-right: 3rem;
 }
 
 .action {

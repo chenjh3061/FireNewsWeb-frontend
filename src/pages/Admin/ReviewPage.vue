@@ -192,7 +192,7 @@ const submitComment = () => {
     });
 
     // 更新文章状态
-    if (currentArticle.value.status === 0) {
+    if (currentArticle.value.status !== 0) {
         currentArticle.value.status = 1;
         message.success(`文章《${currentArticle.value.articleTitle}》已通过审核，批注：${comment.value}`);
     } else {
