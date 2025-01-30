@@ -336,7 +336,8 @@ onMounted(() => {
 .main-news-container {
     display: flex;
     justify-content: center;
-    margin-bottom: 40px;
+    margin-bottom: 10px;
+    max-height: 22rem;
 }
 
 .main-news {

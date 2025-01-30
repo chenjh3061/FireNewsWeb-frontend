@@ -12,23 +12,26 @@
                         placeholder="请输入文章标题"
                         class="title-input"
                     />
-                    <a-textarea class="article-desc" v-model:value="article.articleDesc"
-                                placeholder="填写文章简介">
-                    </a-textarea>
-                    <a-input v-model:value="article.articleAvatar" placeholder="请输入文章封面图片URL" type="url"></a-input>
-                    <div class="article-avatar">
-
-                        <a-upload
-                            :action="uploadUrl"
-                            list-type="picture-card"
-                            :file-list="fileList"
-                            :show-upload-list="false"
-                            @change="handleImageChange"
-                        >
-                            <a-button icon="upload">点击上传</a-button>
-                        </a-upload>
-
-                    </div><img class="avatar-preview" :src="article.articleAvatar" alt="图"/>
+                    <div class="article-good">
+                        <div class="article-desc">
+                            <a-textarea v-model:value="article.articleDesc" placeholder="填写文章简介">
+                            </a-textarea>
+                        </div>
+                        <div class="article-avatar">
+                            <a-input v-model:value="article.articleAvatar" placeholder="请输入文章封面图片URL" type="url"></a-input>
+                            <a-upload
+                                :action="uploadUrl"
+                                list-type="picture-card"
+                                :file-list="fileList"
+                                :show-upload-list="false"
+                                @change="handleImageChange"
+                                :headers="{'token': useUserStore().getToken()}"
+                            >
+                                <a-button icon="upload">点击上传</a-button>
+                            </a-upload>
+                            <img class="avatar-preview" :src="article.articleAvatar" alt="图"/>
+                        </div>
+                    </div>
                     <jodit-editor v-model="article.articleContent" :config="config" />
                     <div class="editor-actions">
                         <a-button type="primary" @click="submitArticle">提交文章</a-button>
@@ -47,6 +50,9 @@
                     :style="{ width: '100%',marginBottom: '16px' }"
                     @change="handleChange"
                     @drop="handleDrop"
+                    :headers="{
+                        'token': useUserStore().getToken()
+                    }"
                 >
                     <p class="ant-upload-drag-icon">
                         <inbox-outlined></inbox-outlined>
@@ -56,6 +62,9 @@
                         支持的文件格式：.doc, .docx, .md, .txt。每次上传一个文件。
                     </p>
                 </a-upload-dragger>
+                <div class="document-preview">
+                    <div v-html="document"></div>
+                </div>
             </a-tab-pane>
         </a-tabs>
     </div>
@@ -68,6 +77,7 @@ import { message, UploadChangeParam } from "ant-design-vue";
 import JoditEditor  from "../../plugins/JoditEditor.vue";
 import myAxios from "../../plugins/myAxios";
 import {watchEffect} from "vue";
+import {useUserStore} from "../../store/index";
 
 // 在线编辑相关状态
 const article = ref({
@@ -92,13 +102,25 @@ const fileList = ref([]);
 const uploadUrl = 'http://localhost:8089/upload/img';
 // 处理图片上传
 const handleImageChange = (info) => {
-    console.log("图片上传信息：", info);
-    if (info.file.status === 'done' || info.file.response ) {
-        // 上传成功，更新封面图片链接
-        article.value.articleAvatar = "http://localhost:8089" + info.file.response.data;
-        console.log("上传成功，更新封面图片链接：", article.value.articleAvatar);
-    } else if (info.file.status === 'error') {
-        message.error('上传失败');
+    if (info.file.status === 'uploading') {
+        // 手动上传文件
+        const formData = new FormData();
+        formData.append('file', info.file.originFileObj);
+        myAxios.post(uploadUrl, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                'token': useUserStore().getToken()
+            }
+        }).then(response => {
+            if (response.data.code === 0) {
+                article.value.articleAvatar = "http://localhost:8089" + response.data.data;
+            } else {
+                message.error('上传失败');
+            }
+        }).catch(error => {
+            console.error(error);
+            message.error('上传失败');
+        });
     }
 };
 watchEffect(() => {
@@ -112,10 +134,12 @@ const handleChange = (info: UploadChangeParam) => {
     }
     if (status === "done") {
         message.success(`${info.file.name} 上传成功`);
+        document.value = info.file.response.data
     } else if (status === "error") {
         message.error(`${info.file.name} 上传失败`);
     }
 };
+const document = ref()
 
 // 拖拽事件
 function handleDrop(e: DragEvent) {
@@ -190,7 +214,7 @@ h2 {
     margin-bottom: 24px;
 }
 
-.title-input, .article-desc, .article-avatar input {
+.title-input {
     margin-bottom: 16px;
     width: 100%;
     border-radius: 6px;
@@ -199,14 +223,25 @@ h2 {
     border: 1px solid #ddd;
 }
 
+.article-good {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
 .article-desc {
-    resize: vertical;
+    width: 50%;
 }
 
 .article-avatar {
     display: flex;
     align-items: center;
     gap: 12px;
+}
+
+.article-avatar>a-input {
+    width: 200px;
 }
 
 .avatar-preview {
@@ -228,18 +263,18 @@ h2 {
     font-size: 16px;
 }
 
-.a-tabs {
+a-tabs {
     background-color: #fff;
     border-radius: 8px;
 }
 
-.a-tab-pane {
+a-tab-pane {
     padding: 16px;
     background-color: #fff;
     border-radius: 8px;
 }
 
-.a-upload-dragger {
+a-upload-dragger {
     background-color: #f7f7f7;
     border: 2px dashed #ddd;
     border-radius: 8px;

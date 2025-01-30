@@ -7,7 +7,6 @@ import { ref, onMounted, onBeforeUnmount, watch } from "vue";
 
 import 'jodit/es2021/jodit.min.css';
 import { Jodit } from "jodit";
-import axios from "axios";
 import {useUserStore} from "../store/index";
 import {message} from "ant-design-vue";
 import myAxios from "../plugins/myAxios";
@@ -109,8 +108,9 @@ let config = {
             //"Content-Type": "multipart/form-data",
             'token': useUserStore().getToken() || ''
         },
-        prepareData(Uploader, formData) {
-            return formData;
+        prepareData(data) {
+            console.log("prepareData", data);
+            return data;
         },
         isSuccess(res) {
             return res;
