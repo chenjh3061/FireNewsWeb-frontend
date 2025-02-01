@@ -77,6 +77,7 @@
                     <a-form-item label="用户头像">
                         <a-avatar :src="formData.userAvatar" style="margin-right: 8px;"/>
                         <a-upload v-model:file-list="fileList" @change="handleUploadChange"
+                                  :headers="{'token': useUserStore().getToken() }"
                                   action="http://localhost:8089/upload/img" accept=".png">
                             <a-button @click="ref">上传头像</a-button>
                         </a-upload>
@@ -112,6 +113,7 @@ import type {TableColumnsType} from "ant-design-vue";
 import {message, Modal} from "ant-design-vue";
 import { fieldMappings } from "../../utils/mapping.js";
 import { Pagination } from "../../utils/Pagination.js";
+import {useUserStore} from "@/store";
 
 const mappings = fieldMappings;
 
@@ -267,7 +269,7 @@ const handleOk = () => {
     if (formData.value.id) {
         // 更新用户
         myAxios
-            .post("user/updateUser", formData.value)
+            .post("user/updateUserByAdmin", formData.value)
             .then((res) => {
                 if (res.data) {
                     message.success("用户更新成功");

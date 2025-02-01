@@ -6,6 +6,16 @@
 import { ref, onMounted, onBeforeUnmount, watch } from "vue";
 
 import 'jodit/es2021/jodit.min.css';
+import "jodit/esm/plugins/add-new-line/add-new-line.js";
+import "jodit/esm/plugins/copy-format/copy-format.js";
+import "jodit/esm/plugins/fullsize/fullsize.js";
+import "jodit/esm/plugins/hr/hr.js";
+import "jodit/esm/plugins/line-height/line-height.js";
+import "jodit/esm/plugins/preview/preview.js";
+import "jodit/esm/plugins/source/source.js";
+import "jodit/esm/plugins/symbols/symbols.js";
+import 'jodit/esm/plugins/table/table.js';
+import * as JoditEditor from "jodit/es2021/jodit.min.js";
 import { Jodit } from "jodit";
 import {useUserStore} from "../store/index";
 import {message} from "ant-design-vue";
@@ -30,15 +40,25 @@ let config = {
     minHeight: 400,
     saveModeInCookie: true,
     toolbarSticky: false, //工具栏设置sticky
-    statusbar: false, //底部状态栏(左：html元素；右：单词数，字符数统计)
+    statusbar: true, //底部状态栏(左：html元素；右：单词数，字符数统计)
     image: {
         //图片相关配置
         editSrc: true,
         editStyle: true,
         useImageEditor: true,
+        resizer: {
+            showSize: true,  // 拖拽时显示尺寸
+            hideSizeTimeout: 2000, // 尺寸提示隐藏延迟
+            forImage: true,  // 允许调整图片大小
+            min_width: 50,   // 最小宽度
+            min_height: 50,  // 最小高度
+            enable: true, // 允许调整大小
+            // 其他配置...
+        }
+
     },
     link: {
-        noFollowCheckbox: false,
+        noFollowCheckbox: true,
         modeClassName: "",
     },
     i18n: {
@@ -84,7 +104,9 @@ let config = {
 
     //disablePlugins: "stat", //要禁用的插件，以逗号分割。stat是底部字符数与单词数统计
     buttons:
-        "source,bold,italic,underline,strikethrough,eraser,superscript,subscript,ul,ol,indent,outdent,left,font,fontsize,paragraph,brush,lineHeight,image,file,video,copyformat,selectall,hr,table,link,symbols,undo,redo,fullsize,preview",
+        "source,bold,italic,underline,strikethrough,eraser,superscript,subscript,ul,ol," +
+        "indent,outdent,align,left,font,fontsize,paragraph,brush,lineHeight,image,file,video,copyformat," +
+        "selectall,hr,table,link,symbols,undo,redo,fullsize,preview",
     controls: {
         font: {
             list: Jodit.atom({
@@ -103,31 +125,47 @@ let config = {
         insertImageAsBase64URI: false, // 本地预览
         withCredentials: true,
         method: "POST",
-        headers: {
-            // 根据后端需求设置 Content-Type
-            //"Content-Type": "multipart/form-data",
-            'token': useUserStore().getToken() || ''
+        format: "json",
+        filesVariableName: (index) => "file",
+        prepareData(formData) {
+            const file = formData.get('file');
+            if (file) {
+                formData.delete('file');
+                formData.append('file', file);
+            }
+            console.log("prepareData", file);
+            return formData;
         },
-        prepareData(data) {
-            console.log("prepareData", data);
-            return data;
-        },
+        // image: {
+        //     url: "http://localhost:8089/upload/img", // 图片上传接口
+        //     method: "POST",
+        //     headers: {
+        //         "Content-Type": "multipart/form-data"
+        //     }
+        // },
+        // file: {
+        //     url: "http://localhost:8089/upload/document", // 文件上传接口
+        //     method: "POST",
+        //     headers: {
+        //         "Content-Type": "multipart/form-data"
+        //     }
+        // },
+        // video: {
+        //     url: "http://localhost:8089/upload/document", // 视频上传接口
+        //     method: "POST",
+        //     headers: {
+        //         "Content-Type": "multipart/form-data"
+        //     }
+        // },
         isSuccess(res) {
+            console.log("isSuccess", res);
             return res;
         },
         defaultHandlerSuccess(data) {
             console.log("defaultHandlerSuccess", data);
-            if (Array.isArray(data)) {
-                data.forEach((item) => {
-                    if (item.url) {
-                        editorInstance.insertImage(item.url);
-                    } else {
-                        console.warn("Item does not have a url property:", item);
-                    }
-                });
-            } else {
-                console.warn("Unexpected upload response:", data);
-            }
+            this.s.insertImage("http://localhost:8089"+data,
+                'style="max-width:80%; height:auto; display:block; margin:0 auto;"'); //将图片插入编辑器中，不可省略
+
         },
 
         defaultHandlerError(err) {
@@ -140,31 +178,22 @@ let config = {
         },
     },
 };
-// 使用 axios 发送文件上传请求的示例函数
-const uploadFile = async (file) => {
-    try {
-        const formData = new FormData();
-        console.log("文件：",file);
-        formData.append('file', file);
-        if (file === null) {
-            message.error('请选择文件');
-        }
-        const response = await myAxios.post('http://localhost:8089/upload/img', formData, {
-            headers: {
-                //'Content-Type': 'multipart/form-data',
-                'token': useUserStore().getToken() || '',
-            }
-        });
-        console.log(response.data);
-    } catch (error) {
-        console.error(error);
-    }
-};
+
 onMounted(() => {
     editorInstance = Jodit.make("#editorRef", { ...config, ...props.config }); //合并组件传入的配置项并创建实例
     editorInstance.value = props.modelValue;
     editorInstance.events.on("change", (newValue) => {
         emit("update:modelValue", newValue);
+    });
+
+    // 监听图片插入事件
+    editorInstance.events.on('afterInsertImage', function (e) {
+        const imageElement = e.target; // 获取插入的图片元素
+        if (imageElement && imageElement.tagName.toLowerCase() === 'img') {
+            imageElement.style.resize = 'both'; // 启用拖拽调整大小
+            imageElement.style.overflow = 'hidden'; // 防止溢出
+            imageElement.style.cursor = 'news-resize'; // 更改光标为调整大小的样式
+        }
     });
 });
 onBeforeUnmount(() => {
@@ -196,23 +225,31 @@ watch(
 .jodit-ui-button_variant_primary:hover:not([disabled]) {
   background-color: var(--themeColor-hover);
 }
-// .jodit-container {
-// blockquote-box {
-//   display: block;
-//   padding: 16px;
-//   margin: 0 0 24px;
-//   border-left: 8px solid #dddfe4;
-//   background: #eef0f4;
-//   color: rgba(0, 0, 0, 0.5);
-//   overflow: auto;
-//   word-break: break-word !important;
-// }
-// }
+ .jodit-container {
+ blockquote-box {
+   display: block;
+   padding: 16px;
+   margin: 0 0 24px;
+   border-left: 8px solid #dddfe4;
+   background: #eef0f4;
+   color: rgba(0, 0, 0, 0.5);
+   overflow: auto;
+   word-break: break-word !important;
+ }
+ }
 .jodit-workplace {
   ol,
   ul,
   li {
     list-style-position: inside;
   }
+}
+.jodit-wysiwyg img {
+    max-width: 100% !important;  /* 限制图片最大宽度为容器宽度 */
+    height: auto !important;     /* 高度自适应 */
+    display: block;              /* 确保居中生效 */
+    margin: 10px auto;           /* 上下边距 10px，水平居中 */
+    resize: both;            /* 允许图片被拖动调整大小 */
+    overflow: hidden;        /* 隐藏超出部分 */
 }
 </style>

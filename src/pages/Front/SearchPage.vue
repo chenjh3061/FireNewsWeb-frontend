@@ -95,6 +95,7 @@ const viewNewsDetail = (newsId, newsData) => {
 /* 搜索页面样式 */
 #search-page {
     width: 100%;
+    min-height: 70vh;
     background-color: #f8f9fa;
     padding: 20px;
     font-family: Arial, sans-serif;

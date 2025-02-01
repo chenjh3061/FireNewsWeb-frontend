@@ -19,7 +19,7 @@
     "dompurify": "^3.2.3",
     "echarts": "^5.5.1",
     "file-saver": "^2.0.5",
-    "jodit": "^4.2.47",
+    "jodit": "^4.4.7",
     "lodash": "^4.17.21",
     "markdown-it": "^14.1.0",
     "pinia": "^2.3.0",
