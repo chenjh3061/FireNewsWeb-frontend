@@ -15,7 +15,13 @@ import "jodit/esm/plugins/preview/preview.js";
 import "jodit/esm/plugins/source/source.js";
 import "jodit/esm/plugins/symbols/symbols.js";
 import 'jodit/esm/plugins/table/table.js';
-import * as JoditEditor from "jodit/es2021/jodit.min.js";
+import "jodit/esm/plugins/file/file.js";
+import "jodit/esm/plugins/video/video.js";
+import "jodit/esm/plugins/paste/paste.js";
+import "jodit/esm/plugins/resizer/resizer.js";
+import "jodit/esm/plugins/search/search.js";
+import "jodit/esm/plugins/select/select.js";
+import "jodit/esm/plugins/spellcheck/spellcheck.js";
 import { Jodit } from "jodit";
 import {useUserStore} from "../store/index";
 import {message} from "ant-design-vue";
@@ -41,6 +47,15 @@ let config = {
     saveModeInCookie: true,
     toolbarSticky: false, //工具栏设置sticky
     statusbar: true, //底部状态栏(左：html元素；右：单词数，字符数统计)
+    allowResizeTags: new Set(['img']),
+    resizer: {
+        showSize: true,
+        hideSizeTimeout: 2000,
+        useAspectRatio: true, //['img', 'table'],
+        forImageChangeAttributes: true,
+        min_width: 10,
+        min_height: 10
+    },
     image: {
         //图片相关配置
         editSrc: true,
@@ -105,8 +120,8 @@ let config = {
     //disablePlugins: "stat", //要禁用的插件，以逗号分割。stat是底部字符数与单词数统计
     buttons:
         "source,bold,italic,underline,strikethrough,eraser,superscript,subscript,ul,ol," +
-        "indent,outdent,align,left,font,fontsize,paragraph,brush,lineHeight,image,file,video,copyformat," +
-        "selectall,hr,table,link,symbols,undo,redo,fullsize,preview",
+        "indent,outdent,align,left,center,right,font,fontsize,paragraph,brush,lineHeight,image,file,video,copyformat," +
+        "selectall,hr,table,link,symbols,undo,redo,fullsize,preview,spellcheck,search",
     controls: {
         font: {
             list: Jodit.atom({
@@ -136,36 +151,38 @@ let config = {
             console.log("prepareData", file);
             return formData;
         },
-        // image: {
-        //     url: "http://localhost:8089/upload/img", // 图片上传接口
-        //     method: "POST",
-        //     headers: {
-        //         "Content-Type": "multipart/form-data"
-        //     }
-        // },
-        // file: {
-        //     url: "http://localhost:8089/upload/document", // 文件上传接口
-        //     method: "POST",
-        //     headers: {
-        //         "Content-Type": "multipart/form-data"
-        //     }
-        // },
-        // video: {
-        //     url: "http://localhost:8089/upload/document", // 视频上传接口
-        //     method: "POST",
-        //     headers: {
-        //         "Content-Type": "multipart/form-data"
-        //     }
-        // },
+        image: {
+            url: "http://localhost:8089/upload/img", // 图片上传接口
+            method: "POST",
+            headers: {
+                "Content-Type": "multipart/form-data"
+            }
+        },
+        file: {
+            url: "http://localhost:8089/upload/document", // 文件上传接口
+            method: "POST",
+            headers: {
+                "Content-Type": "multipart/form-data"
+            }
+        },
+        video: {
+            url: "http://localhost:8089/upload/document", // 视频上传接口
+            method: "POST",
+            headers: {
+                "Content-Type": "multipart/form-data"
+            }
+        },
         isSuccess(res) {
             console.log("isSuccess", res);
             return res;
         },
         defaultHandlerSuccess(data) {
             console.log("defaultHandlerSuccess", data);
-            this.s.insertImage("http://localhost:8089"+data,
-                'style="max-width:80%; height:auto; display:block; margin:0 auto;"'); //将图片插入编辑器中，不可省略
-
+            const imageUrl = "http://localhost:8089" + data; // 根据你自己的后端路径拼接
+            const imageHtml = `<img src="${imageUrl}" style="max-width: 700px; max-height: 500px;
+                                display: block; margin: 0 auto;" />`;
+            this.s.insertHTML(imageHtml);
+            //this.s.insertImage(imageUrl); // 插入图片，并添加样式
         },
 
         defaultHandlerError(err) {
@@ -184,6 +201,7 @@ onMounted(() => {
     editorInstance.value = props.modelValue;
     editorInstance.events.on("change", (newValue) => {
         emit("update:modelValue", newValue);
+
     });
 
     // 监听图片插入事件

@@ -1,7 +1,7 @@
 <template>
     <div class="upload-article-page">
         <h2>上传文章</h2>
-        <a-tabs default-active-key="edit" class="upload-tabs">
+        <a-tabs v-model:active-key="activeKey" class="upload-tabs">
 
             <!-- 在线编辑选项卡 -->
             <a-tab-pane key="edit" tab="在线编辑">
@@ -12,6 +12,10 @@
                         placeholder="请输入文章标题"
                         class="title-input"
                     />
+                    <a-select v-model:value="article.articleCategory" placeholder="请选择分类">
+                        <a-select-option v-for="item in categoryList" :key="item.name" :value="item.id"
+                                         @select="() => article.articleCategory = item.id"/>
+                    </a-select>
                     <div class="article-good">
                         <div class="article-desc">
                             <a-textarea v-model:value="article.articleDesc" placeholder="填写文章简介">
@@ -41,29 +45,33 @@
 
             <!-- 文件上传选项卡 -->
             <a-tab-pane key="upload" tab="文件上传">
-                <a-upload-dragger
-                    v-model:fileList="fileList"
-                    :multiple="false"
-                    accept=".doc,.docx,.md,.txt"
-                    action="http://localhost:8089/upload/document"
-                    name="file"
-                    :style="{ width: '100%',marginBottom: '16px' }"
-                    @change="handleChange"
-                    @drop="handleDrop"
-                    :headers="{
-                        'token': useUserStore().getToken()
-                    }"
-                >
-                    <p class="ant-upload-drag-icon">
-                        <inbox-outlined></inbox-outlined>
-                    </p>
-                    <p class="ant-upload-text">点击或拖动要上传的文件到此处</p>
-                    <p class="ant-upload-hint">
-                        支持的文件格式：.doc, .docx, .md, .txt。每次上传一个文件。
-                    </p>
-                </a-upload-dragger>
-                <div class="document-preview">
-                    <div v-html="document"></div>
+                <div class="upload-doc">
+                    <a-upload-dragger
+                        v-model:fileList="fileList"
+                        :multiple="false"
+                        accept=".doc,.docx,.md,.txt"
+                        action="http://localhost:8089/upload/document"
+                        name="file"
+                        :style="{ width: '100%',marginBottom: '16px' }"
+                        @change="handleChange"
+                        @drop="handleDrop"
+                        :headers="{
+                            'token': useUserStore().getToken()
+                        }"
+                    >
+                        <p class="ant-upload-drag-icon">
+                            <inbox-outlined></inbox-outlined>
+                        </p>
+                        <p class="ant-upload-text">点击或拖动要上传的文件到此处</p>
+                        <p class="ant-upload-hint">
+                            支持的文件格式：.doc, .docx, .md, .txt。每次上传一个文件。
+                        </p>
+                    </a-upload-dragger>
+                    <div class="document-preview">
+<!--                        <div v-html="document">-->
+
+<!--                        </div>-->
+                    </div>
                 </div>
             </a-tab-pane>
         </a-tabs>
@@ -86,12 +94,24 @@ const article = ref({
     articleCategory: "",
     articleDesc: "",
     articleAvatar: "",
+    authorId: useUserStore().userInfo.id,
 });
+const activeKey = ref("upload");
 
 watch(article, (newVal) => {
     console.log("文章内容变化：", newVal);
 },{ deep: true })
-
+const categoryList = ref([{
+    id: 0,
+    name: '新闻报道'
+}, {
+    id: 1,
+    name: '科普文章'
+}, {
+    id: 2,
+    name: '通知'
+}
+]);
 // 编辑器配置
 const config = {
     readonly: false, // 只读
@@ -134,7 +154,9 @@ const handleChange = (info: UploadChangeParam) => {
     }
     if (status === "done") {
         message.success(`${info.file.name} 上传成功`);
-        document.value = info.file.response.data
+        document.value = info.file.response.data;
+        article.value.articleContent = info.file.response.data;
+        activeKey.value = "edit";
     } else if (status === "error") {
         message.error(`${info.file.name} 上传失败`);
     }
@@ -157,13 +179,12 @@ watch(content, (newValue) => {
 
 // 提交文章
 const submitArticle = () => {
-    if (!content.value || content.value.trim() === "") {
+    if (!article.value.articleContent.trim()) {
         message.error("内容不能为空！");
         return;
     }
-    console.log("文章：", { title: title.value, content: content.value });
     // 发送到后端
-    myAxios.post("/addArticle", { title, content })
+    myAxios.post("http://localhost:8089/article/addArticle", article.value)
         .then((response) => {
             message.success(response + "文章提交成功！");
         })
