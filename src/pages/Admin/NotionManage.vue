@@ -7,6 +7,7 @@
 
         <!-- 通知列表 -->
         <a-table
+            :loading="loading"
             :columns="columns"
             :dataSource="notificationData"
             :rowKey="record => record.id"
@@ -23,6 +24,7 @@
                 </template>
                 <template v-if="column.dataIndex === 'action'">
                     <a-button type="primary" @click="editNotification(record)">编辑</a-button>
+                    <a-button type="primary" danger @click="deleteNotification(record)">删除</a-button>
                 </template>
             </template>
         </a-table>
@@ -102,23 +104,33 @@ function handleResizeColumn(w, column){
     column.width = w;
 }
 
+const loading = ref(false);
+
+const currentPage = ref(1);
+const pageSize = ref(10);
 // 分页设置
 const pagination = computed(() => {
     return {
-        current: 1,
-        pageSize: 10,
+        current: currentPage.value,
+        pageSize: pageSize.value,
         total: notificationData.value.length,
         showTotal: (total) => '共'+total+'条记录',
         showSizeChanger: true,
-        onChange: (page: number, pageSize: number) => {
-            pagination.value.current = page;
-            pagination.value.pageSize = pageSize;
+        pageSizeOptions: ['10', '20', '30', '50'],
+        onChange: (page: number, size: number) => {
+            currentPage.value = page;  // 更新当前页
+            pageSize.value = size;      // 更新每页条数
+        },
+        onShowSizeChange: (current: number, size: number) => {
+            currentPage.value = current;  // 更新当前页
+            pageSize.value = size;         // 更新每页条数
         },
     }
 });
 
 // 初始化表单
 const getAllNotion = () => {
+    loading.value = true;
     try {
         myAxios.get("/notion/getAllNotion").then(res => {
             notificationData.value = res.data.data;
@@ -126,7 +138,7 @@ const getAllNotion = () => {
     } catch (error) {
         message.error("获取通知失败");
     } finally {
-
+        loading.value = false;
     }
 }
 

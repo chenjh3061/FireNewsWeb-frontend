@@ -23,10 +23,11 @@
         <!-- 分类列表表格 -->
         <a-table
             :columns="columns"
+            :loading="loading"
             :data-source="categories"
             bordered
             pagination="{ pageSize: 5 }"
-            rowKey="category"
+            rowKey="categoryId"
             @resizeColumn="handleResizeColumn"
             class="category-table"
         >
@@ -49,6 +50,16 @@
                 </template>
             </template>
         </a-table>
+
+        <!-- 编辑分类模态框 -->
+        <a-modal
+            v-model:visible="isEditModalVisible"
+            title="编辑分类"
+            @ok="submitEdit"
+            @cancel="closeEditModal"
+        >
+            <a-input v-model="editedCategory" placeholder="请输入新的分类名称" />
+        </a-modal>
     </div>
 </template>
 
@@ -57,10 +68,13 @@ import { ref } from "vue";
 import { message, TableColumnsType } from "ant-design-vue";
 import myAxios from "../../plugins/myAxios";
 
+const loading = ref(false);
+
 // 分类数据
 const categories = ref();
 
 const getCategory = () => {
+    loading.value = true;
     try {
         myAxios.get("/categories/getAllCategories").then(res => {
             if (res.data.code === 0){
@@ -71,6 +85,8 @@ const getCategory = () => {
         })
     } catch (e) {
         message.error(e)
+    } finally {
+        loading.value = false;
     }
 };
 getCategory();
@@ -89,18 +105,89 @@ const addCategory = () => {
         message.warning("该分类已存在！");
         return;
     }
-    categories.value.push({ category: trimmedCategory });
+    loading.value = true;
+
+    myAxios.post("/categories/addCategory", { category: trimmedCategory })
+        .then(res => {
+            if (res.data.code === 0) {
+                message.success("分类添加成功！");
+                getCategory();
+            } else {
+                message.error(res.data.message);
+            }
+            loading.value = false;
+        })
+        .catch(e => {
+            message.error("添加分类失败");
+            loading.value = false;
+        });
     newCategory.value = "";
-    message.success("分类添加成功！");
 };
 
-// 编辑分类
-const editCategory = (category: string) => {
+// 编辑分类模态框相关
+const isEditModalVisible = ref(false);
+const editedCategory = ref("");
+const currentEditCategoryId = ref(null);
+
+// 打开编辑分类模态框
+const editCategory = (category: any) => {
+    editedCategory.value = category.category;
+    currentEditCategoryId.value = category.categoryId;
+    isEditModalVisible.value = true;
+};
+
+// 提交编辑
+const submitEdit = () => {
+    const trimmedCategory = editedCategory.value.trim();
+    if (!trimmedCategory) {
+        message.warning("分类名称不能为空！");
+        return;
+    }
+    loading.value = true;
+    myAxios.post("/categories/editCategory", {
+        categoryId: currentEditCategoryId.value,
+        category: trimmedCategory
+    })
+        .then(res => {
+            if (res.data.code === 0) {
+                message.success("分类编辑成功！");
+                getCategory();
+                closeEditModal();
+            } else {
+                message.error(res.data.message);
+            }
+            loading.value = false;
+        })
+        .catch(e => {
+            message.error("编辑分类失败");
+            loading.value = false;
+        });
+};
+
+// 关闭编辑分类模态框
+const closeEditModal = () => {
+    isEditModalVisible.value = false;
+    editedCategory.value = "";
+    currentEditCategoryId.value = null;
 };
 
 // 删除分类
-const deleteCategory = (category: string) => {
-
+const deleteCategory = (category: any) => {
+    loading.value = true;
+    myAxios.post("/categories/deleteCategory", { categoryId: category.categoryId })
+        .then(res => {
+            if (res.data.code === 0) {
+                message.success("分类删除成功！");
+                getCategory();
+            } else {
+                message.error(res.data.message);
+            }
+            loading.value = false;
+        })
+        .catch(e => {
+            message.error("删除分类失败");
+            loading.value = false;
+        });
 };
 
 // 表格列配置

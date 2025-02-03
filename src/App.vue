@@ -4,19 +4,25 @@
         <float-buttons />
         <router-view />
         <GlobalFooter />
+        <div v-if="notification" class="notification">
+            <button @click="closeNotification">Close</button>
+            <p>{{ notification }}</p>
+        </div>
     </div>
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import GlobalHeader from './components/layout/GlobalHeader.vue';
 import GlobalFooter from './components/layout/GlobalFooter.vue';
 import FloatButtons from './plugins/FloatButtons.vue';
-import {useUserStore} from "./store/index.js";
+import { useUserStore } from "./store/index.js";
+import Swal from 'sweetalert2';
 
 const route = useRoute();
 const store = useUserStore();
+const notification = ref<string | null>(null);
 
 const appClass = computed(() => {
     // 判断当前路由是否是后台页面
@@ -26,7 +32,34 @@ const appClass = computed(() => {
 const isLogin = computed(() => {
     const path = route.path;
     return (path.startsWith('/admin') || path.startsWith('/writer') || path === '/user') && !store.isLoggedIn();
-})
+});
+
+const showNotification = (msg: string) => {
+    notification.value = msg;
+    setTimeout(() => {
+        closeNotification();
+    }, 5000); // 5秒后自动关闭通知
+};
+
+const closeNotification = () => {
+    notification.value = null;
+};
+
+// 模拟从后端获取通知
+const fetchNotification = async () => {
+    try {
+        const response = await fetch('/api/notifications');
+        const data = await response.json();
+        if (data.message) {
+            showNotification(data.message);
+        }
+    } catch (error) {
+        console.error('Error fetching notification:', error);
+    }
+};
+
+// 在组件挂载时获取通知
+fetchNotification();
 </script>
 
 <style scoped>
@@ -34,8 +67,6 @@ const isLogin = computed(() => {
     margin: 0 auto;
     height: 100vh;
 }
-
-
 
 /* 前端页面设置宽度为80vw */
 .frontend-layout {
@@ -84,5 +115,16 @@ body {
     .frontend-layout {
         max-width: 100vw; /* 小屏设备下宽度为100% */
     }
+}
+
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    padding: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
 }
 </style>

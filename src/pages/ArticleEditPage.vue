@@ -19,7 +19,9 @@
                     <a-form-item label="文章分类" name="articleCategory">
                         <a-select v-model:value="articleForm.articleCategory" placeholder="请选择分类">
                             <a-select-option v-for="item in categoryList" :key="item.name" :value="item.id"
-                                                @select="() => articleForm.articleCategory = item.id"/>
+                                                @select="() => articleForm.articleCategory = item.id">
+                                {{ item.name }}
+                            </a-select-option>
                         </a-select>
                     </a-form-item>
                 </a-col>

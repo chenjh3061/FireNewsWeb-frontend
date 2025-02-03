@@ -111,17 +111,18 @@ const pagination = computed(() => {
 const getArticles = () => {
     loading.value = true; // 开始加载
     myAxios.get("/article/getAllArticles").then((res) => {
-        loading.value = false; // 加载完成
+
         if (res.data.code === 0) {
             newsData.value = res.data.data; // 设置表格数据源
             console.table(res.data.data);
+            loading.value = false; // 加载完成
         } else {
             console.log("获取文章失败");
         }
     }).catch(() => {
         loading.value = false; // 加载完成，即使发生错误
         message.error("加载文章数据失败");
-    });
+    }) ;
 };
 
 // Modal 控制

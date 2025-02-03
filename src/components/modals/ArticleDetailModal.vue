@@ -15,7 +15,7 @@
             <div class="article-info">
                 <div class="article-title">{{ article?.articleTitle }}</div>
                 <div class="article-category">分类：{{
-                        mapping["articleCategory"](article.articleCategory) }}</div>
+                        mapping["articleCategory"](article).text }}</div>
                 <div class="article-author">作者：{{ article?.authorName }}</div>
                 <div class="article-time">发布时间：{{ dayjs(article?.createTime).format("YYYY-MM-DD HH:mm") }}</div>
             </div>
@@ -39,6 +39,7 @@ const props = defineProps({
     visible: Boolean, // 父组件传递的 visible
     article: Object, // 父组件传递的文章详情
 });
+const article = computed(() => props.article);
 
 const emit = defineEmits(["update:visible"]); // 定义用于触发的事件
 
@@ -52,6 +53,7 @@ const modalVisible = computed({
 const purifyHtml = (html: string) => {
     return DOMPurify.sanitize(html);
 };
+
 
 // 关闭弹窗的方法
 const closeModal = () => {

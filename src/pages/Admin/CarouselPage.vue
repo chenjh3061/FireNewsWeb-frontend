@@ -6,11 +6,12 @@
         <div class="selected-news">
             <h3>已选择的轮播新闻</h3>
             <a-table
-                    :columns="columns"
-                    :data-source="selectedNews"
-                    :pagination="{ pageSize: 5 }"
-                    bordered
-                    rowKey="id"
+                :loading="loading"
+                :columns="columns"
+                :data-source="selectedNews"
+                :pagination="{ pageSize: 5 }"
+                bordered
+                rowKey="id"
             >
                 <template #bodyCell="{ column, record }">
                     <template v-if="column.dataIndex === 'createTime'">
@@ -105,6 +106,8 @@ import {computed} from "vue";
 
 const mappings = fieldMappings;
 
+const loading = ref(false);
+
 const columns = ref<TableColumnsType>([
     {title: "文章标题", dataIndex: "articleTitle", key: "articleTitle"},
     {title: "提交时间", dataIndex: "createTime", key: "createTime",
@@ -182,6 +185,7 @@ const getCarouselNews = async () => {
 
 // 获取可添加新闻列表
 const getCarouselList = async () => {
+    loading.value = true;
     try {
         const res = await myAxios.get("/article/getAllArticles");
         if (res.data.code === 0) {
@@ -194,6 +198,8 @@ const getCarouselList = async () => {
         }
     } catch (error) {
         message.error("获取新闻列表失败！");
+    } finally {
+        loading.value = false;
     }
 };
 

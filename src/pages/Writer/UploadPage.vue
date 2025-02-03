@@ -5,16 +5,19 @@
 
             <!-- 在线编辑选项卡 -->
             <a-tab-pane key="edit" tab="在线编辑">
-                <span>支持从word文档粘贴，图片插入推荐使用url导入</span>
+                <span>支持从word文档粘贴</span>
                 <div class="editor-container">
                     <a-input
                         v-model:value="article.articleTitle"
                         placeholder="请输入文章标题"
                         class="title-input"
                     />
-                    <a-select v-model:value="article.articleCategory" placeholder="请选择分类">
+                    <span>请选择文章类别：</span>
+                    <a-select class="article-category" v-model:value="article.articleCategory" placeholder="请选择分类">
                         <a-select-option v-for="item in categoryList" :key="item.name" :value="item.id"
-                                         @select="() => article.articleCategory = item.id"/>
+                                         @select="() => article.articleCategory = item.id">
+                            {{ item.name }}
+                        </a-select-option>
                     </a-select>
                     <div class="article-good">
                         <div class="article-desc">
@@ -96,7 +99,7 @@ const article = ref({
     articleAvatar: "",
     authorId: useUserStore().userInfo.id,
 });
-const activeKey = ref("upload");
+const activeKey = ref("edit");
 
 watch(article, (newVal) => {
     console.log("文章内容变化：", newVal);
@@ -153,7 +156,7 @@ const handleChange = (info: UploadChangeParam) => {
         console.log(info.file, info.fileList);
     }
     if (status === "done") {
-        message.success(`${info.file.name} 上传成功`);
+        message.success(`${info.file.name} 上传成功, 请切换到在线编辑页查看内容.`);
         document.value = info.file.response.data;
         article.value.articleContent = info.file.response.data;
         activeKey.value = "edit";
@@ -179,6 +182,22 @@ watch(content, (newValue) => {
 
 // 提交文章
 const submitArticle = () => {
+    if (!article.value.articleContent.trim()) {
+        message.error("内容不能为空！");
+        return;
+    }
+    if (!article.value.articleCategory) {
+        message.error("文章类别不能为空！");
+        return;
+    }
+    if (!article.value.articleDesc.trim()) {
+        message.error("文章简介不能为空！");
+        return;
+    }
+    if (!article.value.articleAvatar.trim()) {
+        message.error("文章封面图片 URL 不能为空！");
+        return;
+    }
     if (!article.value.articleContent.trim()) {
         message.error("内容不能为空！");
         return;
@@ -243,7 +262,9 @@ h2 {
     font-size: 14px;
     border: 1px solid #ddd;
 }
-
+.article-category {
+    width: 50%;
+}
 .article-good {
     display: flex;
     justify-content: space-between;
