@@ -205,7 +205,11 @@ const submitArticle = () => {
     // 发送到后端
     myAxios.post("http://localhost:8089/article/addArticle", article.value)
         .then((response) => {
-            message.success(response + "文章提交成功！");
+            if (response.code === 0) {
+                message.success(response + "文章提交成功！");
+                clearEditor();
+            }
+            
         })
         .catch((error) => {
             console.error("提交失败：", error);

@@ -184,11 +184,13 @@ const submitComment = () => {
     }).then(res => {
         if (res.data.code === 0) {
             message.success("提交成功");
+            getArticles();
         } else {
             message.error(res.data.message);
         }
     }).catch(err => {
         message.error(err + "提交批注失败");
+        getArticles();
     });
 
     // 更新文章状态
