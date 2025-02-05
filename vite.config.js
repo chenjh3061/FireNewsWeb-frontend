@@ -7,6 +7,10 @@ import visualizer from "rollup-plugin-visualizer";
 
 // https://vite.dev/config/
 export default defineConfig({
+  define: {
+    'process.env': {},
+    global: {}
+  },
   plugins: [
     vue(),
     vueDevTools(),

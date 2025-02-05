@@ -30,7 +30,6 @@
                     <a-menu-item key="carousel">轮播新闻</a-menu-item>
                     <a-menu-item key="categories">分类管理</a-menu-item>
                     <a-menu-item key="newsManage">文章管理</a-menu-item>
-                    <a-menu-item key="notionManage">通知管理</a-menu-item>
                 </a-sub-menu>
                 <a-menu-item key="commentManage">
                     <CommentOutlined />
@@ -39,6 +38,10 @@
                 <a-menu-item key="userManage">
                     <user-outlined />
                     <span>用户管理</span>
+                </a-menu-item>
+                <a-menu-item key="notionManage">
+                    <VideoCameraOutlined />
+                    <span>通知管理</span>
                 </a-menu-item>
             </a-menu>
         </a-layout-sider>
@@ -72,7 +75,7 @@ import {useRoute} from "vue-router";
 
 const route = useRoute();
 
-const selectedKeys = ref<string[]>(['dashboard']);
+const selectedKeys = ref<string[]>(['']);
 
 const checkRouter = (to: any) => {
     console.log(router)

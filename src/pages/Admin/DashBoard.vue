@@ -53,24 +53,12 @@
                 <div ref="lineChart" id="lineChart"></div>
             </div>
             <!-- 动态信息 -->
-            <div class="activity-section">
+            <div class="activity-section" >
                 <h3>最近动态</h3>
-                <ul class="activity-list">
+                <ul class="activity-list" v-for="log in logs">
                     <li>
-                        <p>新增用户：张三</p>
-                        <span>1小时前</span>
-                    </li>
-                    <li>
-                        <p>新闻发布：火灾最新动态</p>
-                        <span>2小时前</span>
-                    </li>
-                    <li>
-                        <p>系统更新：版本 1.0.3 发布</p>
-                        <span>3小时前</span>
-                    </li>
-                    <li>
-                        <p>管理员登录：李四</p>
-                        <span>5小时前</span>
+                        <p>{{ log.name }}</p>
+                        <span>{{ log.createTime }}</span>
                     </li>
                 </ul>
             </div>
@@ -83,6 +71,8 @@ import {nextTick, onMounted, ref} from 'vue';
 import * as echarts from 'echarts';
 import myAxios from "../../plugins/myAxios";
 import {useUserStore} from "../../store/index";
+import {iframe} from "jodit/types/plugins/iframe/iframe";
+import {message} from "ant-design-vue";
 
 const userStore = useUserStore();
 
@@ -92,7 +82,7 @@ const DashboardData = ref<any>({
     articleNum: 0,
     runningDays: 0
 });
-const getData = async () => {
+const getDashboardData = async () => {
     try {
         const response = await myAxios.get('admin/getDashboardData');
         DashboardData.value = response.data.data;
@@ -103,6 +93,21 @@ const getData = async () => {
         console.error("Error fetching dashboard data:", error);
     }
 };
+const logs = ref();
+const getRecentLog = async () => {
+  try {
+    await myAxios.get('admin/getRecentLog').then(res =>{
+      if (res.data.code === 0){
+        logs.value = res.data.data.slice(0, 5);
+        console.log(res.data.data);
+      } else {
+        logs.value = [];
+      }
+    });
+  } catch (e) {
+    message.error('获取日志失败');
+  }
+}
 
 
 
@@ -152,7 +157,8 @@ const initChart = () => {
     }
 }
 onMounted(() => {
-    getData();
+    getDashboardData();
+    getRecentLog();
 });
 </script>
 

@@ -66,7 +66,7 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 import { message, TableColumnsType } from "ant-design-vue";
-import myAxios from "../../plugins/myAxios";
+import myAxios from "../../../plugins/myAxios";
 
 const loading = ref(false);
 

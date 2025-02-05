@@ -3,7 +3,16 @@
         <h2 class="title">文章管理</h2>
 
         <!-- 操作按钮，点击弹出新闻管理的Modal -->
-        <a-button type="primary" @click="addArticle">新增文章</a-button>
+        <a-button style="display: inline-block" type="primary" @click="addArticle">新增文章</a-button>
+        <a-input-search
+            v-model:value="searchParams"
+            class="search-bar"
+            style="width: 50%; display: inline-block; margin-left: 20px"
+            enter-button="搜索"
+            placeholder="请输入搜索内容"
+            @search="onSearch"
+        ></a-input-search>
+        <a-button style="display: inline-block; margin-left: 20px" type="primary" @click="clearSearch">重置</a-button>
 
         <!-- 新闻列表 -->
         <a-skeleton :loading="loading" active :style="{margin: '20px',}">
@@ -52,12 +61,12 @@
 <script lang="ts" setup>
 import {computed, onMounted, ref} from "vue";
 import {message, TableColumnsType} from "ant-design-vue";
-import myAxios from "../../plugins/myAxios";
-import JoditEditor from "../../plugins/JoditEditor.vue";
+import myAxios from "../../../plugins/myAxios";
+import JoditEditor from "../../../plugins/JoditEditor.vue";
 import dayjs from "dayjs";
-import ArticleModal from "../../components/modals/ArticleDetailModal.vue";
-import {fieldMappings} from "../../utils/mapping.js";
-import {useArticleStore} from "../../store";
+import ArticleModal from "../../../components/modals/ArticleDetailModal.vue";
+import {fieldMappings} from "../../../utils/mapping.js";
+import {useArticleStore} from "../../../store";
 import {useRouter} from "vue-router";
 
 const mappings = fieldMappings;
@@ -157,6 +166,39 @@ const editeArticle = (record: any) => {
 const deleteNews = (id: number) => {
     newsData.value = newsData.value.filter(news => news.id !== id);
     message.success("新闻删除成功");
+};
+
+const searchParams = ref("");
+
+const onSearch = () => {
+    if (searchParams.value.trim() === "") {
+        message.error("请输入搜索内容");
+        return;
+    }
+    try {
+      const query = (searchParams.value.trim());;
+        myAxios.get(`/article/searchArticle` ,{
+          params: {
+            page: currentPage.value - 1,
+            size: pageSize.value,
+            searchParams: query,
+          }
+        } ).then((res) => {
+            if (res.data.code === 0) {
+                newsData.value = res.data.data; // 设置表格数据源
+                console.table(res.data.data);
+            } else {
+                message.error("搜索失败");
+            }
+        });
+    } catch (error) {
+        message.error("搜索失败");
+    }
+};
+
+const clearSearch = () => {
+    searchParams.value = "";
+    getArticles();
 };
 
 onMounted(() => {

@@ -48,10 +48,10 @@
 <script lang="ts" setup>
 import {computed, ref} from "vue";
 import {message, TableColumnsType} from "ant-design-vue";
-import myAxios from "../../plugins/myAxios";
-import {fieldMappings} from "../../utils/mapping.js";
+import myAxios from "../../../plugins/myAxios";
+import {fieldMappings} from "../../../utils/mapping.js";
 import dayjs from "dayjs";
-import ArticleModal from "../../components/modals/ArticleDetailModal.vue";
+import ArticleModal from "../../../components/modals/ArticleDetailModal.vue";
 
 const mappings = fieldMappings;
 

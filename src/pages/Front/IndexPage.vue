@@ -177,7 +177,6 @@ const getNews = async () => {
         myAxios.get("/article/getHotNews").then((res) => {
             if (res.data.code === 0) {
                 hotArticles.value = res.data.data.slice(0, 5);
-                console.log(hotArticles.value);
                 loadingInstance.value = false;
             } else {
                 console.log('获取热点新闻失败');
