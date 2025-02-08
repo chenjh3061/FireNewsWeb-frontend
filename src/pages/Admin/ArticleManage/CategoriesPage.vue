@@ -101,26 +101,29 @@ const addCategory = () => {
         message.warning("分类名称不能为空！");
         return;
     }
-    if (categories.value.some((cat) => cat.category === trimmedCategory)) {
+
+    const exists = categories.value.some(cat => cat.category === trimmedCategory);
+    if (exists) {
         message.warning("该分类已存在！");
         return;
     }
-    loading.value = true;
 
+    loading.value = true;
     myAxios.post("/categories/addCategory", { category: trimmedCategory })
         .then(res => {
+            loading.value = false;
             if (res.data.code === 0) {
                 message.success("分类添加成功！");
                 getCategory();
             } else {
                 message.error(res.data.message);
             }
-            loading.value = false;
         })
         .catch(e => {
-            message.error("添加分类失败");
             loading.value = false;
+            message.error(`添加分类失败: ${e.message}`);
         });
+
     newCategory.value = "";
 };
 
@@ -130,7 +133,12 @@ const editedCategory = ref("");
 const currentEditCategoryId = ref(null);
 
 // 打开编辑分类模态框
-const editCategory = (category: any) => {
+interface Category {
+    categoryId: number;
+    category: string;
+}
+
+const editCategory = (category: Category) => {
     editedCategory.value = category.category;
     currentEditCategoryId.value = category.categoryId;
     isEditModalVisible.value = true;
@@ -143,12 +151,14 @@ const submitEdit = () => {
         message.warning("分类名称不能为空！");
         return;
     }
+
     loading.value = true;
     myAxios.post("/categories/editCategory", {
         categoryId: currentEditCategoryId.value,
         category: trimmedCategory
     })
         .then(res => {
+            loading.value = false;
             if (res.data.code === 0) {
                 message.success("分类编辑成功！");
                 getCategory();
@@ -156,11 +166,10 @@ const submitEdit = () => {
             } else {
                 message.error(res.data.message);
             }
-            loading.value = false;
         })
         .catch(e => {
-            message.error("编辑分类失败");
             loading.value = false;
+            message.error(`编辑分类失败: ${e.message}`);
         });
 };
 

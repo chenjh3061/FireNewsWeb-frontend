@@ -50,15 +50,16 @@ const modalVisible = computed({
 });
 
 // 净化 HTML 标签，防止 XSS
-const purifyHtml = (html: string) => {
+const purifyHtml = (html: string | undefined | null) => {
+    if (html == null) {
+        return ''; // 返回空字符串，避免对未定义或空值进行净化处理
+    }
     return DOMPurify.sanitize(html);
 };
 
 
 // 关闭弹窗的方法
-const closeModal = () => {
-    modalVisible.value = false; // 设置 visible 为 false
-};
+const closeModal = () => modalVisible.value = false;
 </script>
 
 <style scoped>

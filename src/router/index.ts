@@ -25,6 +25,8 @@ import {useErrorStore, useUserStore} from "../store";
 import myAxios from "../plugins/myAxios";
 import checkAccess from "../access/checkAccess";
 import {message} from "ant-design-vue";
+import FileManage from "../pages/Admin/DataCenter/FileManage.vue";
+import LogManage from "../pages/Admin/DataCenter/LogManage.vue";
 
 const routes: Array<RouteRecordRaw> = [
     {
@@ -118,6 +120,16 @@ const routes: Array<RouteRecordRaw> = [
                 path: "dashboard",
                 name: "dashboard",
                 component: DashBoard,
+            },
+            {
+                path: "fileManage",
+                name: "fileManage",
+                component: FileManage,
+            },
+            {
+                path: "logManage",
+                name: "logManage",
+                component: LogManage,
             },
             {
                 path: "review",

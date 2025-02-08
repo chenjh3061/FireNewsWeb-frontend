@@ -10,6 +10,7 @@
                 enter-button="搜索"
                 @search="handleSearch"
             />
+            <a-button type="primary" @click="handleReset">重置</a-button>
         </div>
 
         <!-- 评论列表表格 -->
@@ -32,7 +33,7 @@
                 <template v-if="column.dataIndex === 'user'">
                     <div class="user-info">
                         <a-avatar :src="record.userAvatar" style="margin-right: 8px" />
-                            <div>{{ record.userName }}</div>
+                        <div>{{ record.userName }}</div>
                     </div>
                 </template>
                 <template v-if="column.dataIndex === 'status'">
@@ -56,75 +57,55 @@ import myAxios from "../../plugins/myAxios";
 
 // 搜索关键字
 const searchQuery = ref("");
-
-// 假数据（评论列表）
-const allComments = ref([
-    {
-        id: 1,
-        content: "这篇文章写得真棒！",
-        articleTitle: "如何优化 Vue 性能",
-        userAvatar: "https://via.placeholder.com/40",
-        userName: "张三",
-        status: "approved",
-    },
-    {
-        id: 2,
-        content: "我有不同的看法",
-        articleTitle: "如何优化 Vue 性能",
-        userAvatar: "https://via.placeholder.com/40",
-        userName: "李四",
-        status: "pending",
-    },
-    {
-        id: 3,
-        content: "受教了！",
-        articleTitle: "Vue 3 新特性详解",
-        userAvatar: "https://via.placeholder.com/40",
-        userName: "王五",
-        status: "approved",
-    },
-    {
-        id: 4,
-        content: "写得很好，值得收藏",
-        articleTitle: "使用 Vuex 管理状态",
-        userAvatar: "https://via.placeholder.com/40",
-        userName: "赵六",
-        status: "approved",
-    },
-    {
-        id: 5,
-        content: "讲解清晰易懂",
-        articleTitle: "Vue Router 实战教程",
-        userAvatar: "https://via.placeholder.com/40",
-        userName: "孙七",
-        status: "pending",
-    },
-]);
+// 评论列表
+const allComments = ref<any[]>([]);
+// 当前页码
+const currentPage = ref(1);
+// 每页条数
+const pageSize = ref(20);
+// 原始评论列表，用于搜索后恢复数据
+const originalComments = ref<any[]>([]);
 
 // 从后端获取评论
-const getComments = () => {
+const getComments = async () => {
     try {
-        myAxios.get("/comments/getAllComments").then((res) => {
-            allComments.value = res.data.data;
+        const res = await myAxios.get("/comments/getAllCommentsByPage", {
+            params: { page: currentPage.value - 1, size: pageSize.value },
         });
+        allComments.value = res.data.data;
+        originalComments.value = res.data.data;
     } catch (error) {
-        message.error("获取评论失败！");
+        message.error("获取评论失败！" + (error as Error).message);
     }
-}
-getComments();
+};
+
+onMounted(() => {
+    getComments();
+});
 
 // 表格列配置
 const columns = ref([
-    { title: "评论内容", dataIndex: "content", key: "content", width: 300,
+    {
+        title: "评论内容",
+        dataIndex: "content",
+        key: "content",
+        width: 300,
         sorter: (a: any, b: any) => a.content.length - b.content.length,
         sortDirections: ["ascend", "descend"],
     },
-    { title: "文章", dataIndex: "article", key: "article", width: 200,
-        sorter: (a: any, b: any) =>
-            a.articleTitle.localeCompare(b.articleTitle),
+    {
+        title: "文章",
+        dataIndex: "article",
+        key: "article",
+        width: 200,
+        sorter: (a: any, b: any) => a.articleTitle.localeCompare(b.articleTitle),
         sortDirections: ["ascend", "descend"],
     },
-    { title: "用户", dataIndex: "user", key: "user", width: 200,
+    {
+        title: "用户",
+        dataIndex: "user",
+        key: "user",
+        width: 200,
         sorter: (a: any, b: any) => a.userName.localeCompare(b.userName),
         sortDirections: ["ascend", "descend"],
     },
@@ -134,13 +115,8 @@ const columns = ref([
         key: "status",
         width: 100,
         align: "center",
-        sorter : (a: any, b: any) => a.status === 'approved' ? -1 : 1,
+        sorter: (a: any, b: any) => (a.status === "approved" ? -1 : 1),
         sortDirections: ["ascend", "descend"],
-        // filters: [
-        //     { text: "已显示", value: "approved" },
-        //     { text: "未显示", value: "pending" },
-        // ],
-        // onFilter: (value: string, record: any) => record.status === value,
     },
     {
         title: "操作",
@@ -152,49 +128,43 @@ const columns = ref([
 ]);
 
 // 分页配置
-const currentPage = ref(1);
-const pageSize = ref(10);
 const pagination = computed(() => {
     return {
         current: currentPage.value,
         pageSize: pageSize.value,
         total: allComments.value.length,
-        showTotal: (total) => '共'+total+'条记录',
+        showTotal: (total) => `共${total}条记录`,
         showSizeChanger: true,
-        pageSizeOptions: ['10', '20', '30', '50'],
-        onChange: (page: number, pageSize: number) => {
-            pagination.value.current = page;
-            pagination.value.pageSize = pageSize;
+        pageSizeOptions: ["10", "20", "30", "50"],
+        onChange: (page: number, size: number) => {
+            currentPage.value = page;
+            pageSize.value = size;
+            getComments();
         },
         onShowSizeChange: (current: number, size: number) => {
-            currentPage.value = current;  // 更新当前页
-            pageSize.value = size;         // 更新每页条数
+            currentPage.value = current;
+            pageSize.value = size;
+            getComments();
         },
-    }
+    };
 });
 
 // 切换评论状态
-const toggleStatus = (record: any) => {
-    console.table(record)
+const toggleStatus = async (record: any) => {
     try {
-        myAxios.post("/comments/changeCommentStatus", {
+        const res = await myAxios.post("/comments/changeCommentStatus", {
             id: record.id,
             status: record.isShow === 1 ? 0 : 1,
-        }).then((res) => {
-            if (res.data.code !== 0) {
-                message.error("更新评论状态失败！");
-                return;
-            } else {
-                message.success("评论状态已更新！");
-                record.isShow = res.data.data;
-            }
         });
+        if (res.data.code !== 0) {
+            message.error("更新评论状态失败！");
+        } else {
+            message.success("评论状态已更新！");
+            record.isShow = res.data.data;
+        }
     } catch (error) {
-        message.error("更新评论状态失败！");
-    } finally {
-
+        message.error("更新评论状态失败！" + (error as Error).message);
     }
-    // message.success("评论状态已更新！");
 };
 
 // 删除评论
@@ -202,26 +172,53 @@ const deleteComment = (record: any) => {
     Modal.confirm({
         title: "确认删除",
         content: `确定要删除这条评论吗？`,
-        onOk() {
-            allComments.value = allComments.value.filter(
-                (comment) => comment.id !== record.id
-            );
-            pagination.value.total = allComments.value.length;
-            message.success("评论已删除！");
+        async onOk() {
+            try {
+                const res = await myAxios.delete("/comments/deleteCommentById", {
+                    params: { id: record.id },
+                });
+                if (res.data.code === 0) {
+                    allComments.value = allComments.value.filter(
+                        (comment) => comment.id !== record.id
+                    );
+                    originalComments.value = originalComments.value.filter(
+                        (comment) => comment.id !== record.id
+                    );
+                    pagination.value.total = allComments.value.length;
+                    message.success("评论已删除！");
+                }
+            } catch (error) {
+                message.error("删除评论失败！" + (error as Error).message);
+            }
         },
     });
 };
 
-const searchList = ref([]);
 // 搜索评论
-const handleSearch = () => {
-    if (!searchQuery.value) return;
-    console.log(searchQuery.value);
-    searchList.value = allComments.value;
-    allComments.value = allComments.value.filter((item) =>
-        item.articleTitle.includes(searchQuery.value)
-    );
-    pagination.value.current = 1; // 搜索后重置到第一页
+const handleSearch = async () => {
+    if (!searchQuery.value) {
+        message.info("请输入搜索内容！");
+        return;
+    }
+    try {
+        const res = await myAxios.get("/comments/searchCommentsByPage", {
+            params: { keyword: searchQuery.value },
+        });
+        if (res.data.code === 0) {
+            allComments.value = res.data.data;
+            pagination.value.current = 1;
+            pagination.value.total = allComments.value.length;
+        } else {
+            message.error("搜索失败！");
+        }
+    } catch (error) {
+        message.error("搜索失败！" + (error as Error).message);
+    }
+};
+
+const handleReset = () => {
+    searchQuery.value = "";
+    getComments();
 };
 </script>
 
@@ -236,6 +233,7 @@ h2 {
 
 .search-bar {
     margin-bottom: 20px;
+    display: flex;
 }
 
 .comment-content {

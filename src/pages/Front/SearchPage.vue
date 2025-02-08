@@ -49,6 +49,7 @@ import { useRouter, useRoute } from 'vue-router';
 import { LeftOutlined } from '@ant-design/icons-vue';
 import myAxios from "../../plugins/myAxios";
 import { useArticleStore, useHistoryStore } from "../../store/index";
+import { message } from 'ant-design-vue'; // 引入 message 对象
 
 const router = useRouter();
 const route = useRoute();
@@ -66,18 +67,19 @@ const pageSize = ref(20); // 每页显示的记录数
 const total = ref(0); // 总记录数
 
 // 根据查询参数进行搜索
+
+
 const onSearch = async () => {
-    if (!searchParams.value.text.trim()) {
+    const trimmedText = searchParams.value.text.trim(); // 只调用一次 trim()
+    if (!trimmedText) {
         message.warning('请输入搜索内容');
         return;
     }
 
-    const query = (searchParams.value.text.trim());
-
     try {
         const res = await myAxios.get(`/article/searchArticle`, {
             params: {
-                searchParams: query,
+                searchParams: trimmedText,
                 page: currentPage.value,
                 size: pageSize.value
             }
@@ -86,15 +88,15 @@ const onSearch = async () => {
         if (res.data?.code === 0 && Array.isArray(res.data.data)) {
             searchResults.value = res.data.data;
             total.value = res.data.message || 0;
-            useHistoryStore().addSearchHistory(searchParams.value.text);
+            useHistoryStore().addSearchHistory(trimmedText);
         } else {
             searchResults.value = [];
             total.value = 0;
-            message.error('搜索失败');
+            message.error('搜索失败：未找到相关数据或数据格式错误');
         }
     } catch (error) {
-        console.error('搜索失败', error);
-        message.error('请求失败，请检查网络');
+        console.error('搜索请求失败', error);
+        message.error('请求失败，请检查网络或联系管理员');
     }
 };
 

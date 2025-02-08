@@ -9,11 +9,11 @@
         <!-- 大图展示区域 -->
         <div class="highlight-section">
             <div v-for="article in articles.slice(0, 1)" :key="article.id" class="highlight-item">
-                <img :src="article.coverImage" alt="Article Image" class="highlight-image"/>
+                <img :src="article.articleAvatar" alt="Article Image" class="highlight-image"/>
                 <div class="highlight-content">
                     <h3>{{ article.articleTitle }}</h3>
                     <p class="article-meta">发表于: {{ article.createTime }}</p>
-                    <p class="article-summary">{{ article.articleContent }}</p>
+                    <p class="article-summary">{{ article.articleDesc }}</p>
                     <a class="read-more" @click.prevent="viewArticleDetail(article.id, article)">阅读更多</a>
                 </div>
             </div>
@@ -24,12 +24,12 @@
             <!-- 图文结合布局 -->
             <div v-for="article in articles.slice(1, 4)" :key="article.id" class="article-item">
                 <div class="article-image">
-                    <img :src="article.coverImage" alt="Article Image"/>
+                    <img :src="article.articleAvatar" alt="Article Image"/>
                 </div>
                 <div class="article-content">
                     <h3>{{ article.articleTitle }}</h3>
                     <p class="article-meta">发表于: {{ article.createTime }}</p>
-                    <p class="article-body">{{ article.articleContent }}</p>
+                    <p class="article-body">{{ article.articleDesc }}</p>
                     <div class="article-footer">
                         <a class="read-more" @click.prevent="viewArticleDetail(article.id, article)">阅读更多</a>
                     </div>
@@ -43,7 +43,7 @@
                     <p class="article-meta">发表于: {{ article.createTime }}</p>
                 </div>
                 <div class="article-body">
-                    <p>{{ article.articleContent }}</p>
+                    <p>{{ article.articleDesc }}</p>
                 </div>
                 <div class="article-footer">
                     <a class="read-more" @click.prevent="viewArticleDetail(article.id, article)">阅读更多</a>
@@ -67,7 +67,8 @@ const articles = ref([
         articleTitle: '火灾预防小常识',
         createTime: '2024-12-01',
         articleContent: '火灾是一种极其危险的灾害，提前了解一些火灾预防常识对减少火灾发生的几率至关重要...',
-        coverImage: 'https://via.placeholder.com/800x400?text=Fire+Prevention',
+        articleAvatar: 'https://via.placeholder.com/800x400?text=Fire+Prevention',
+        articleDesc: '123',
         url: '#'
     },
     {
@@ -75,7 +76,8 @@ const articles = ref([
         articleTitle: '火灾报警系统的重要性',
         createTime: '2024-12-02',
         articleContent: '火灾报警系统是早期火灾预警的关键，可以在火灾发生时及时报警，挽救生命...',
-        coverImage: 'https://via.placeholder.com/600x400?text=Fire+Alarm+System',
+        articleAvatar: 'https://via.placeholder.com/600x400?text=Fire+Alarm+System',
+        articleDesc: '123',
         url: '#'
     },
     {
@@ -83,7 +85,8 @@ const articles = ref([
         articleTitle: '灭火器使用指南',
         createTime: '2024-12-03',
         articleContent: '灭火器是扑灭初起火灾的重要工具，了解其正确使用方法是每个人应具备的基本消防常识...',
-        coverImage: 'https://via.placeholder.com/600x400?text=Fire+Extinguisher',
+        articleAvatar: 'https://via.placeholder.com/600x400?text=Fire+Extinguisher',
+        articleDesc: '123',
         url: '#'
     },
     {
@@ -91,7 +94,8 @@ const articles = ref([
         articleTitle: '家庭火灾防范措施',
         createTime: '2024-12-04',
         articleContent: '家庭火灾防范措施至关重要，及时了解并准备必要的灭火工具，能够有效减少灾害损失...',
-        coverImage: 'https://via.placeholder.com/600x400?text=Home+Fire+Prevention',
+        articleAvatar: 'https://via.placeholder.com/600x400?text=Home+Fire+Prevention',
+        articleDesc: '123',
         url: '#'
     },
     {
@@ -99,7 +103,8 @@ const articles = ref([
         articleTitle: '火灾逃生技巧',
         createTime: '2024-12-05',
         articleContent: '火灾发生时如何有效逃生是每个人都需要知道的常识，正确的逃生方法能大大增加生还几率...',
-        coverImage: 'https://via.placeholder.com/600x400?text=Fire+Escape',
+        articleAvatar: 'https://via.placeholder.com/600x400?text=Fire+Escape',
+        articleDesc: '123',
         url: '#'
     },
     {
@@ -107,33 +112,37 @@ const articles = ref([
         articleTitle: '公共场所火灾安全',
         createTime: '2024-12-06',
         articleContent: '在公共场所发生火灾时，掌握火灾安全措施非常重要，大家需要知道如何在紧急情况下保护自己...',
-        coverImage: 'https://via.placeholder.com/600x400?text=Public+Fire+Safety',
+        articleAvatar: 'https://via.placeholder.com/600x400?text=Public+Fire+Safety',
+        articleDesc: '123',
         url: '#'
     }
 ]);
 const scienceArticles  = ref([]);
 // 后端获取科普文章
 const getScienceArticles = () => {
-    myAxios.get("/article/getHotScience").then(res => {
-        try {
+    myAxios.get("/article/getHotScience")
+        .then(res => {
             if (res.status === 200) {
-                scienceArticles.value = res.data;
+                articles.value = res.data.data;
             } else {
-                console.log("获取科普文章失败");
+                console.error(`获取科普文章失败，HTTP状态码: ${res.status}`);
+                alert(`获取科普文章失败，HTTP状态码: ${res.status}`);
             }
-        } catch (e) {
-            console.log(e);
-        }
-    })
+        })
+        .catch(error => {
+            console.error('获取科普文章时发生错误:', error);
+            alert('获取科普文章时发生错误，请稍后重试。');
+        });
 }
 // 点击新闻详情，跳转到新闻详情页面
-const viewArticleDetail = (newsId, newsData) => {
-    useArticleStore().setSelectedArticle(newsData);
-    console.log(newsData)
+const viewArticleDetail = (articleId, articleData) => {
+    useArticleStore().setSelectedArticle(articleData);
     router.push({
         path: '/article',
-        params: { id: newsId },
+        params: { id: articleId },
     });
+    // 点击跳转之后页面平滑滚动到顶部
+    window.scrollTo(0, 0);
 };
 onMounted(() => {
     getScienceArticles();

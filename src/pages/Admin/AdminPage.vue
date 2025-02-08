@@ -17,10 +17,17 @@
                 @select="handleSelect"
             >
                 <a-menu-item key="dashboard">
-                    <PieChartOutlined />
+                    <GlobalOutlined />
                     <span>系统首页</span>
                 </a-menu-item>
-
+                <a-sub-menu key="data-center">
+                    <template #title>
+                        <PieChartOutlined />
+                        <span>数据中心</span>
+                    </template>
+                    <a-menu-item key="fileManage">附件管理</a-menu-item>
+                    <a-menu-item key="logManage">日志管理</a-menu-item>
+                </a-sub-menu>
                 <a-sub-menu key="articles-management">
                     <template #title>
                         <upload-outlined />
@@ -69,6 +76,7 @@ import {
     CommentOutlined,
     PieChartOutlined,
     VideoCameraOutlined,
+    GlobalOutlined
 } from '@ant-design/icons-vue';
 import router, {getLoginUser} from "../../router";
 import {useRoute} from "vue-router";

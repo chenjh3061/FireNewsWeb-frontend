@@ -95,11 +95,11 @@ const errorMessage = ref("");
 const showPassword = ref(false);
 const isRegister = ref(false); // 切换登录和注册表单
 
-const onFocus = (field: "userName" | "password" | "confirmPassword") => {
+const onFocus = (field: "userAccount" | "password" | "confirmPassword") => {
     isFocused.value[field] = true;
 };
 
-const onBlur = (field: "userName" | "password" | "confirmPassword") => {
+const onBlur = (field: "userAccount" | "password" | "confirmPassword") => {
     if (!userForm.value[field]) {
         isFocused.value[field] = false;
     }

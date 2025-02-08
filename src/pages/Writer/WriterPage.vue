@@ -1,6 +1,6 @@
 <template>
     <a-layout class="writer-page">
-        <a-layout-sider class="writer-sider" :width="siderWidth">
+        <a-layout-sider class="writer-sider" :style="{width: '200px'}">
             <div class="side-title">作者管理页面</div>
             <a-menu
                 v-model:selectedKeys="selectedKeys"

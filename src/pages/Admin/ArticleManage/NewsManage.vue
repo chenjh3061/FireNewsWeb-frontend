@@ -175,25 +175,24 @@ const onSearch = () => {
         message.error("请输入搜索内容");
         return;
     }
-    try {
-      const query = (searchParams.value.trim());;
-        myAxios.get(`/article/searchArticle` ,{
-          params: {
+
+    const query = searchParams.value.trim();
+    myAxios.get(`/article/searchArticle`, {
+        params: {
             page: currentPage.value - 1,
             size: pageSize.value,
             searchParams: query,
-          }
-        } ).then((res) => {
-            if (res.data.code === 0) {
-                newsData.value = res.data.data; // 设置表格数据源
-                console.table(res.data.data);
-            } else {
-                message.error("搜索失败");
-            }
-        });
-    } catch (error) {
+        }
+    }).then((res) => {
+        if (res.data.code === 0) {
+            newsData.value = res.data.data; // 设置表格数据源
+            console.table(res.data.data);
+        } else {
+            message.error("搜索失败");
+        }
+    }).catch((error) => {
         message.error("搜索失败");
-    }
+    });
 };
 
 const clearSearch = () => {
