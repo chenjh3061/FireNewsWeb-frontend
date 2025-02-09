@@ -96,7 +96,9 @@ const getDashboardData = async () => {
 const logs = ref();
 const getRecentLog = async () => {
   try {
-    await myAxios.get('admin/getRecentLog').then(res =>{
+    await myAxios.get('admin/getRecentLog',{
+      params: {page: 1, size: 10},
+    }).then(res =>{
       if (res.data.code === 0){
         logs.value = res.data.data.slice(0, 5);
         console.log(res.data.data);

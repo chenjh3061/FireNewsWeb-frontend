@@ -21,20 +21,23 @@
           :pagination="pagination"
           :rowSelection="rowSelection"
           :loading="loading"
+          @resizeColumn="handleResizeColumn"
       >
-        <!-- 格式化创建时间 -->
-        <template #createTime="{ text }">
-          {{ formatTime(text) }}
+        <template #bodyCell="{ column, record }">
+          <template v-if="column.dataIndex === 'createTime'">
+            {{ record.createTime ? dayjs(record.startTime).format('YYYY-MM-DD HH:mm') : '未设置' }}
+          </template>
+          <!-- 操作列：删除按钮 -->
+          <template v-if="column.dataIndex === 'action'">
+            <a-popconfirm
+                title="确定删除吗？"
+                @confirm="() => deleteLog(record.id)"
+            >
+              <a-button type="link" danger>删除</a-button>
+            </a-popconfirm>
+          </template>
         </template>
-        <!-- 操作列：删除按钮 -->
-        <template #action="{ record }">
-          <a-popconfirm
-              title="确定删除吗？"
-              @confirm="() => deleteLog(record.id)"
-          >
-            <a-button type="link" danger>删除</a-button>
-          </a-popconfirm>
-        </template>
+
       </a-table>
     </a-card>
   </div>
@@ -45,35 +48,48 @@ import { ref, computed, onMounted } from 'vue';
 import { message, Modal } from 'ant-design-vue';
 import axios from 'axios';
 import dayjs from 'dayjs';
+import myAxios from "@/plugins/myAxios";
 
 // 日志数据、分页、加载状态、选中项
 const logs = ref([]);
 const loading = ref(false);
 const selectedRowKeys = ref<number[]>([]);
 const currentPage = ref(1);
-const pageSize = ref(10);
+const pageSize = ref(20);
 const total = ref(0);
 
 // 表格列配置
-const columns = [
-  { title: '用户名称', dataIndex: 'userName', key: 'userName' },
-  { title: '请求方式', dataIndex: 'requestMethod', key: 'requestMethod' },
-  { title: '请求路径', dataIndex: 'requestPath', key: 'requestPath' },
-  { title: '业务名称', dataIndex: 'businessName', key: 'businessName' },
-  { title: '请求 IP', dataIndex: 'requestIP', key: 'requestIP' },
-  { title: '创建时间', dataIndex: 'createTime', key: 'createTime' },
-  { title: '操作', dataIndex: 'action', key: 'action' },
-];
+const columns = ref([
+  { title: '用户名称', dataIndex: 'userAccount', key: 'userAccount' , resizable: true},
+  { title: '请求方式', dataIndex: 'requestMethod', key: 'requestMethod' , resizable: true},
+  { title: '请求路径', dataIndex: 'requestPath', key: 'requestPath' , resizable: true},
+  { title: '业务名称', dataIndex: 'name', key: 'name' , resizable: true},
+  { title: '请求 IP', dataIndex: 'requestIP', key: 'requestIP' , resizable: true},
+  { title: '创建时间', dataIndex: 'createTime', key: 'createTime' , resizable: true},
+  { title: '操作', dataIndex: 'action', key: 'action' , resizable: true},
+]);
+
+// 表格列宽拖动
+const handleResizeColumn = (w, column) => {
+  column.width = w;
+};
 
 // 分页配置（使用 computed 保持数据联动）
+// 分页设置
 const pagination = computed(() => ({
   current: currentPage.value,
   pageSize: pageSize.value,
-  total: total.value,
-  onChange: (page: number, size: number) => {
+  total: logs.value.length,
+  showTotal: (total) => `共 ${total} 条记录`,
+  showSizeChanger: true,
+  pageSizeOptions: ["10", "20", "30", "50"],
+  onChange: (page, size) => {
     currentPage.value = page;
     pageSize.value = size;
-    fetchLogs();
+  },
+  onShowSizeChange: (current, size) => {
+    currentPage.value = current;
+    pageSize.value = size;
   },
 }));
 
@@ -89,10 +105,10 @@ const rowSelection = computed(() => ({
 const fetchLogs = async () => {
   loading.value = true;
   try {
-    const res = await axios.get('/admin/logs', {
+    const res = await myAxios.get('/admin/getRecentLog', {
       params: { page: currentPage.value, size: pageSize.value },
     });
-    logs.value = res.data.records;
+    logs.value = res.data.data;
     total.value = res.data.total;
   } catch (error) {
     message.error('获取日志失败');
@@ -150,7 +166,6 @@ onMounted(() => {
 }
 
 .table-operations {
-  margin-bottom: 16px;
   display: flex;
   justify-content: flex-end;
 }

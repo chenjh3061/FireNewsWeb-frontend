@@ -16,6 +16,8 @@ import FloatButtons from './plugins/FloatButtons.vue';
 import { useUserStore } from "./store/index.js";
 import Swal from 'sweetalert2';
 import myAxios from "./plugins/myAxios";
+import 'es6-promise/auto';
+
 
 const route = useRoute();
 const store = useUserStore();

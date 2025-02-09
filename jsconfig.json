@@ -2,7 +2,9 @@
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "lib": ["dom", "es6", "es2015.promise"]
   },
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

@@ -19,6 +19,7 @@
     "dayjs": "^1.11.13",
     "dompurify": "^3.2.3",
     "echarts": "^5.5.1",
+    "es6-promise": "^4.2.8",
     "file-saver": "^2.0.5",
     "jodit": "^4.4.7",
     "lodash": "^4.17.21",
