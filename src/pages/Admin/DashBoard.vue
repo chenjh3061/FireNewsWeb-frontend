@@ -71,7 +71,6 @@ import {nextTick, onMounted, ref} from 'vue';
 import * as echarts from 'echarts';
 import myAxios from "../../plugins/myAxios";
 import {useUserStore} from "../../store/index";
-import {iframe} from "jodit/types/plugins/iframe/iframe";
 import {message} from "ant-design-vue";
 
 const userStore = useUserStore();
