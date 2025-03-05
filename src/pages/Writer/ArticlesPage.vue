@@ -84,19 +84,22 @@ const columns = ref([
 ]);
 
 // 请求文章数据
-const getArticles = () => {
-    // 请求数据
-    myAxios.get("/article/getArticlesByAuthorId", {
-                        params: { id: userStore.userInfo.id,}}
-    ).then((res) => {
-
-        if (res.data.code === 0) {
-            dataSource.value = res.data.data; // 设置表格数据源
-            console.log(dataSource.value);
-        } else {
-            console.log("获取文章失败");
-        }
+const getArticles = async () => {
+  try {
+    const userId = userStore.userInfo.id; // 假设userId在请求期间不会改变，这里提前获取
+    const response = await myAxios.get("/article/getArticlesByAuthorId", {
+      params: { id: userId }
     });
+
+    if (response.data.code === 0) {
+      dataSource.value = response.data.data; // 设置表格数据源
+      console.log(dataSource.value);
+    } else {
+      console.error("获取文章失败", response.data); // 使用console.error以便在日志中更容易区分错误信息
+    }
+  } catch (error) {
+    console.error("请求文章数据时发生错误", error); // 捕获并处理请求过程中可能发生的任何错误
+  }
 };
 
 // 弹窗状态及选中的文章

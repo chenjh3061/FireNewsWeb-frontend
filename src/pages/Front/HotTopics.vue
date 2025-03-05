@@ -1,7 +1,7 @@
 <template>
     <a-layout class="hotTopicLayout">
         <h1 class="hot-title">热点新闻榜</h1>
-        <a-layout-content class="hotTopicContent">
+        <a-layout-content ref="tpcRef" class="hotTopicContent">
             <a-list :data-source="listData" :pagination="pagination" item-layout="vertical" size="large"
                     :style="{ width: '100%' }">
                 <template #footer>
@@ -47,6 +47,7 @@ import { ref, onMounted } from 'vue';
 import myAxios from "../../plugins/myAxios";
 import { useArticleStore } from "../../store";
 import router from "../../router";
+import {browser} from "jodit/types/core/helpers";
 
 // 使用 ref 包装 listData
 const listData = ref<any[]>([]);
@@ -88,6 +89,8 @@ const actions = [
     { icon: MessageOutlined, text: '2' },
 ];
 
+
+const tpcRef = ref(null);
 // 页面加载时获取热点新闻
 onMounted(() => {
     getHotTopics();
@@ -96,7 +99,7 @@ onMounted(() => {
 
 <style scoped>
 .hotTopicLayout {
-    min-height: 60%;
+    min-height: 70vh;
     width: 85%;
     background: #edf0f6;
     padding: 22px;
@@ -116,6 +119,7 @@ onMounted(() => {
 
 .hotTopicContent {
     width: 100%;
+    height: 100%;
     background: #eecfc9;
     display: flex;
     margin: 0 auto;
@@ -146,7 +150,6 @@ onMounted(() => {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(255, 255, 255, 0.4); /* 半透明灰白色蒙板 */
     transition: all 0.3s ease;
     z-index: -1;
 }
@@ -202,9 +205,10 @@ onMounted(() => {
 }
 
 .action {
+    position: relative;
     font-size: 14px;
     color: #fff; /* 白色字体 */
-    margin-top: 40px;
+    margin-bottom: 40px;
     margin-right: 16px;
     z-index: 2;
 }

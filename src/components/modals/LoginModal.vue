@@ -11,8 +11,8 @@
                     </span>
                     <input
                         class="input"
-                        @focus="onFocus('userName')"
-                        @blur="onBlur('userName')"
+                        @focus="onFocus('userAccount')"
+                        @blur="onBlur('userAccount')"
                         v-model="userForm.userAccount"
                         type="text"
                     />
@@ -106,48 +106,50 @@ const onBlur = (field: "userAccount" | "password" | "confirmPassword") => {
 };
 
 const togglePasswordVisibility = () => {
-    showPassword.value = !showPassword.value;
+  showPassword.value = !showPassword.value;
 };
-
 const submitForm = () => {
     if (!userForm.value.userAccount || !userForm.value.password || (isRegister.value && !userForm.value.checkPassword)) {
-        errorMessage.value = "请填写所有字段！";
-        return;
+      errorMessage.value = "请填写所有字段！";
+      return;
     }
     if (isRegister.value && userForm.value.password !== userForm.value.checkPassword) {
-        errorMessage.value = "密码不一致！";
-        return;
+      errorMessage.value = "密码不一致！";
+      return;
     }
     const apiUrl = isRegister.value ? "/user/register" : "/user/login";
     try {
-        myAxios.post(apiUrl, userForm.value,
-            {
-                headers: {'Content-Type': 'application/json'}
-            }).then((res) => {
-            if (res.data.code === 0) {
-                userStore.userInfo = res.data.data;
-                userForm.value = {
-                    userAccount: "",
-                    password: "",
-                    checkPassword: ""
-                };
-                if (isRegister.value) {
-                    message.info("注册成功！登录后请到个人页面完善个人信息！")
-                    router.go(0);
-                } else {
-                    message.info("登录成功！")
-                    router.go(0);
-                }
-                console.log(isRegister.value ? "注册成功" : "登录成功" , userStore.userInfo);
-            } else {
-                message.error(res.data.message);
-            }
-        });
+      myAxios.post(apiUrl, userForm.value,
+          {
+            headers: {'Content-Type': 'application/json'}
+          }).then((res) => {
+        if (res.data.code === 0) {
+          userStore.userInfo = res.data.data;
+          userForm.value = {
+            userAccount: "",
+            password: "",
+            checkPassword: ""
+          };
+          if (isRegister.value) {
+            message.info("注册成功！登录后请到个人页面完善个人信息！")
+            router.go(0);
+          } else {
+            message.info("登录成功！")
+            router.go(0);
+          }
+          console.log(isRegister.value ? "注册成功" : "登录成功" , userStore.userInfo);
+        } else {
+          message.error(res.data.message);
+        }
+      });
     } catch (err) {
-        errorMessage.value = isRegister.value ? "注册失败，请检查网络连接！" : "登录失败，请检查网络连接！";
+      errorMessage.value = isRegister.value ? "注册失败，请检查网络连接！" : "登录失败，请检查网络连接！";
     }
     closeModal();
+
 };
+
+
 
 const closeModal = () => {
     emit("close");

@@ -29,8 +29,8 @@
         <!-- 登录/注册模态框 -->
         <login-modal
             :visible="isLoginModalVisible"
-            @close="isLoginModalVisible = false"
             v-model="loginForm"
+            @close="isLoginModalVisible = false"
             @login="handleLogin"
         ></login-modal>
     </div>
@@ -40,7 +40,7 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useUserStore } from "../../store/index";
-import LoginModal from "@/components/modals/LoginModal.vue";
+import LoginModal from "../modals/LoginModal.vue";
 import myAxios from "../../plugins/myAxios";
 
 const isLoginModalVisible = ref(false);
