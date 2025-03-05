@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import  ACCESS_ENUM  from "../access/ACCESS_ENUM.js";
 import myAxios from "../plugins/myAxios";
 
 export const useUserStore = defineStore("user", {
@@ -6,7 +7,7 @@ export const useUserStore = defineStore("user", {
     userInfo: {
       id: null,
       userName: null,
-      userRole: null,
+      userRole: ACCESS_ENUM.NOT_LOGIN,
       userAvatar: null,
       token: null,
     },

@@ -6,7 +6,7 @@
         </div>
         <span id="title">消防新闻网</span>
         <ul id="navMenu" >
-            <li v-for="item in menuRoutes">
+            <li v-for="item in filteredMenuRoutes" :key="item.path">
                 <router-link :to="item.path" active-class="active">{{ item.meta.title }}</router-link>
             </li>
         </ul>
@@ -37,11 +37,12 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import {computed, ref} from "vue";
 import { useRouter } from "vue-router";
 import { useUserStore } from "../../store/index";
 import LoginModal from "../modals/LoginModal.vue";
 import myAxios from "../../plugins/myAxios";
+import checkAccess from "../../access/checkAccess.ts";
 
 const isLoginModalVisible = ref(false);
 
@@ -49,7 +50,23 @@ const router = useRouter();
 const userStore = useUserStore();
 
 // 过滤需要的导航路由（只显示一级路由，并且包含 meta.title）
-const menuRoutes = router.options.routes.filter(route => route.meta && route.meta.title);
+const menuRoutes = computed(() => {
+  return router.options.routes.filter(route => route.meta && route.meta?.title);
+});
+
+// 根据用户权限过滤特殊路由
+const filteredMenuRoutes = computed(() => {
+  const userRole = userStore.userInfo?.userRole; // 假设用户角色信息存储在 userInfo.role 中
+  return menuRoutes.value.filter(route => {
+    if (route.meta && route.meta.access) {
+      // 如果路由有角色要求，检查用户角色是否匹配
+      return route.meta.access.includes(userRole);
+    }
+    return true; // 没有角色要求的路由直接显示
+  });
+});
+
+
 
 // 登录表单
 const loginForm = ref({

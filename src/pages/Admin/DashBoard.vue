@@ -58,7 +58,7 @@
                 <ul class="activity-list" v-for="log in logs">
                     <li>
                         <p>{{ log.name }}</p>
-                        <span>{{ log.createTime }}</span>
+                        <span>{{ dayjs(log.createTime) }}</span>
                     </li>
                 </ul>
             </div>
@@ -72,6 +72,7 @@ import * as echarts from 'echarts';
 import myAxios from "../../plugins/myAxios";
 import {useUserStore} from "../../store/index";
 import {message} from "ant-design-vue";
+import dayjs from "dayjs";
 
 const userStore = useUserStore();
 

@@ -6,6 +6,9 @@ import dayjs from "dayjs";
 // utils.ts
 export const adjustFontSize = (size: "small" | "large" | "reset"): number => {
     const sizes = { small: 14, large: 20, reset: 16 };
+    if (!sizes.hasOwnProperty(size)) {
+        throw new Error(`Invalid size parameter: ${size}`);
+    }
     return sizes[size];
 };
 
