@@ -25,7 +25,7 @@
       >
         <template #bodyCell="{ column, record }">
           <template v-if="column.dataIndex === 'createTime'">
-            {{ record.createTime ? dayjs(record.startTime).format('YYYY-MM-DD HH:mm') : '未设置' }}
+            {{ dayjs(record.createTime).format('YYYY-MM-DD HH:mm') || '未设置' }}
           </template>
           <!-- 操作列：删除按钮 -->
           <template v-if="column.dataIndex === 'action'">
