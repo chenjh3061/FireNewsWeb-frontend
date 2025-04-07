@@ -166,8 +166,8 @@ const handleLogout = async () => {
 
 #logo img {
     display: block;
-    width: 100px;
-    height: 100px;
+    width: 5rem;
+    height: 5rem;
     border-radius: 50%;
     object-fit: cover;
     border: 1px solid #1f607e;

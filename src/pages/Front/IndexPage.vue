@@ -248,9 +248,12 @@ onMounted(() => {
 
 .carousel-container {
     position: relative;
-    max-width: 1000px;
-    min-width: 300px;
+    max-width: 70%;
+    min-width: 30rem;
     margin: 0;
+}
+.custom-carousel {
+  width: 100%;
 }
 
 .carousel-item {
@@ -259,7 +262,7 @@ onMounted(() => {
 
 .carousel-image {
     width: 100%;
-    height: 500px;
+    height: 32rem;
     object-fit: fill;
     border-radius: 8px;
 }
@@ -306,7 +309,7 @@ onMounted(() => {
 .hot-news-container {
     padding: 20px;
     background-color: #fff;
-    margin-top: 30px;
+    margin-top: 1rem;
 }
 
 .hot-news-list {

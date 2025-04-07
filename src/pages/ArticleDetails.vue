@@ -31,65 +31,35 @@
         <!-- 文章详情 -->
         <div :style="{ fontSize: fontSize + 'px', zoom: scale }" class="news-content" v-html="sanitizedArticleContent"></div>
 
-        <!-- 可拖动、可折叠的AI总结与提问窗口 -->
-        <transition name="ai-window-collapse">
-        <div
-                v-show="isAiWindowVisible"
-                ref="aiWindow"
-                id="aiWindow"
-                :style="{ top: aiWindowPosition.top + 'px', left: aiWindowPosition.left + 'px',
-                      width: aiWindowSize.width + 'px', height: aiWindowSize.height + 'px' }"
-                class="ai-window"
-                :class="{ 'ai-window-collapsed': isAiWindowCollapsed }"
-                @mousedown="startDrag"
-                @mouseup="stopDrag"
-        >
-            <div class="ai-header">
-                <span>AI总结与提问</span>
-                <a-icon type="minus" @click="toggleAiWindow"/>
-                <button @click="toggleCollapse">
-                    {{ isAiWindowCollapsed ? '展开' : '折叠' }}
-                </button>
-            </div>
-
-            <div class="ai-content" v-if="!isAiWindowCollapsed">
-                <h2>AI总结</h2>
-                <h3>请登录后使用</h3>
-                <div v-if="isAILoading" class="loading">加载中...</div>
-                <p v-else>{{ aiSummary }}</p>
-
-                <div class="question-section">
-                    <h3>提问AI</h3>
-                    <a-input
-                            v-model:value="userQuestion"
-                            allow-clear
-                            placeholder="请输入您的问题"
-                            @pressEnter="askQuestion"
-                    />
-                    <a-button :loading="isAILoading" type="primary" @click="askQuestion">提问</a-button>
-                </div>
-
-                <div v-if="aiAnswer" class="ai-answer">
-                    <h3>AI回答</h3>
-                    <p>{{ aiAnswer }}</p>
-                </div>
-
-                <div class="ai-footer">
-                    <a-button :loading="isAILoading" type="primary" @click="getAiSummary">获取AI总结</a-button>
-                </div>
-            </div>
-            <!-- 可调节大小的手柄 -->
-            <div class="resize-handle top-left" @mousedown="startResize('top-left')"></div>
-            <div class="resize-handle top-right" @mousedown="startResize('top-right')"></div>
-            <div class="resize-handle bottom-left" @mousedown="startResize('bottom-left')"></div>
-            <div class="resize-handle bottom-right" @mousedown="startResize('bottom-right')"></div>
-            <div class="resize-handle top" @mousedown="startResize('top')"></div>
-            <div class="resize-handle right" @mousedown="startResize('right')"></div>
-            <div class="resize-handle bottom" @mousedown="startResize('bottom')"></div>
-            <div class="resize-handle left" @mousedown="startResize('left')"></div>
-        </div>
-        </transition>
     </div>
+
+  <AIModal
+      v-if="showAiWindow"
+      :articleTitle="articleData?.articleTitle"
+      :articleContent="articleData?.articleContent"
+      :articleId="articleData?.articleId"
+      @close="showAiWindow = false"
+  />
+
+  <!-- 添加一个按钮来显示AI窗口 -->
+  <div
+      class="ai-trigger-button"
+      :style="{ top: position.top + 'px', left: position.left + 'px' }"
+      @mousedown="startDrag"
+      @click="showAiWindow = true"
+      @hover="handleHover"
+  >
+    <a-button
+        type="primary"
+        shape="circle"
+        size="large"
+        @click="$emit('click')"
+    >
+      <template #icon>
+        <RobotOutlined />
+      </template>
+    </a-button>
+  </div>
 
   <!-- 评论区 -->
     <div class="comment-section">
@@ -160,6 +130,11 @@ import DOMPurify from "dompurify";
 import {adjustFontSize, formatDate} from '../utils/utils.js';
 import {_} from "lodash";
 import {message} from "ant-design-vue";
+import AIModal from "../components/modals/AIModal.vue";
+import { RobotOutlined } from "@ant-design/icons-vue";
+
+// 添加控制AI窗口显示的变量
+const showAiWindow = ref(true);
 
 
 // 获取路由和文章数据
@@ -210,7 +185,10 @@ const toggleCollapse = () => {
 
 };
 
+// 悬停提示功能
+const handleHover  = () => {
 
+}
 
 // 获取评论
 const getComments = () => {
@@ -346,161 +324,37 @@ const aiWindowSize = reactive({width: 100, height: 100}); // 控制窗口的初�
 // const AIUrl = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
 // const apiKey = "cd3e9fa7f67988e4c4a87e6adaad7d4f.tXpGrIlHvyIoqIlL"
 
-const isAILoading = ref(false); // 控制提问按钮的加载状态
+const position = ref({ top: 20, left: 20 });
 
-// 获取文章内容的AI总结
-const getAiSummary =  _.debounce(async () => {
-    try {
-        isAILoading.value = true; // 开始加载
-        const res = await myAxios.post(
-            "/ai/generateSummary",
-            {
-                "content": "你是一位记者，需要给出下面文章的总结：" +
-                    "标题：" + articleData.value.articleTitle + "内容：" + articleData.value.articleContent,
-            },
-        );
-        // 打印完整的返回数据来检查字段
-        console.log("AI返回的数据：", res.data);
-
-        // 获取summary字段的内容并提取其中的content
-        if (res.data && res.data.data && res.data.data.summary) {
-            // 正则表达式提取content字段的内容
-            const summaryString = res.data.data.summary;
-            const contentMatch = summaryString.match(/content=([^,]+)/);  // 提取"content"后的内容
-            if (contentMatch && contentMatch[1]) {
-                aiSummary.value = contentMatch[1].trim(); // 获取并去掉前后空白字符
-                console.log("AI总结：", aiSummary.value);
-            } else {
-                console.error("AI总结生成失败: content提取失败", summaryString);
-            }
-        } else {
-            console.error("AI总结生成失败: 返回数据结构不符合预期", res.data);
-        }
-    } catch (err) {
-        console.error("AI总结生成失败", err);
-    } finally {
-        isAILoading.value = false; // 结束加载
-    }
-}, 500);
-
-
-// 提问功能
-const askQuestion = _.debounce(async () => {
-    if (!userQuestion.value) {
-        console.log(userQuestion.value)
-        return; // 如果问题为空，则不发送请求
-    }
-    console.log("题目：", userQuestion.value); // 输出返回的响应
-
-    try {
-        isAILoading.value = true; // 开始加载
-        const res = await myAxios.post(
-            "/ai/askQuestion", // 这里的 URL 需要根据你的 API 地址进行调整
-            {
-                messages: [
-                    {
-                        userRole: "user",
-                        content: "你是一位消防记者，帮助回答以下问题：\n问题：" + userQuestion.value + "\n文章内容：" + articleData.value.articleContent
-                    }
-                ]
-            },
-            {
-                headers: {
-                    "Content-Type": "application/json"
-                }
-            }
-        );
-
-        aiAnswer.value = res.data.answer.message.content; // 假设返回的结构类似
-        isAILoading.value = false; // 结束加载
-    } catch (err) {
-        console.error("AI回答失败", err);
-    } finally {
-        isAILoading.value = false; // 结束加载
-    }
-}, 500);
-
-
-// 拖动窗口的相关操作
 let isDragging = false;
-let offsetX = 0;
-let offsetY = 0;
+let offset = { x: 0, y: 0 };
 
 const startDrag = (e: MouseEvent) => {
-    isDragging = true;
-    offsetX = e.clientX - aiWindowPosition.left;
-    offsetY = e.clientY - aiWindowPosition.top;
-    document.addEventListener("mousemove", dragWindow);
-    document.addEventListener("mouseup", stopDrag);
+  if (e.target instanceof HTMLButtonElement) return;
+
+  isDragging = true;
+  offset = {
+    x: e.clientX - position.value.left,
+    y: e.clientY - position.value.top
+  };
+
+  document.addEventListener('mousemove', drag);
+  document.addEventListener('mouseup', stopDrag);
 };
 
-const dragWindow = (e: MouseEvent) => {
-    if (isDragging) {
-        aiWindowPosition.left = e.clientX - offsetX;
-        aiWindowPosition.top = e.clientY - offsetY;
+const drag = (e: MouseEvent) => {
+  if (!isDragging) return;
 
-        let left = aiWindowPosition.left;
-        let top = aiWindowPosition.top;
-
-        // 吸附到屏幕边缘
-        const margin = 20; // 吸附边距
-        if (left < margin) left = 0;
-        if (top < margin) top = 0;
-
-        aiWindowPosition.left = left;
-        aiWindowPosition.top = top;
-    }
+  position.value = {
+    left: e.clientX - offset.x,
+    top: e.clientY - offset.y
+  };
 };
 
 const stopDrag = () => {
-    isDragging = false;
-    document.removeEventListener("mousemove", dragWindow);
-    document.removeEventListener("mouseup", stopDrag);
-};
-
-// 窗口大小调整
-let resizing = false;
-let resizeDirection = "";
-let startSize = {width: 0, height: 0};
-let startPos = {x: 0, y: 0};
-
-const startResize = (direction: string) => {
-    resizing = true;
-    resizeDirection = direction;
-    startSize = {...aiWindowSize};
-    startPos = {x: event.clientX, y: event.clientY};
-    document.addEventListener("mousemove", resizeWindow);
-    document.addEventListener("mouseup", stopResize);
-};
-
-const resizeWindow = (event: MouseEvent) => {
-    if (resizing) {
-        const dx = event.clientX - startPos.x;
-        const dy = event.clientY - startPos.y;
-        if (resizeDirection.includes("right")) {
-            aiWindowSize.width = startSize.width + dx;
-        }
-        if (resizeDirection.includes("bottom")) {
-            aiWindowSize.height = startSize.height + dy;
-        }
-        if (resizeDirection === "left") {
-            aiWindowSize.width = startSize.width - dx;
-        }
-        if (resizeDirection === "top") {
-            aiWindowSize.height = startSize.height - dy;
-        }
-    }
-};
-
-const stopResize = () => {
-    resizing = false;
-    document.removeEventListener("mousemove", resizeWindow);
-    document.removeEventListener("mouseup", stopResize);
-};
-
-// 控制AI模块的折叠与展开
-const toggleAiWindow = () => {
-    isAiWindowVisible.value = !isAiWindowVisible.value;
+  isDragging = false;
+  document.removeEventListener('mousemove', drag);
+  document.removeEventListener('mouseup', stopDrag);
 };
 
 // 记录浏览
@@ -559,7 +413,20 @@ onMounted(() => {
     font-size: 16px;
     margin-right: 10px;
 }
+.ai-trigger-button {
+  position: fixed;
+  z-index: 1000;
+  cursor: move;
+  transition: transform 0.2s;
+}
 
+.ai-trigger-button:hover {
+  transform: scale(1.1);
+}
+
+.ant-btn-circle {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
 .article-title {
     display: inline-block;
     font-size: 28px;
