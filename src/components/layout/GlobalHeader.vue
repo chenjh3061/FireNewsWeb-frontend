@@ -38,11 +38,11 @@
 
 <script setup>
 import {computed, ref} from "vue";
-import { useRouter } from "vue-router";
-import { useUserStore } from "../../store/index";
+import {useRouter} from "vue-router";
+import {useUserCryptoStore, useUserStore} from "../../store/index";
 import LoginModal from "../modals/LoginModal.vue";
 import myAxios from "../../plugins/myAxios";
-import checkAccess from "../../access/checkAccess.ts";
+import {base64Encode, rsaEncrypt, setPublicKey} from "@/utils/crypto.js";
 
 const isLoginModalVisible = ref(false);
 
@@ -80,20 +80,41 @@ const openLoginModal = () => {
 };
 
 // 登录请求
+const userCryptoStore = useUserCryptoStore()
+
 const handleLogin = async () => {
-    try {
-        const response = await myAxios.post("/user/login", loginForm.value);
-        if (response.data.success) {
-            // 登录成功后可以做一些操作，比如跳转到首页或者展示用户信息
-            alert("登录成功");
-            isLoginModalVisible.value = false;  // 关闭模态框
-        } else {
-            alert("登录失败：" + response.data.message);
-        }
-    } catch (error) {
-        alert("登录失败，请检查网络连接");
+  try {
+    // 如果缓存中没有才请求
+    if (!userCryptoStore.publicKey) {
+      const res = await myAxios.get("/user/getPublicKey")
+      userCryptoStore.setPublicKey(res.data)
     }
-};
+
+    setPublicKey(userCryptoStore.publicKey)
+
+    const encryptedPwd = rsaEncrypt(loginForm.value.password)
+    if (!encryptedPwd) {
+      alert("加密失败，请刷新页面或稍后再试")
+      return
+    }
+    console.log(loginForm.value.password, encryptedPwd)
+    const response = await myAxios.post("/user/login", {
+      ...loginForm.value,
+      password: encryptedPwd,
+    })
+
+    if (response.data.success) {
+      alert("登录成功")
+      isLoginModalVisible.value = false
+    } else {
+      alert("登录失败：" + response.data.message)
+    }
+  } catch (error) {
+    console.error("登录请求异常:", error)
+    alert("登录失败，请检查网络连接或稍后重试")
+  }
+}
+
 const isDropdownVisible = ref(false);
 // 切换下拉菜单的显示状态
 const toggleDropdown = () => {
@@ -113,6 +134,7 @@ const handleLogout = async () => {
             {headers: {'token': userStore.userInfo?.token}});
         if (response.data.code === 0) {
             userStore.$state.userInfo = null; // 清空用户信息
+            userCryptoStore.clearPublicKey(); // 清空公钥信息
             userStore.$reset(); // 重置用户信息，例如清除token等
             await router.push('/'); // 跳转到登录页
             alert('已退出登录');
@@ -181,14 +203,27 @@ const handleLogout = async () => {
 }
 
 #title {
-    color: #fff;
-    font-size: 38px;
-    margin-top: 1%;
-    font-weight: bold;
-    font-family: "Arial Black", sans-serif;
-    margin-right: auto; /* 将标题推到中间 */
-    -webkit-text-stroke: 1px #ff5e3a; /* 描边效果 */
-    text-shadow: 2px -1px 10px rgba(0, 0, 0, 0.3);
+  font-size: 3rem;
+  font-weight: 700;
+  font-family: 'Playfair Display', serif; /* 更有艺术气息的字体 */
+  margin-top: 1%;
+  margin-right: auto;
+  letter-spacing: 2px;
+  transition: all 0.5s ease-in-out;
+
+  background: linear-gradient(90deg, #ff5e3a, #ffa726);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  text-shadow: none; /* 移除模糊阴影，保持干净 */
+  cursor: default;
+}
+
+#title:hover {
+  color: #ff5e3a;
+  -webkit-text-fill-color: #ff5e3a; /* 改回纯色，避免放大导致模糊 */
+  background: none;
+  transform: scale(1.05); /* 稍微放大以增加视觉反馈 */
 }
 
 #navMenu {

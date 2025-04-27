@@ -23,8 +23,13 @@ const route = useRoute();
 const store = useUserStore();
 const webSocket = ref<WebSocket | null>(null);
 
+const getLayoutClass = (path: string) => {
+  const backendPaths = ['/admin', '/writer', '/dashboard', '/management', '/articleEditor'];
+  return backendPaths.some(p => path.startsWith(p)) ? 'back-layout' : 'frontend-layout';
+};
+
 const appClass = computed(() => {
-  return route.path.startsWith('/admin') || route.path.startsWith('/writer') ? 'back-layout' : 'frontend-layout';
+  return getLayoutClass(route.path);
 });
 
 const isLogin = computed(() => {

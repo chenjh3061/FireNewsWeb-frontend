@@ -93,8 +93,143 @@ const onSearch = () => {
 };
 
 // 预览文件
+import { h } from 'vue';
+import { FilePdfTwoTone, FileUnknownTwoTone } from '@ant-design/icons-vue';
+import { Button } from 'ant-design-vue';
+
 const previewFile = (file) => {
-    window.open(file.url, '_blank');
+  let content;
+
+  switch (file.fileType) {
+    case 'image':
+      content = h('div', { style: { textAlign: 'center' } }, [
+        h('img', {
+          src: file.url,
+          style: {
+            maxWidth: '100%',
+            maxHeight: '70vh',
+            display: 'block',
+            margin: '0 auto',
+          },
+          alt: file.name,
+        }),
+      ]);
+      break;
+
+    case 'video':
+      content = h('div', { style: { textAlign: 'center' } }, [
+        h('video', {
+          controls: true,
+          style: {
+            maxWidth: '100%',
+            maxHeight: '70vh',
+            outline: 'none',
+          },
+        }, [
+          h('source', {
+            src: file.url,
+            type: `video/${file.name.split('.').pop()}`,
+          }),
+          '您的浏览器不支持视频预览',
+        ]),
+      ]);
+      break;
+
+    case 'audio':
+      content = h('div', { style: { padding: '20px' } }, [
+        h('audio', {
+          controls: true,
+          style: { width: '100%' },
+        }, [
+          h('source', {
+            src: file.url,
+            type: `audio/${file.name.split('.').pop()}`,
+          }),
+          '您的浏览器不支持音频播放',
+        ]),
+      ]);
+      break;
+
+    case 'pdf':
+      content = h('div', { style: { height: '70vh' } }, [
+        h('embed', {
+          src: file.url,
+          type: 'application/pdf',
+          style: {
+            width: '100%',
+            height: '100%',
+            border: 'none',
+          },
+        }),
+      ]);
+      break;
+
+    case 'document':
+      content = h('div', {
+        style: {
+          padding: '24px',
+          textAlign: 'center',
+        },
+      }, [
+        h(FilePdfTwoTone, { style: { fontSize: '48px', marginBottom: '16px' } }),
+        h('p', '文档文件预览需要下载后查看'),
+        h('a', {
+          href: file.url,
+          download: file.name,
+        }, [
+          h(Button, { type: 'primary' }, { default: () => '下载文档' }),
+        ]),
+      ]);
+      break;
+
+    default:
+      content = h('div', {
+        style: {
+          padding: '24px',
+          textAlign: 'center',
+        },
+      }, [
+        h(FileUnknownTwoTone, { style: { fontSize: '48px', marginBottom: '16px' } }),
+        h('p', '不支持在线预览此文件类型'),
+        h('p', `文件类型: ${file.fileType}`),
+        h('a', {
+          href: file.url,
+          download: file.name,
+        }, [
+          h(Button, {}, { default: () => '下载文件' }),
+        ]),
+      ]);
+      break;
+  }
+
+  Modal.info({
+    width: '80%',
+    style: { top: '20px' },
+    title: h('div', [
+      h('span', file.name),
+      h('span', {
+        style: {
+          marginLeft: '8px',
+          color: '#888',
+          fontSize: '14px',
+        },
+      }, `(${formatFileSize(file.size)})`),
+    ]),
+    content,
+    okText: '关闭',
+    maskClosable: true,
+    bodyStyle: { padding: 0 },
+  });
+};
+
+
+// 辅助函数：格式化文件大小
+const formatFileSize = (bytes) => {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };
 
 // 确认删除文件

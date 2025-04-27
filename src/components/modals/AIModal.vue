@@ -234,6 +234,7 @@ const stopResize = () => {
   document.removeEventListener("mouseup", stopResize);
 };
 
+
 // 窗口最小化/最大化
 const toggleMinimize = () => {
   if (isMinimized.value) {

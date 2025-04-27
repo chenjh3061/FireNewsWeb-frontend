@@ -29,6 +29,7 @@
           </template>
           <!-- 操作列：删除按钮 -->
           <template v-if="column.dataIndex === 'action'">
+            <a-button type="link" primary @click="showLogModal(record)">查看</a-button>
             <a-popconfirm
                 title="确定删除吗？"
                 @confirm="() => deleteLog(record.id)"
@@ -37,18 +38,38 @@
             </a-popconfirm>
           </template>
         </template>
-
       </a-table>
     </a-card>
   </div>
+  <a-modal
+      class="log-detail-modal"
+      v-model:visible="isLogModalVisible"
+      title="日志详情"
+  >
+    <div v-if="currentLog">
+      <p><strong>用户名称：</strong>{{ currentLog.userAccount }}</p>
+      <p><strong>请求方式：</strong>{{ currentLog.requestMethod }}</p>
+      <p><strong>请求路径：</strong>{{ currentLog.requestPath }}</p>
+      <p><strong>业务名称：</strong>{{ currentLog.name }}</p>
+      <p><strong>请求 IP：</strong>{{ currentLog.requestIP }}</p>
+      <p><strong>创建时间：</strong>{{ formatTime(currentLog.createTime) }}</p>
+      <p><strong>请求对象Id：</strong>{{ currentLog.targetId }}</p>
+      <p><strong>对象名称：</strong>{{ currentLog.targetName }}</p>
+    </div>
+    <div v-else>
+      无详细信息
+    </div>
+  </a-modal>
+
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { message, Modal } from 'ant-design-vue';
+import {message, Modal, TableColumnsType} from 'ant-design-vue';
 import axios from 'axios';
 import dayjs from 'dayjs';
 import myAxios from "@/plugins/myAxios";
+import { extractIdAndName } from '../../../utils/utils';
 
 // 日志数据、分页、加载状态、选中项
 const logs = ref([]);
@@ -59,7 +80,7 @@ const pageSize = ref(20);
 const total = ref(0);
 
 // 表格列配置
-const columns = ref([
+const columns = ref<TableColumnsType>([
   { title: '用户名称', dataIndex: 'userAccount', key: 'userAccount' , resizable: true},
   { title: '请求方式', dataIndex: 'requestMethod', key: 'requestMethod' , resizable: true},
   { title: '请求路径', dataIndex: 'requestPath', key: 'requestPath' , resizable: true},
@@ -75,7 +96,6 @@ const handleResizeColumn = (w, column) => {
 };
 
 // 分页配置（使用 computed 保持数据联动）
-// 分页设置
 const pagination = computed(() => ({
   current: currentPage.value,
   pageSize: pageSize.value,
@@ -100,6 +120,36 @@ const rowSelection = computed(() => ({
     selectedRowKeys.value = selectedKeys;
   },
 }));
+
+const isLogModalVisible = ref(false);
+const currentLog = ref(null); // 用于存储当前选中的日志数据
+
+const showLogModal = (log) => {
+  try {
+    const paramStr = typeof log.params === 'string'
+        ? log.params
+        : JSON.stringify(log.params);
+
+    const shortText = paramStr.slice(0, 250).toString();
+
+    const idandname = extractIdAndName(shortText) || {name: '', id: '' };
+    // if (!idandname || !idandname.id || !idandname.name) {
+    //   console.error('Failed to extract id and name from params:', shortText);
+    //   return;
+    // }
+
+    currentLog.value = {
+      ...log,
+      targetId: idandname.id,
+      targetName: idandname.name,
+    };
+    isLogModalVisible.value = true;
+  } catch (error) {
+    console.error('Error in showLogModal:', error);
+    message.error('显示日志详情时出错');
+  }
+};
+
 
 // 从后端获取日志数据（假设接口返回 { records: [...], total: 数字 }）
 const fetchLogs = async () => {

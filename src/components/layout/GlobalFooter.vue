@@ -26,7 +26,7 @@
                 <p>电话: 123-456-7890</p>
             </div>
 
-            <!-- 网站地图部分（替代了原“关注我们”） -->
+            <!-- 网站地图部分 -->
             <div class="footer-sitemap">
                 <h4>网站地图</h4>
                 <ul>
@@ -75,7 +75,6 @@ const scrollToTop = () => {
 .footer-sitemap {  /* 修改为 footer-sitemap */
     flex: 1;
     margin: 15px;
-    min-width: 250px;
     padding: 15px;
 }
 

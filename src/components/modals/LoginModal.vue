@@ -49,6 +49,11 @@
                         v-model="userForm.checkPassword"
                         type="password"
                     />
+                    <div class="password-strength">
+                            密码强度：
+                        <span :style="{ color: getColor(strength) }">{{ strengthText }}</span>
+                    </div>
+
                     <div :class="{ line: true, active: isFocused.checkPassword }"></div>
                 </label>
 
@@ -66,12 +71,19 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
+import {onMounted, ref, watch} from "vue";
 import { defineProps, defineEmits } from "vue";
-import { useUserStore } from "../../store";
+import {useUserCryptoStore, useUserStore} from "../../store";
 import myAxios from "../../plugins/myAxios";
 import {message} from "ant-design-vue";
 import router from "@/router";
+import {
+  validatePassword,
+  getPasswordStrength,
+  getPasswordStrengthText,
+  setPublicKey,
+  rsaEncrypt, aesEncrypt
+} from '../../utils/crypto.js';
 
 const userStore = useUserStore();
 
@@ -95,6 +107,16 @@ const errorMessage = ref("");
 const showPassword = ref(false);
 const isRegister = ref(false); // 切换登录和注册表单
 
+const strength = ref(0); // 密码强度
+const strengthText = ref(""); // 密码强度文本
+
+watch(() => userForm.value.password, (newPassword) => {
+  if (isRegister.value) {
+    strength.value = getPasswordStrength(newPassword);
+    strengthText.value = getPasswordStrengthText(strength.value);
+  }
+});
+
 const onFocus = (field: "userAccount" | "password" | "confirmPassword") => {
     isFocused.value[field] = true;
 };
@@ -108,44 +130,67 @@ const onBlur = (field: "userAccount" | "password" | "confirmPassword") => {
 const togglePasswordVisibility = () => {
   showPassword.value = !showPassword.value;
 };
-const submitForm = () => {
-    if (!userForm.value.userAccount || !userForm.value.password || (isRegister.value && !userForm.value.checkPassword)) {
-      errorMessage.value = "请填写所有字段！";
-      return;
-    }
-    if (isRegister.value && userForm.value.password !== userForm.value.checkPassword) {
-      errorMessage.value = "密码不一致！";
-      return;
-    }
-    const apiUrl = isRegister.value ? "/user/register" : "/user/login";
-    try {
-      myAxios.post(apiUrl, userForm.value,
-          {
-            headers: {'Content-Type': 'application/json'}
-          }).then((res) => {
-        if (res.data.code === 0) {
-          userStore.userInfo = res.data.data;
-          userForm.value = {
-            userAccount: "",
-            password: "",
-            checkPassword: ""
-          };
-          if (isRegister.value) {
-            message.info("注册成功！登录后请到个人页面完善个人信息！")
-            router.go(0);
-          } else {
-            message.info("登录成功！")
-            router.go(0);
-          }
-          console.log(isRegister.value ? "注册成功" : "登录成功" , userStore.userInfo);
+
+const userCryptoStore = useUserCryptoStore();
+const submitForm = async () => {
+  // 密码长度验证
+  if (!validatePassword(userForm.value.password)) {
+    errorMessage.value = "密码长度需在6-18位之间";
+    return;
+  }
+
+  // 注册时确认密码验证
+  if (isRegister.value && userForm.value.password !== userForm.value.checkPassword) {
+    errorMessage.value = "两次输入的密码不一致";
+    return;
+  }
+  // 如果缓存中没有才请求
+  if (!userCryptoStore.publicKey) {
+    const res = await myAxios.get("/user/getPublicKey")
+    userCryptoStore.setPublicKey(res.data.data)
+  }
+
+  setPublicKey(userCryptoStore.publicKey)
+
+
+  const encryptedPwd = aesEncrypt(userForm.value.password);
+  if (!encryptedPwd) {
+    alert("加密失败，请刷新页面或稍后再试");
+    return;
+  }
+  console.log(userForm.value.password, encryptedPwd)
+
+  const apiUrl = isRegister.value ? "/user/register" : "/user/login";
+  userForm.value.password = encryptedPwd;
+  userForm.value.checkPassword = aesEncrypt(userForm.value.checkPassword);
+  try {
+    myAxios.post(apiUrl, userForm.value,
+        {
+          headers: {'Content-Type': 'application/json'}
+        }).then((res) => {
+      if (res.data.code === 0) {
+        userStore.userInfo = res.data.data;
+        userForm.value = {
+          userAccount: "",
+          password: "",
+          checkPassword: ""
+        };
+        if (isRegister.value) {
+          message.info("注册成功！登录后请到个人页面完善个人信息！")
+          router.go(0);
         } else {
-          message.error(res.data.message);
+          message.info("登录成功！")
+          router.go(0);
         }
-      });
-    } catch (err) {
-      errorMessage.value = isRegister.value ? "注册失败，请检查网络连接！" : "登录失败，请检查网络连接！";
-    }
-    closeModal();
+        console.log(isRegister.value ? "注册成功" : "登录成功", userStore.userInfo);
+      } else {
+        message.error(res.data.message);
+      }
+    });
+  } catch (err) {
+    errorMessage.value = isRegister.value ? "注册失败，请检查网络连接！" : "登录失败，请检查网络连接！";
+  }
+  closeModal();
 
 };
 
@@ -159,6 +204,20 @@ const toggleForm = () => {
     isRegister.value = !isRegister.value;
     errorMessage.value = ""; // 清空错误信息
 };
+
+const getColor = (level: number) => {
+  switch (level) {
+    case 1:
+      return 'red';
+    case 2:
+      return 'orange';
+    case 3:
+      return 'green';
+    default:
+      return '#999';
+  }
+};
+
 </script>
 
 <style scoped>
@@ -210,6 +269,10 @@ const toggleForm = () => {
     height: 100%;
     text-align: left;
     border-bottom: 2px solid #ddd;
+}
+.password-strength {
+  font-size: 14px;
+  margin-top: 5px;
 }
 
 .input {

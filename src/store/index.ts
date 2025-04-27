@@ -85,3 +85,17 @@ export const useErrorStore = defineStore('error', {
     },
   },
 });
+
+export const useUserCryptoStore = defineStore('userCrypto', {
+  state: () => ({
+    publicKey: '',
+  }),
+  actions: {
+    setPublicKey(key: string) {
+      this.publicKey = key
+    },
+    clearPublicKey() {
+      this.publicKey = ''
+    },
+  },
+})

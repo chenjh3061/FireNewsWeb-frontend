@@ -44,7 +44,7 @@
                     <template v-if="column.dataIndex === 'action'">
                         <a-button id="action" @click="viewDetails(record)">查看详情</a-button>
                         <a-button id="action" @click="editeArticle(record)">修改文章</a-button>
-                        <a-button @click="deleteNews(record.id)">删除文章</a-button>
+                        <a-button @click="deleteNews(record.articleId)">删除文章</a-button>
                     </template>
                 </template>
             </a-table>
@@ -60,7 +60,7 @@
 
 <script lang="ts" setup>
 import {computed, onMounted, ref} from "vue";
-import {message, TableColumnsType} from "ant-design-vue";
+import {message, Modal, TableColumnsType} from "ant-design-vue";
 import myAxios from "../../../plugins/myAxios";
 import JoditEditor from "../../../plugins/JoditEditor.vue";
 import dayjs from "dayjs";
@@ -76,6 +76,7 @@ const newsData = ref([
     {id: 1, title: "新闻标题 1", content: "新闻内容 1"},
     {id: 2, title: "新闻标题 2", content: "新闻内容 2"},
 ]);
+
 
 // loading 状态
 const loading = ref(false);
@@ -164,8 +165,36 @@ const editeArticle = (record: any) => {
 
 // 删除新闻
 const deleteNews = (id: number) => {
-    newsData.value = newsData.value.filter(news => news.id !== id);
-    message.success("新闻删除成功");
+  Modal.confirm({
+    title: "确认删除这篇文章吗？",
+    content: "删除后将无法恢复，请谨慎操作。",
+    okText: "确认",
+    cancelText: "取消",
+    onOk: () => {
+      loading.value = true;
+      myAxios.post(`/article/deleteArticle`, {
+        id: id,
+      },{
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+          .then((res) => {
+            if (res.data.code === 0) {
+              message.success("文章删除成功");
+              loading.value = false;
+              getArticles(); // 删除后刷新文章列表
+            } else {
+              message.error("删除失败：" + res.data.message);
+              loading.value = false;
+            }
+          })
+          .catch(() => {
+            message.error("删除请求失败");
+            loading.value = false;
+          });
+    },
+  });
 };
 
 const searchParams = ref("");

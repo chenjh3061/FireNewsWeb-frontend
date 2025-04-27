@@ -127,7 +127,7 @@ import {useRouter} from "vue-router";
 import {StepBackwardOutlined} from "@ant-design/icons-vue";
 import myAxios from "../plugins/myAxios";
 import DOMPurify from "dompurify";
-import {adjustFontSize, formatDate} from '../utils/utils.js';
+import {adjustFontSize, formatDate} from '../utils/utils';
 import {_} from "lodash";
 import {message} from "ant-design-vue";
 import AIModal from "../components/modals/AIModal.vue";

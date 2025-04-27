@@ -25,15 +25,6 @@
                 <button class="secondary-button" @click="openChangePasswordModal">修改密码</button>
             </div>
 
-            <!-- 用户动态 -->
-            <div class="user-action">
-                <h3>最近动态</h3>
-                <ul>
-                    <li v-for="(action, index) in actions" :key="index" class="user-action-item">
-                        <span>{{ action.time }}</span> - {{ action.text }}
-                    </li>
-                </ul>
-            </div>
         </div>
 
         <!-- 编辑资料弹窗 -->
@@ -348,9 +339,10 @@ onMounted(() => {
 .modal-input {
     margin-bottom: 20px;
     img{
-        max-width: 50%;
+        max-width: 15rem;
         max-height: 15rem;
-        height: auto;
+        object-fit: cover;
+        display: inline-block;
         margin: auto auto auto 3rem;
         border-radius: 50%;
     }

@@ -18,7 +18,6 @@
                         </div>
                     </a-carousel>
                 </div>
-    <!--            <a-button v-allow="'admin'" type="primary" @click="addNews">添加新闻</a-button>-->
                 <!-- 搜索栏部分 -->
                 <div class="search-container">
                     <a-dropdown >
@@ -43,8 +42,6 @@
                             </a-menu>
                         </template>
                     </a-dropdown>
-
-
                     <!-- 热点新闻榜 -->
                     <div class="hot-news-container">
                         <h2>热点新闻榜</h2>
@@ -57,7 +54,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- 主要新闻展示区 -->
             <div class="main-news-container">
                 <div class="main-news">
@@ -87,6 +83,7 @@
                 </div>
             </div>
     </div>
+  <!--            <a-button v-allow="'admin'" type="primary" @click="addNews">添加新闻</a-button>-->
 </template>
 
 <script setup>

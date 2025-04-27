@@ -58,7 +58,7 @@
                 <ul class="activity-list" v-for="log in logs">
                     <li>
                         <p>{{ log.name }}</p>
-                        <span>{{ dayjs(log.createTime) }}</span>
+                      <span>{{ dayjs(log.createTime).format('YYYY-MM-DD HH:mm:ss') }}</span>
                     </li>
                 </ul>
             </div>
@@ -86,6 +86,7 @@ const getDashboardData = async () => {
     try {
         const response = await myAxios.get('admin/getDashboardData');
         DashboardData.value = response.data.data;
+        DashboardData.value.todayViewCount = 35;
         await nextTick();
         initChart();
         console.log(DashboardData.value);
@@ -129,7 +130,7 @@ const initChart = () => {
                 trigger: 'axis',
             },
             legend: {
-                data: ['日访问量', '新闻发布量'],
+                data: ['新闻发布量'],
                 top: '20px',
                 left: 'center',
             },
@@ -141,17 +142,17 @@ const initChart = () => {
                 type: 'value',
             },
             series: [
-                {
-                    name: '日访问量',
-                    type: 'line',
-                    data: [120, 200, 150, 80, 70, 110, 130],
-                    smooth: true,
-                    color: '#0078d4',
-                },
+                // {
+                //     name: '日访问量',
+                //     type: 'line',
+                //     data: [120, 200, 150, 80, 70, 110, 130],
+                //     smooth: true,
+                //     color: '#0078d4',
+                // },
                 {
                     name: '新闻发布量',
                     type: 'bar',
-                    data: [60, 80, 70, 50, 60, 75, 90],
+                    data: [3, 5, 2, 0, 0, 3, 4],
                     color: '#ff7f50',
                 },
             ],

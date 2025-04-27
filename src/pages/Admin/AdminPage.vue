@@ -128,6 +128,7 @@ watch(
     display: flex;
     flex-direction: column;
     padding: 20px 0; /* 上下内边距 */
+    margin-left: 1rem;
 }
 
 .side-title {

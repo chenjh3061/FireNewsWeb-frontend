@@ -34,6 +34,9 @@
                         <span>{{ record.username }}</span>
                     </div>
                 </template>
+                <template v-if="column.dataIndex === 'userPassword'">
+                  <p style="font-size: 1rem">******</p>
+                </template>
                 <template v-if="mappings[column.dataIndex]">
                     <a-tag v-bind="mappings[column.dataIndex](record)">
                         {{ mappings[column.dataIndex](record).text }}
@@ -41,7 +44,8 @@
                 </template>
                 <template v-if="column.dataIndex === 'action'">
                     <a-button id="action" @click="editUser(record)">编辑用户</a-button>
-                    <a-button id="action" @click="deleteUser(record)">删除用户</a-button>
+                    <a-button id="action" @click="deleteUser(record)" danger>删除用户</a-button>
+                    <a-button id="action" @click="resetPassword(record)" type="primary">重置密码</a-button>
                 </template>
             </template>
         </a-table>
@@ -177,7 +181,7 @@ const columns = ref<TableColumnsType>([
         title: "操作",
         key: "action",
         dataIndex: "action",
-        width: 200,
+        minWidth: 100,
     },
 ]);
 
@@ -210,6 +214,29 @@ const onSearch = () => {
         message.warning("请输入搜索内容");
     }
 }
+
+const resetPassword = (id) => {
+    Modal.confirm({
+      title: '重置密码',
+      content: '确定要重置该用户的密码吗？这将把用户密码设置为默认值。',
+      style: {
+        top: '20vh',
+        width: '30vw',
+        height: '20vh',
+      },
+      onOk() {
+        myAxios.post("/admin/resetPassword", id).then((res) => {
+          if (res.data.code === 0) {
+            message.success("密码已重置");
+          } else {
+            message.error(res.data.msg);
+          }
+        });
+      },
+      onCancel() {
+      },
+    });
+};
 
 const clearSearchBar = () => {
     userSearch.value = "";
